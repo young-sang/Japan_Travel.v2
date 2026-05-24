@@ -4,8 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.japantravel.dto.Dtos.Festival;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -70,5 +75,52 @@ public class FestivalRepository {
     public int count() {
         Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM festivals", Integer.class);
         return n == null ? 0 : n;
+    }
+
+    public java.util.Map<String, Integer> countsByPrefecture() {
+        java.util.Map<String, Integer> out = new java.util.HashMap<>();
+        jdbc.query("SELECT prefecture, COUNT(*) AS n FROM festivals GROUP BY prefecture", rs -> {
+            out.put(rs.getString("prefecture"), rs.getInt("n"));
+        });
+        return out;
+    }
+
+    // ── manual CRUD (admin) ────────────────────────────────────────────────
+    public long insert(Festival f) {
+        KeyHolder kh = new GeneratedKeyHolder();
+        jdbc.update(con -> {
+            PreparedStatement ps = con.prepareStatement("""
+                INSERT INTO festivals(name, prefecture, month, date_text, lat, lng, image_path, description, wiki_title, last_refreshed_at)
+                VALUES (?,?,?,?,?,?,?,?,?, datetime('now'))
+                """, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, f.name());
+            ps.setString(2, f.prefecture());
+            if (f.month() == null) ps.setNull(3, Types.INTEGER); else ps.setInt(3, f.month());
+            ps.setString(4, f.dateText());
+            if (f.lat() == null) ps.setNull(5, Types.DOUBLE); else ps.setDouble(5, f.lat());
+            if (f.lng() == null) ps.setNull(6, Types.DOUBLE); else ps.setDouble(6, f.lng());
+            ps.setString(7, f.imagePath());
+            ps.setString(8, f.description());
+            ps.setString(9, f.wikiTitle()); // nullable for manual
+            return ps;
+        }, kh);
+        return kh.getKey().longValue();
+    }
+
+    public void update(long id, Festival f) {
+        jdbc.update("""
+            UPDATE festivals
+               SET name=?, prefecture=?, month=?, date_text=?, lat=?, lng=?,
+                   image_path=?, description=?, wiki_title=?, last_refreshed_at=datetime('now')
+             WHERE id=?
+            """, f.name(), f.prefecture(), f.month(), f.dateText(),
+                f.lat(), f.lng(), f.imagePath(), f.description(), f.wikiTitle(), id);
+    }
+
+    public void deleteById(long id) {
+        jdbc.update("DELETE FROM favorites WHERE target_type='festival' AND target_id=?", id);
+        jdbc.update("DELETE FROM reviews WHERE target_type='festival' AND target_id=?", id);
+        jdbc.update("DELETE FROM history WHERE target_type='festival' AND target_id=?", id);
+        jdbc.update("DELETE FROM festivals WHERE id=?", id);
     }
 }

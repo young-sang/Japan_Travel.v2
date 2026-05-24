@@ -40,10 +40,39 @@ public final class Dtos {
     public record CollectorRunStatus(
             Long id, String type, String prefecture, String source, String status,
             Integer itemsAdded, Integer itemsUpdated, Integer itemsFailed,
-            String startedAt, String finishedAt
+            String startedAt, String finishedAt,
+            Long bulkRunId, String lastHeartbeatAt, String stage
+    ) {}
+
+    public record BulkRun(
+            Long id, String startedAt, String finishedAt, String status,
+            Integer totalTasks, Integer tasksSuccess, Integer tasksPartial,
+            Integer tasksFailed, Integer tasksAborted, String notes
     ) {}
 
     public record FavoriteCreateRequest(String targetType, Long targetId) {}
 
     public record ReviewCreateRequest(String targetType, Long targetId, Integer rating, String comment) {}
+
+    public record User(Long id, String username, String nickname, String role, String createdAt) {}
+
+    public record SignupRequest(String username, String password, String nickname) {}
+
+    public record LoginRequest(String username, String password) {}
+
+    public record BulkRunSummary(
+            long id, String startedAt, String finishedAt, String status,
+            int totalTasks, int tasksSuccess, int tasksPartial, int tasksFailed, int tasksAborted
+    ) {}
+
+    public record FailureEntry(String title, String stage, String exceptionClass, String message) {}
+
+    public record CollectorRunDetail(
+            long id, String type, String prefecture, String status,
+            int itemsAdded, int itemsUpdated, int itemsFailed,
+            String stage, String lastHeartbeatAt,
+            java.util.List<FailureEntry> failures, String abortReason
+    ) {}
+
+    public record BulkRunDetail(BulkRunSummary summary, java.util.List<CollectorRunDetail> children) {}
 }

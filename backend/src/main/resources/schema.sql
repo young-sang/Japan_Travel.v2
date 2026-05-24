@@ -1,15 +1,18 @@
 -- Japan Travel v2 schema (SQLite). 시드 없음. Collector가 외부 API에서 적재.
 
 CREATE TABLE IF NOT EXISTS users (
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
   nickname TEXT NOT NULL DEFAULT '관리자',
+  role TEXT NOT NULL DEFAULT 'USER',
   avatar_path TEXT,
   bio TEXT,
   default_prefecture TEXT,
   theme TEXT DEFAULT 'light',
   created_at TEXT DEFAULT (datetime('now'))
 );
-INSERT OR IGNORE INTO users (id, nickname) VALUES (1, '관리자');
+-- admin 시드는 StartupRunner에서 BCryptPasswordEncoder로 처리 (id=1, username=admin, password=admin1234)
 
 CREATE TABLE IF NOT EXISTS destinations (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -109,6 +112,19 @@ CREATE TABLE IF NOT EXISTS achievements (
   UNIQUE(user_id, code)
 );
 
+CREATE TABLE IF NOT EXISTS bulk_runs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  started_at TEXT NOT NULL,
+  finished_at TEXT,
+  status TEXT NOT NULL,
+  total_tasks INTEGER NOT NULL,
+  tasks_success INTEGER NOT NULL DEFAULT 0,
+  tasks_partial INTEGER NOT NULL DEFAULT 0,
+  tasks_failed  INTEGER NOT NULL DEFAULT 0,
+  tasks_aborted INTEGER NOT NULL DEFAULT 0,
+  notes TEXT
+);
+
 CREATE TABLE IF NOT EXISTS collector_runs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   type TEXT NOT NULL,
@@ -120,5 +136,28 @@ CREATE TABLE IF NOT EXISTS collector_runs (
   items_failed INTEGER DEFAULT 0,
   errors_json TEXT,
   started_at TEXT DEFAULT (datetime('now')),
-  finished_at TEXT
+  finished_at TEXT,
+  bulk_run_id INTEGER REFERENCES bulk_runs(id),
+  last_heartbeat_at TEXT,
+  stage TEXT
 );
+CREATE INDEX IF NOT EXISTS idx_runs_bulk ON collector_runs(bulk_run_id);
+CREATE INDEX IF NOT EXISTS idx_runs_heartbeat ON collector_runs(status, last_heartbeat_at);
+
+CREATE TABLE IF NOT EXISTS audit_log (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER,                  -- NULL 가능(로그인 실패 등)
+  username TEXT,                    -- 사용자 삭제 후에도 흔적 보존
+  action TEXT NOT NULL,             -- LOGIN_SUCCESS / LOGIN_FAIL / SIGNUP / LOGOUT
+                                    -- REVIEW_CREATE / REVIEW_UPDATE / REVIEW_DELETE
+                                    -- COURSE_CREATE / COURSE_UPDATE / COURSE_DELETE
+                                    -- COLLECTOR_RUN / COLLECTOR_BULK
+                                    -- USER_ROLE_CHANGE / USER_DELETE
+                                    -- CONTENT_CREATE / CONTENT_UPDATE / CONTENT_DELETE
+  target_type TEXT,
+  target_id INTEGER,
+  detail TEXT,                      -- 자유 텍스트(JSON 가능)
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_log(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_log(action, created_at DESC);

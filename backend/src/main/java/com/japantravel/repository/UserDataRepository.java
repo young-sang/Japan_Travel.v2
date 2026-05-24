@@ -44,6 +44,18 @@ public class UserDataRepository {
         return n == null ? 0 : n;
     }
 
+    public int countAllFavorites() {
+        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM favorites", Integer.class);
+        return n == null ? 0 : n;
+    }
+
+    public boolean reviewExistsForUser(long reviewId, long userId) {
+        Integer n = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM reviews WHERE id=? AND user_id=?",
+                Integer.class, reviewId, userId);
+        return n != null && n > 0;
+    }
+
     // ── reviews ─────────────────────────────────────────────────────────────
     private final RowMapper<Review> reviewRow = (rs, i) -> new Review(
             rs.getLong("id"), rs.getLong("user_id"), rs.getString("target_type"), rs.getLong("target_id"),
@@ -108,5 +120,26 @@ public class UserDataRepository {
 
     public void clearHistory(long userId) {
         jdbc.update("DELETE FROM history WHERE user_id=?", userId);
+    }
+
+    // ── per-user counts (admin user mgmt) ──────────────────────────────────
+    public int countFavoritesByUser(long userId) {
+        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM favorites WHERE user_id=?", Integer.class, userId);
+        return n == null ? 0 : n;
+    }
+
+    public int countReviewsByUser(long userId) {
+        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM reviews WHERE user_id=?", Integer.class, userId);
+        return n == null ? 0 : n;
+    }
+
+    public int countCoursesByUser(long userId) {
+        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM courses WHERE owner_user_id=?", Integer.class, userId);
+        return n == null ? 0 : n;
+    }
+
+    public int countHistoryByUser(long userId) {
+        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM history WHERE user_id=?", Integer.class, userId);
+        return n == null ? 0 : n;
     }
 }

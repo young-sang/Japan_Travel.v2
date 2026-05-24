@@ -1,12 +1,20 @@
 server:
   port: 8080
+  servlet:
+    session:
+      timeout: 7d
+      cookie:
+        same-site: lax
+        http-only: true
 
 spring:
   application:
     name: japan-travel-backend
   datasource:
-    url: jdbc:sqlite:${user.dir}/../data/japan_travel.db
+    url: jdbc:sqlite:${user.dir}/../data/japan_travel.db?journal_mode=WAL&busy_timeout=10000&synchronous=NORMAL
     driver-class-name: org.sqlite.JDBC
+    hikari:
+      maximum-pool-size: 4
   sql:
     init:
       mode: always
