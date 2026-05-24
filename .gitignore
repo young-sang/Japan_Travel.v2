@@ -32,3 +32,15 @@ hs_err_pid*.log
 # Data (대용량/민감 데이터는 제외, 필요 시 화이트리스트로 추가)
 data/*
 !data/.gitkeep
+
+# 테스트/디버깅 아티팩트
+*.png
+*.tmp
+*.tmp.*
+cookie.txt
+backend/cookie.txt
+.playwright-mcp/
+
+# Claude Code 로컬 설정
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
