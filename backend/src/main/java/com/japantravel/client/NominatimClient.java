@@ -12,7 +12,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
+import java.time.Duration;
 import java.util.concurrent.locks.ReentrantLock;
 
 /** OpenStreetMap Nominatim. Usage Policy: 1 req/sec, User-Agent 필수. */
@@ -40,8 +40,8 @@ public class NominatimClient {
     }
 
     /** 자유 텍스트 검색 → 첫 좌표 반환. */
-    @Cacheable(cacheNames = "nominatimSearch", key = "#query", unless = "#result == null || !#result.isPresent()")
-    public Optional<LatLng> search(String query) {
+    @Cacheable(cacheNames = "nominatimSearch", key = "#query", unless = "!#result.isSuccess()")
+    public FetchResult<LatLng> search(String query) {
         throttle();
         URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl + "/search")
                 .queryParam("q", query)
@@ -52,18 +52,19 @@ public class NominatimClient {
                 .build()
                 .toUri();
         try {
-            String body = web.get().uri(uri).retrieve().bodyToMono(String.class).block();
+            String body = web.get().uri(uri).retrieve().bodyToMono(String.class).block(Duration.ofSeconds(20));
             JsonNode arr = mapper.readTree(body);
             if (arr.isArray() && arr.size() > 0) {
                 JsonNode first = arr.get(0);
                 double lat = first.path("lat").asDouble();
                 double lng = first.path("lon").asDouble();
-                return Optional.of(new LatLng(lat, lng));
+                return FetchResult.success(new LatLng(lat, lng));
             }
+            return FetchResult.notFound();
         } catch (Exception e) {
             log.debug("Nominatim search 실패: {} → {}", query, e.getMessage());
+            return FetchResult.error(WikipediaClient.classify(e), e);
         }
-        return Optional.empty();
     }
 
     private void throttle() {
