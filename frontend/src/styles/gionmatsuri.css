@@ -1,0 +1,218 @@
+/* gionmatsuri.css */
+
+.detail-page {
+    background-color: #fff;
+    min-height: calc(100vh - 80px);
+    padding: 60px 20px;
+    font-family: 'Pretendard', sans-serif;
+}
+
+.detail-container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.detail-main-title {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #000;
+    margin-bottom: 40px;
+}
+
+/* Gallery Layout */
+.detail-gallery {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 50px;
+    height: 500px;
+}
+
+.gallery-left {
+    flex: 1.2;
+    height: 100%;
+}
+
+.gallery-left img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.gallery-right {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 15px;
+    height: 100%;
+}
+
+.gallery-right img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.gallery-more {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.more-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.more-overlay span {
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* Divider */
+.detail-divider {
+    border: 0;
+    height: 2px;
+    background-color: #000;
+    margin: 0 0 50px 0;
+}
+
+/* Description Section */
+.detail-desc-section {
+    text-align: center;
+    margin-bottom: 50px;
+    padding: 0 20px;
+}
+
+.desc-subtitle {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 30px;
+}
+
+.desc-text {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #222;
+    text-align: justify;
+    word-break: keep-all;
+}
+
+/* Info Box Section - Festival version uses light blue instead of pink */
+.detail-info-box {
+    background-color: #e6f2ff; /* 축제에 어울리는 시원한 톤 */
+    padding: 40px 50px;
+    display: flex;
+    gap: 50px;
+    margin-bottom: 80px;
+}
+
+.info-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.info-column p {
+    font-size: 1.1rem;
+    color: #000;
+    margin: 0;
+    font-weight: 500;
+}
+
+/* Nearby Attractions Section */
+.nearby-section {
+    margin-bottom: 50px;
+}
+
+.nearby-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #000;
+    margin-bottom: 30px;
+}
+
+.nearby-list {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.nearby-item {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+}
+
+.nearby-img {
+    width: 320px;
+    height: 180px;
+    flex-shrink: 0;
+}
+
+.nearby-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.nearby-info h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #000;
+    margin: 0 0 15px 0;
+}
+
+.nearby-info p {
+    font-size: 1.1rem;
+    color: #000;
+    margin: 0;
+    font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .detail-gallery {
+        flex-direction: column;
+        height: auto;
+    }
+    .gallery-left {
+        height: 400px;
+    }
+    .gallery-right {
+        height: 400px;
+    }
+    .detail-info-box {
+        flex-direction: column;
+        gap: 20px;
+        padding: 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    .nearby-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .nearby-img {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16/9;
+    }
+}

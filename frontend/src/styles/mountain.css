@@ -1,0 +1,326 @@
+/* mountain.css */
+
+.mountain-page {
+    background-color: #e6e2d3; /* Earthy, natural background */
+    min-height: calc(100vh - 80px);
+    padding: 0;
+    margin: 0;
+    font-family: 'Pretendard', sans-serif;
+    position: relative;
+}
+
+/* Add a subtle mountain silhouette background to the whole page */
+.mountain-page::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 400px;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23d0ccbd" fill-opacity="0.5" d="M0,288L48,272C96,256,192,224,288,197.3C384,171,480,149,576,165.3C672,181,768,235,864,250.7C960,267,1056,245,1152,250.7C1248,256,1344,288,1392,304L1440,320L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom center;
+    background-size: cover;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.mountain-container {
+    display: flex;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+/* ---------------------------------
+   Left Section (Hero info)
+----------------------------------- */
+.mountain-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-img-box {
+    width: 100%;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4); /* Match onsen's shadow */
+}
+
+.main-img-box img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.main-info {
+    text-align: center;
+    padding: 40px 40px 60px;
+}
+
+.main-info h2 {
+    font-size: 2.4rem;
+    color: #1b4c35; /* Forest green */
+    margin-bottom: 20px;
+    font-weight: 800;
+}
+
+.main-info .divider {
+    width: 60%;
+    max-width: 300px;
+    height: 4px;
+    background-color: #8b5a2b; /* Earthy brown */
+    margin: 0 auto 30px;
+    border-radius: 2px;
+}
+
+.main-info .description {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: #333;
+    margin-bottom: 40px;
+    font-weight: 600;
+}
+
+.main-info .description strong {
+    color: #c95118; /* Autumn orange highlight */
+    font-weight: 800;
+}
+
+.learn-more-btn {
+    background-color: #1b4c35;
+    color: #fff;
+    border: none;
+    padding: 18px 45px;
+    font-size: 1.15rem;
+    cursor: pointer;
+    border-radius: 30px; /* Pill shape for nature theme */
+    transition: all 0.3s ease;
+    font-weight: 700;
+    box-shadow: 0 5px 15px rgba(27, 76, 53, 0.4);
+}
+
+.learn-more-btn:hover {
+    background-color: #123625;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(27, 76, 53, 0.5);
+}
+
+/* ---------------------------------
+   Right Section (Mountain Info)
+----------------------------------- */
+.mountain-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 40px;
+}
+
+.mountain-title-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.mountain-title-area h2 {
+    font-size: 2rem;
+    color: #222;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.icon-bubble img {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px; /* Soft square instead of circle */
+    object-fit: cover;
+    background: #e6eed3;
+    border: 3px solid #1b4c35;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.icon-sign {
+    width: 80px;
+    height: 80px;
+    background: #8b5a2b;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.icon-sign .emoji {
+    font-size: 2.5rem;
+    color: #fff;
+}
+
+.mountain-desc {
+    text-align: center;
+    font-size: 1.15rem;
+    line-height: 1.9;
+    color: #444;
+    margin-bottom: 50px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.4);
+    padding: 30px;
+    border-radius: 15px;
+    border: 1px dashed #8b5a2b;
+}
+
+/* Notice Board */
+.mountain-rules {
+    background: #d4c5a9; /* Soft wood/parchment color */
+    border: 6px solid #5a3a22; /* Darker wood border */
+    border-radius: 12px;
+    box-shadow: 4px 4px 0px rgba(90, 58, 34, 0.2), inset 0px 0px 30px rgba(0,0,0,0.05);
+    width: 90%;
+    max-width: 500px;
+    padding: 35px 40px;
+    position: relative;
+}
+
+/* Add two "nails" to the board */
+.mountain-rules::before, .mountain-rules::after {
+    content: '';
+    position: absolute;
+    top: 15px;
+    width: 12px;
+    height: 12px;
+    background: #333;
+    border-radius: 50%;
+    box-shadow: inset -2px -2px 4px rgba(255,255,255,0.4);
+}
+.mountain-rules::before { left: 20px; }
+.mountain-rules::after { right: 20px; }
+
+.mountain-rules h3 {
+    text-align: center;
+    color: #1b4c35;
+    font-size: 1.7rem;
+    font-weight: 900;
+    margin-bottom: 30px;
+    letter-spacing: 1px;
+    border-bottom: 2px solid #5a3a22;
+    padding-bottom: 10px;
+}
+
+.mountain-rules ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mountain-rules ul li {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.mountain-rules ul li::before {
+    content: '🍃';
+    margin-right: 10px;
+    font-size: 1rem;
+}
+
+/* ---------------------------------
+   Mountain List Section
+----------------------------------- */
+.mountain-list-section {
+    background-color: #faf9f6;
+    padding: 80px 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.mountain-list-container {
+    max-width: 900px;
+    margin: 0 auto;
+    border-top: 3px solid #000; /* Match onsen theme black line exactly */
+}
+
+.mountain-list-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 35px 0;
+    border-bottom: 1px solid #aaa;
+    gap: 40px;
+}
+
+.item-image {
+    width: 200px;
+    height: 200px;
+    flex-shrink: 0;
+}
+
+.item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.item-content {
+    flex: 1;
+}
+
+.item-content h3 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #1b4c35;
+    margin: 0 0 10px 0;
+    letter-spacing: -0.5px;
+}
+
+.item-content .location {
+    font-size: 1.3rem;
+    color: #222;
+    margin: 0 0 20px 0;
+    font-weight: 600;
+}
+
+.item-content .description {
+    font-size: 1.15rem;
+    color: #555;
+    line-height: 1.7;
+    margin: 0;
+    word-break: keep-all;
+}
+
+@media (max-width: 1024px) {
+    .mountain-container {
+        flex-direction: column;
+    }
+    
+    .mountain-left, .mountain-right {
+        width: 100%;
+        flex: none;
+    }
+    
+    .mountain-right {
+        padding: 40px 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .mountain-list-item {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 20px;
+    }
+    
+    .item-image {
+        width: 100%;
+        max-width: 300px;
+        height: auto;
+        aspect-ratio: 1 / 1;
+    }
+}

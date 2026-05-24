@@ -1,0 +1,23 @@
+.row {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.star {
+  background: transparent;
+  border: none;
+  padding: 0 1px;
+  color: var(--color-ink-300);
+  line-height: 1;
+  cursor: pointer;
+  transition: color var(--duration-fast);
+}
+.star.filled { color: var(--color-rating); }
+.star:hover:not(.readonly) { color: var(--color-rating); transform: scale(1.1); }
+.readonly { cursor: default; }
+.value {
+  margin-left: 6px;
+  font-size: var(--fs-sm);
+  color: var(--color-ink-700);
+  font-weight: var(--fw-semibold);
+}

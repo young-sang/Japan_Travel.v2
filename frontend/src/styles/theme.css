@@ -1,0 +1,121 @@
+/* Theme Page Specific Styles */
+
+.theme-page {
+    background-color: #FAFAFA;
+    min-height: calc(100vh - 90px);
+    padding-bottom: 80px;
+}
+
+/* GNB Active State Overlay */
+.gnb a.active {
+    color: var(--primary-red);
+}
+.gnb a.active::after {
+    width: 100%;
+}
+
+/* Theme Hero Section */
+.theme-hero {
+    width: 100%;
+    padding: 60px 20px 40px;
+    text-align: center;
+}
+
+.theme-hero-content h1 {
+    font-size: 42px;
+    font-weight: 800;
+    color: #111;
+    margin-bottom: 16px;
+    letter-spacing: -1px;
+}
+
+.theme-hero-content h1 span {
+    color: var(--primary-red);
+}
+
+.theme-hero-content p {
+    font-size: 18px;
+    color: #666;
+    font-weight: 400;
+}
+
+/* Theme Grid Gallery */
+.theme-gallery {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.simple-gallery-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px;
+    padding: 20px 0;
+}
+
+.simple-theme-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+.simple-card-image {
+    width: 100%;
+    aspect-ratio: 1; /* Square images like the design */
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    background-color: #EFEFEF; /* Placeholder background */
+}
+
+.simple-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.simple-theme-card:hover .simple-card-image img {
+    transform: scale(1.05); /* subtle zoom */
+}
+
+.simple-card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111;
+    margin: 0;
+    text-align: center;
+    transition: color 0.3s ease;
+}
+
+.simple-theme-card:hover .simple-card-title {
+    color: var(--primary-red);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .simple-gallery-container {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    .theme-hero-content h1 {
+        font-size: 32px;
+    }
+    
+    .simple-gallery-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .simple-gallery-container {
+        grid-template-columns: auto;
+    }
+}

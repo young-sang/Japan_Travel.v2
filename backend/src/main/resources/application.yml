@@ -1,0 +1,33 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: japan-travel-backend
+  datasource:
+    url: jdbc:sqlite:${user.dir}/../data/japan_travel.db
+    driver-class-name: org.sqlite.JDBC
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+      continue-on-error: true
+
+collector:
+  auto-bootstrap: false      # 부팅 시 자동 수집 여부 (true면 빈 DB일 때 도쿄도 관광지 1회 수집)
+  user-agent: "JapanTravelV2/0.1 (internal prototype)"
+  wikipedia:
+    base-url: https://ko.wikipedia.org
+  nominatim:
+    base-url: https://nominatim.openstreetmap.org
+    rate-limit-ms: 1100
+
+external:
+  open-meteo:
+    base-url: https://api.open-meteo.com
+  frankfurter:
+    base-url: https://api.frankfurter.app
+
+logging:
+  level:
+    com.japantravel: DEBUG

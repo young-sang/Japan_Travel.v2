@@ -1,0 +1,81 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  font-family: inherit;
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard),
+    transform var(--duration-fast) var(--easing-standard);
+  white-space: nowrap;
+  user-select: none;
+  line-height: var(--lh-tight);
+}
+.btn:disabled,
+.btn[aria-busy='true'] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.btn:not(:disabled):active { transform: translateY(1px); }
+
+/* Sizes */
+.s_sm { padding: 6px 14px; font-size: var(--fs-sm); }
+.s_md { padding: 10px 20px; font-size: var(--fs-md); }
+.s_lg { padding: 14px 28px; font-size: var(--fs-base); }
+
+/* Primary */
+.v_primary {
+  background: var(--color-brand-500);
+  color: #fff;
+}
+.v_primary:not(:disabled):hover { background: var(--color-brand-600); }
+.v_primary:not(:disabled):active { background: var(--color-brand-700); }
+
+/* Secondary */
+.v_secondary {
+  background: var(--color-surface-0);
+  color: var(--color-ink-900);
+  border-color: var(--color-border-strong);
+}
+.v_secondary:not(:disabled):hover { background: var(--color-surface-2); border-color: var(--color-ink-500); }
+
+/* Ghost */
+.v_ghost {
+  background: transparent;
+  color: var(--color-ink-700);
+}
+.v_ghost:not(:disabled):hover { background: var(--color-surface-2); color: var(--color-ink-900); }
+
+/* Danger */
+.v_danger {
+  background: var(--color-danger);
+  color: #fff;
+}
+.v_danger:not(:disabled):hover { background: #a71b1b; }
+
+/* Tint (brand subtle) */
+.v_tint {
+  background: var(--color-brand-100);
+  color: var(--color-brand-600);
+}
+.v_tint:not(:disabled):hover { background: #f9d8d8; }
+
+.iconL, .iconR { display: inline-flex; align-items: center; font-size: 1.1em; }
+.label { display: inline-block; }
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

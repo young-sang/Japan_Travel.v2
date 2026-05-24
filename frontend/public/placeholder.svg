@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="이미지 없음">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F2F2F2"/>
+      <stop offset="100%" stop-color="#E5E5E5"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#g)"/>
+  <g fill="#BFBFBF" transform="translate(160 110)">
+    <rect x="0" y="0" width="80" height="60" rx="6" fill="none" stroke="#BFBFBF" stroke-width="3"/>
+    <circle cx="22" cy="22" r="8"/>
+    <path d="M6 54 L30 32 L48 46 L62 32 L74 54 Z"/>
+  </g>
+  <text x="200" y="210" text-anchor="middle" font-family="Pretendard, sans-serif" font-size="14" fill="#9E9E9E">이미지 준비 중</text>
+</svg>

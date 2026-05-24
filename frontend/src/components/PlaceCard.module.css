@@ -1,0 +1,36 @@
+.linkWrap {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  height: 100%;
+}
+.linkWrap:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-lg);
+}
+
+.card { height: 100%; }
+
+.badge {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  background: var(--color-surface-0);
+  color: var(--color-ink-800);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  box-shadow: var(--shadow-sm);
+}
+.badge_destination { background: var(--color-pin-destination); color: #fff; }
+.badge_festival { background: var(--color-pin-festival); color: #fff; }
+.badge_course { background: var(--color-brand-500); color: #fff; }
+
+.fav {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+}
