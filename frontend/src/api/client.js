@@ -2,13 +2,19 @@
 
 async function req(path, opts = {}) {
   const res = await fetch(path, {
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json; charset=utf-8', ...(opts.headers || {}) },
     ...opts,
     body: opts.body ? JSON.stringify(opts.body) : undefined,
   });
   if (res.status === 204) return null;
   const text = await res.text();
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${text}`);
+  if (!res.ok) {
+    const err = new Error(`${res.status} ${res.statusText}: ${text}`);
+    err.status = res.status;
+    try { err.body = JSON.parse(text); } catch {}
+    throw err;
+  }
   return text ? JSON.parse(text) : null;
 }
 
@@ -32,11 +38,11 @@ export const api = {
   getFestival: (id) => req(`/api/festivals/${id}`),
 
   // courses
-  listCourses: ({ prefecture, tag, ownerUserId, status } = {}) => {
+  listCourses: ({ prefecture, tag, mine, status } = {}) => {
     const q = new URLSearchParams();
     if (prefecture) q.set('prefecture', prefecture);
     if (tag) q.set('tag', tag);
-    if (ownerUserId !== undefined) q.set('ownerUserId', ownerUserId);
+    if (mine) q.set('mine', 'true');
     if (status) q.set('status', status);
     return req(`/api/courses${q.toString() ? '?' + q : ''}`);
   },
@@ -70,6 +76,12 @@ export const api = {
   weather: (prefecture) => req(`/api/weather?prefecture=${encodeURIComponent(prefecture || '도쿄도')}`),
   fx: () => req('/api/fx'),
 
+  // auth
+  me: () => req('/api/auth/me'),
+  login: (username, password) => req('/api/auth/login', { method: 'POST', body: { username, password } }),
+  signup: (username, password, nickname) => req('/api/auth/signup', { method: 'POST', body: { username, password, nickname } }),
+  logout: () => req('/api/auth/logout', { method: 'POST' }),
+
   // admin
   stats: () => req('/api/admin/stats'),
   runCollector: (type, prefecture) => req('/api/admin/collector/run', { method: 'POST', body: { type, prefecture } }),
@@ -77,4 +89,47 @@ export const api = {
   recentCollectorRuns: (limit = 20) => req(`/api/admin/collector/runs?limit=${limit}`),
   cacheStats: () => req('/api/admin/cache/stats'),
   invalidateCache: (name) => req(`/api/admin/cache/invalidate${name ? '?name=' + name : ''}`, { method: 'POST' }),
+
+  collectionMatrix: () => req('/api/admin/collection-matrix'),
+
+  // admin: bulk collector
+  runBulkCollector: async () => {
+    try {
+      return await req('/api/admin/collector/bulk', { method: 'POST' });
+    } catch (e) {
+      if (e?.status === 409 && e?.body?.code === 'BULK_ALREADY_RUNNING') {
+        return { conflict: true, bulkRunId: e.body.bulkRunId };
+      }
+      throw e;
+    }
+  },
+  bulkRuns: (limit = 20) => req(`/api/admin/collector/bulk-runs?limit=${limit}`),
+  bulkRunDetail: (id) => req(`/api/admin/collector/bulk-runs/${id}`),
+  retryRun: (id) => req(`/api/admin/collector/runs/${id}/retry`, { method: 'POST' }),
+  retryFailedInBulk: (id) => req(`/api/admin/collector/bulk-runs/${id}/retry-failed`, { method: 'POST' }),
+
+  // admin: users
+  adminListUsers: () => req('/api/admin/users'),
+  adminSetUserRole: (id, role) => req(`/api/admin/users/${id}/role`, { method: 'PATCH', body: { role } }),
+  adminDeleteUser: (id) => req(`/api/admin/users/${id}`, { method: 'DELETE' }),
+
+  // admin: audit
+  adminListAudit: ({ userId, action, from, to, page = 0, size = 50 } = {}) => {
+    const q = new URLSearchParams();
+    if (userId) q.set('userId', userId);
+    if (action) q.set('action', action);
+    if (from) q.set('from', from);
+    if (to) q.set('to', to);
+    q.set('page', String(page));
+    q.set('size', String(size));
+    return req(`/api/admin/audit?${q.toString()}`);
+  },
+
+  // admin: content CRUD
+  adminCreateDestination: (body) => req('/api/admin/destinations', { method: 'POST', body }),
+  adminUpdateDestination: (id, body) => req(`/api/admin/destinations/${id}`, { method: 'PUT', body }),
+  adminDeleteDestination: (id) => req(`/api/admin/destinations/${id}`, { method: 'DELETE' }),
+  adminCreateFestival: (body) => req('/api/admin/festivals', { method: 'POST', body }),
+  adminUpdateFestival: (id, body) => req(`/api/admin/festivals/${id}`, { method: 'PUT', body }),
+  adminDeleteFestival: (id) => req(`/api/admin/festivals/${id}`, { method: 'DELETE' }),
 };

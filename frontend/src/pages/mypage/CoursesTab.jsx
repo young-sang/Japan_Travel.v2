@@ -21,7 +21,7 @@ export default function CoursesTab() {
   async function reload() {
     setCourses(null);
     try {
-      const list = await api.listCourses({ ownerUserId: 1, status: status || undefined });
+      const list = await api.listCourses({ mine: true, status: status || undefined });
       setCourses(list);
     } catch {
       toast.error('코스를 불러오지 못했습니다');

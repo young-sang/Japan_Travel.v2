@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../api/client.js';
+import { useAuth } from '../auth/useAuth.js';
 import Field from './ui/Field.jsx';
 import Button from './ui/Button.jsx';
 import Rating from './ui/Rating.jsx';
@@ -14,6 +16,7 @@ export default function ReviewSection({ targetType, targetId }) {
   const [editingId, setEditingId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const toast = useToast();
+  const { user } = useAuth();
 
   async function reload() {
     try {
@@ -72,30 +75,38 @@ export default function ReviewSection({ targetType, targetId }) {
         )}
       </div>
 
-      <form onSubmit={submit} className={styles.form}>
-        <Field label="평점" required>
-          <div>
-            <Rating value={rating} onChange={setRating} size={28} />
-          </div>
-        </Field>
-        <Field label="감상" required helper="다른 여행자에게 도움이 되는 솔직한 후기를 남겨주세요">
-          <textarea
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            placeholder="기억에 남는 순간, 추천 시간대, 주의할 점…"
-          />
-        </Field>
-        <div className={styles.actions}>
-          {editingId && (
-            <Button type="button" variant="ghost" onClick={() => { setEditingId(null); setComment(''); setRating(5); }}>
-              취소
+      {user && user.role === 'ADMIN' ? null : user ? (
+        <form onSubmit={submit} className={styles.form}>
+          <Field label="평점" required>
+            <div>
+              <Rating value={rating} onChange={setRating} size={28} />
+            </div>
+          </Field>
+          <Field label="감상" required helper="다른 여행자에게 도움이 되는 솔직한 후기를 남겨주세요">
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="기억에 남는 순간, 추천 시간대, 주의할 점…"
+            />
+          </Field>
+          <div className={styles.actions}>
+            {editingId && (
+              <Button type="button" variant="ghost" onClick={() => { setEditingId(null); setComment(''); setRating(5); }}>
+                취소
+              </Button>
+            )}
+            <Button type="submit" variant="primary" loading={submitting}>
+              {editingId ? '수정' : '작성'}
             </Button>
-          )}
-          <Button type="submit" variant="primary" loading={submitting}>
-            {editingId ? '수정' : '작성'}
-          </Button>
+          </div>
+        </form>
+      ) : (
+        <div style={{ padding: 'var(--space-4)', textAlign: 'center',
+          background: 'var(--color-surface-1)', borderRadius: 'var(--radius-md)',
+          border: '1px dashed var(--color-border)', marginBottom: 'var(--space-4)' }}>
+          리뷰를 작성하려면 <Link to="/login">로그인</Link>이 필요합니다.
         </div>
-      </form>
+      )}
 
       <ul className={styles.list}>
         {(data.items || []).length === 0 && (
@@ -111,10 +122,12 @@ export default function ReviewSection({ targetType, targetId }) {
             <div className={styles.itemHead}>
               <Rating value={r.rating} size={14} />
               <span className={styles.date}>{r.createdAt}</span>
-              <span className={styles.itemActions}>
-                <button type="button" onClick={() => startEdit(r)} className={styles.linkBtn}>수정</button>
-                <button type="button" onClick={() => remove(r.id)} className={styles.linkBtn}>삭제</button>
-              </span>
+              {user && (user.id === r.userId || user.role === 'ADMIN') && (
+                <span className={styles.itemActions}>
+                  <button type="button" onClick={() => startEdit(r)} className={styles.linkBtn}>수정</button>
+                  <button type="button" onClick={() => remove(r.id)} className={styles.linkBtn}>삭제</button>
+                </span>
+              )}
             </div>
             {r.comment && <p className={styles.comment}>{r.comment}</p>}
           </li>

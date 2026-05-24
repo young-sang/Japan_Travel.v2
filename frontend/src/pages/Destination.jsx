@@ -18,7 +18,7 @@ export default function Destination() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const toast = useToast();
-  const [prefecture, setPrefecture] = useState('도쿄도');
+  const [prefecture, setPrefecture] = useState('');
   const [tag, setTag] = useState(params.get('tag') || '');
   const [items, setItems] = useState(null);
   const [sort, setSort] = useState('default');
@@ -26,7 +26,7 @@ export default function Destination() {
   async function load() {
     setItems(null);
     try {
-      const list = await api.listDestinations({ prefecture, tag: tag || undefined });
+      const list = await api.listDestinations({ prefecture: prefecture || undefined, tag: tag || undefined });
       setItems(list);
     } catch (e) {
       toast.error('여행지 목록을 불러오지 못했습니다');
@@ -56,8 +56,8 @@ export default function Destination() {
           <>
             <PrefectureGrid value={prefecture} onChange={setPrefecture} />
             <TagGrid tags={DEST_TAGS} value={tag} onChange={setTag} title="테마" />
-            {(tag || prefecture !== '도쿄도') && (
-              <Button variant="ghost" size="sm" onClick={() => { setPrefecture('도쿄도'); setTag(''); }}>
+            {(tag || prefecture) && (
+              <Button variant="ghost" size="sm" onClick={() => { setPrefecture(''); setTag(''); }}>
                 필터 초기화
               </Button>
             )}
@@ -66,7 +66,7 @@ export default function Destination() {
         toolbar={
           <>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-              <Tag variant="brand" size="md">{prefecture}{tag && ` · ${tag}`}</Tag>
+              <Tag variant="brand" size="md">{prefecture || '전체'}{tag && ` · ${tag}`}</Tag>
               <span style={{ color: 'var(--color-ink-500)', fontSize: 'var(--fs-sm)' }}>
                 {items === null ? '불러오는 중…' : `결과 ${items.length}건`}
               </span>
@@ -92,8 +92,11 @@ export default function Destination() {
         }
       >
         {items === null && <SkeletonGrid count={8} />}
-        {items !== null && items.length === 0 && (
+        {items !== null && items.length === 0 && prefecture && (
           <EmptyStateCollector type="destination" prefecture={prefecture} onComplete={load} />
+        )}
+        {items !== null && items.length === 0 && !prefecture && (
+          <div style={{ padding: 40, textAlign: 'center', color: 'var(--color-ink-500)' }}>표시할 여행지가 없습니다</div>
         )}
         {items !== null && items.length > 0 && (
           <ResultsGrid>

@@ -32,7 +32,7 @@ export default function SettingsTab() {
   async function exportData() {
     try {
       const [fav, hist, revs, courses] = await Promise.all([
-        api.listFavorites(), api.history(), api.myReviews(), api.listCourses({ ownerUserId: 1 }),
+        api.listFavorites(), api.history(), api.myReviews(), api.listCourses({ mine: true }),
       ]);
       const blob = new Blob([JSON.stringify({ favorites: fav, history: hist, reviews: revs, courses }, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);

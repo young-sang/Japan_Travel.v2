@@ -5,6 +5,8 @@ import SearchOverlay from './SearchOverlay.jsx';
 import WeatherWidget from './WeatherWidget.jsx';
 import FxWidget from './FxWidget.jsx';
 import IconButton from './ui/IconButton.jsx';
+import { useAuth } from '../auth/useAuth.js';
+import { useToast } from './ui/Toast.jsx';
 import styles from './Header.module.css';
 
 const NAV = [
@@ -21,6 +23,15 @@ export default function Header() {
   const [userOpen, setUserOpen] = useState(false);
   const userRef = useRef(null);
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const toast = useToast();
+
+  async function onLogout() {
+    setUserOpen(false);
+    await logout();
+    toast.info('로그아웃되었습니다');
+    navigate('/');
+  }
 
   useEffect(() => {
     const onKey = (e) => {
@@ -87,15 +98,34 @@ export default function Header() {
                 onClick={() => setUserOpen((v) => !v)}
                 aria-expanded={userOpen}
               >
-                <span aria-hidden="true">👤</span>
+                <span aria-hidden="true">{user ? '🙂' : '👤'}</span>
               </IconButton>
               {userOpen && (
                 <div className={styles.dropdown} role="menu">
-                  <button type="button" role="menuitem" onClick={() => { setUserOpen(false); navigate('/mypage'); }}>마이페이지</button>
-                  <button type="button" role="menuitem" onClick={() => { setUserOpen(false); navigate('/mypage/favorites'); }}>즐겨찾기</button>
-                  <button type="button" role="menuitem" onClick={() => { setUserOpen(false); navigate('/mypage/courses'); }}>내 코스</button>
-                  <div className={styles.dropdownDivider} />
-                  <button type="button" role="menuitem" onClick={() => { setUserOpen(false); navigate('/admin'); }}>🛠 관리자</button>
+                  {user ? (
+                    <>
+                      <div style={{ padding: '6px 12px', fontSize: 'var(--fs-sm)', color: 'var(--color-ink-500)' }}>
+                        {user.nickname} <span style={{ opacity: 0.6 }}>({user.username})</span>
+                      </div>
+                      <div className={styles.dropdownDivider} />
+                      {user.role === 'ADMIN' ? (
+                        <button type="button" role="menuitem" onClick={() => { setUserOpen(false); navigate('/admin'); }}>🛠 관리자</button>
+                      ) : (
+                        <>
+                          <button type="button" role="menuitem" onClick={() => { setUserOpen(false); navigate('/mypage'); }}>마이페이지</button>
+                          <button type="button" role="menuitem" onClick={() => { setUserOpen(false); navigate('/mypage/favorites'); }}>즐겨찾기</button>
+                          <button type="button" role="menuitem" onClick={() => { setUserOpen(false); navigate('/mypage/courses'); }}>내 코스</button>
+                        </>
+                      )}
+                      <div className={styles.dropdownDivider} />
+                      <button type="button" role="menuitem" onClick={onLogout}>로그아웃</button>
+                    </>
+                  ) : (
+                    <>
+                      <button type="button" role="menuitem" onClick={() => { setUserOpen(false); navigate('/login'); }}>로그인</button>
+                      <button type="button" role="menuitem" onClick={() => { setUserOpen(false); navigate('/signup'); }}>가입</button>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -124,8 +154,21 @@ export default function Header() {
               >{n.label}</NavLink>
             ))}
             <div className={styles.mobileDivider} />
-            <button type="button" className={styles.mobileLink} onClick={() => { setMenuOpen(false); navigate('/mypage'); }} role="menuitem">마이페이지</button>
-            <button type="button" className={styles.mobileLink} onClick={() => { setMenuOpen(false); navigate('/admin'); }} role="menuitem">관리자</button>
+            {user ? (
+              <>
+                {user.role === 'ADMIN' ? (
+                  <button type="button" className={styles.mobileLink} onClick={() => { setMenuOpen(false); navigate('/admin'); }} role="menuitem">관리자</button>
+                ) : (
+                  <button type="button" className={styles.mobileLink} onClick={() => { setMenuOpen(false); navigate('/mypage'); }} role="menuitem">마이페이지</button>
+                )}
+                <button type="button" className={styles.mobileLink} onClick={() => { setMenuOpen(false); onLogout(); }} role="menuitem">로그아웃</button>
+              </>
+            ) : (
+              <>
+                <button type="button" className={styles.mobileLink} onClick={() => { setMenuOpen(false); navigate('/login'); }} role="menuitem">로그인</button>
+                <button type="button" className={styles.mobileLink} onClick={() => { setMenuOpen(false); navigate('/signup'); }} role="menuitem">가입</button>
+              </>
+            )}
           </div>
         )}
       </header>

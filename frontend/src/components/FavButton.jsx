@@ -1,15 +1,19 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client.js';
+import { useAuth } from '../auth/useAuth.js';
 import { useToast } from './ui/Toast.jsx';
 import styles from './FavButton.module.css';
 
-const PLACEHOLDER_CACHE = { items: null, ts: 0 };
+const PLACEHOLDER_CACHE = { items: null, ts: 0, userKey: null };
 
-async function fetchOnce() {
-  if (PLACEHOLDER_CACHE.items && Date.now() - PLACEHOLDER_CACHE.ts < 5000) return PLACEHOLDER_CACHE.items;
+async function fetchOnce(userKey) {
+  if (PLACEHOLDER_CACHE.userKey === userKey && PLACEHOLDER_CACHE.items
+      && Date.now() - PLACEHOLDER_CACHE.ts < 5000) return PLACEHOLDER_CACHE.items;
   const items = await api.listFavorites();
   PLACEHOLDER_CACHE.items = items;
   PLACEHOLDER_CACHE.ts = Date.now();
+  PLACEHOLDER_CACHE.userKey = userKey;
   return items;
 }
 
@@ -17,15 +21,25 @@ export default function FavButton({ targetType, targetId, size = 'md' }) {
   const [on, setOn] = useState(false);
   const [busy, setBusy] = useState(false);
   const toast = useToast();
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
-    fetchOnce()
+    if (!user || user.role === 'ADMIN') { setOn(false); return; }
+    fetchOnce(user.id)
       .then((items) => setOn(items.some((it) => it.targetType === targetType && it.targetId === targetId)))
       .catch(() => {});
-  }, [targetType, targetId]);
+  }, [targetType, targetId, user]);
+
+  if (user?.role === 'ADMIN') return null;
 
   async function toggle(e) {
     e.preventDefault(); e.stopPropagation();
+    if (!user) {
+      toast.info('로그인이 필요합니다');
+      navigate('/login');
+      return;
+    }
     if (busy) return;
     setBusy(true);
     try {

@@ -4,12 +4,14 @@ import EmptyState from './ui/EmptyState.jsx';
 import Button from './ui/Button.jsx';
 import Spinner from './ui/Spinner.jsx';
 import { useToast } from './ui/Toast.jsx';
+import { useAuth } from '../auth/useAuth.js';
 
 export default function EmptyStateCollector({ type, prefecture, onComplete, message }) {
   const [running, setRunning] = useState(false);
   const [run, setRun] = useState(null);
   const pollRef = useRef(null);
   const toast = useToast();
+  const { user } = useAuth();
 
   useEffect(() => () => clearInterval(pollRef.current), []);
 
@@ -41,6 +43,16 @@ export default function EmptyStateCollector({ type, prefecture, onComplete, mess
   }
 
   const label = type === 'festival' ? '축제' : '관광지';
+
+  if (user?.role !== 'ADMIN') {
+    return (
+      <EmptyState
+        icon="📭"
+        title="아직 데이터가 없습니다."
+        description="관리자에게 문의해주세요."
+      />
+    );
+  }
 
   return (
     <EmptyState

@@ -15,7 +15,7 @@ import filterStyles from '../components/FilterGroup.module.css';
 const MONTHS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 export default function Festival() {
-  const [prefecture, setPrefecture] = useState('도쿄도');
+  const [prefecture, setPrefecture] = useState('');
   const [month, setMonth] = useState(null);
   const [items, setItems] = useState(null);
   const [view, setView] = useState('list');
@@ -24,7 +24,7 @@ export default function Festival() {
   async function load() {
     setItems(null);
     try {
-      const list = await api.listFestivals({ prefecture, month: month || undefined });
+      const list = await api.listFestivals({ prefecture: prefecture || undefined, month: month || undefined });
       setItems(list);
     } catch (e) {
       toast.error('축제 목록을 불러오지 못했습니다');
@@ -53,15 +53,15 @@ export default function Festival() {
                 ))}
               </div>
             </div>
-            {month !== null && (
-              <Button variant="ghost" size="sm" onClick={() => setMonth(null)}>필터 초기화</Button>
+            {(month !== null || prefecture) && (
+              <Button variant="ghost" size="sm" onClick={() => { setMonth(null); setPrefecture(''); }}>필터 초기화</Button>
             )}
           </>
         }
         toolbar={
           <>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-              <Tag variant="brand" size="md">{prefecture}{month && ` · ${month}월`}</Tag>
+              <Tag variant="brand" size="md">{prefecture || '전체'}{month && ` · ${month}월`}</Tag>
               <span style={{ color: 'var(--color-ink-500)', fontSize: 'var(--fs-sm)' }}>
                 {items === null ? '불러오는 중…' : `결과 ${items.length}건`}
               </span>
@@ -74,8 +74,11 @@ export default function Festival() {
         }
       >
         {items === null && <SkeletonGrid count={8} />}
-        {items !== null && items.length === 0 && (
+        {items !== null && items.length === 0 && prefecture && (
           <EmptyStateCollector type="festival" prefecture={prefecture} onComplete={load} />
+        )}
+        {items !== null && items.length === 0 && !prefecture && (
+          <div style={{ padding: 40, textAlign: 'center', color: 'var(--color-ink-500)' }}>표시할 축제가 없습니다</div>
         )}
         {items !== null && items.length > 0 && view === 'list' && (
           <ResultsGrid>

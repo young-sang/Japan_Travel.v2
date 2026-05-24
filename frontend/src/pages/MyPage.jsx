@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api/client.js';
+import { useAuth } from '../auth/useAuth.js';
 import FavoritesTab from './mypage/FavoritesTab.jsx';
 import CoursesTab from './mypage/CoursesTab.jsx';
 import HistoryTab from './mypage/HistoryTab.jsx';
@@ -23,12 +24,13 @@ const TABS = [
 export default function MyPage() {
   const { tab } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [stats, setStats] = useState({ favorites: 0, courses: 0, history: 0, reviews: 0 });
 
   useEffect(() => {
     Promise.all([
       api.listFavorites().catch(() => []),
-      api.listCourses({ ownerUserId: 1 }).catch(() => []),
+      api.listCourses({ mine: true }).catch(() => []),
       api.history().catch(() => []),
       api.myReviews().catch(() => []),
     ]).then(([fav, courses, hist, revs]) => setStats({
@@ -41,10 +43,10 @@ export default function MyPage() {
       <section className={styles.hero}>
         <Container>
           <div className={styles.profile}>
-            <div className={styles.avatar} aria-hidden="true">🛠</div>
+            <div className={styles.avatar} aria-hidden="true">{user?.role === 'ADMIN' ? '🛠' : '🙂'}</div>
             <div className={styles.profileInfo}>
-              <h1 className={styles.name}>관리자</h1>
-              <p className={styles.subtitle}>사내 프로토타입 단일 사용자</p>
+              <h1 className={styles.name}>{user?.nickname || '게스트'}</h1>
+              <p className={styles.subtitle}>@{user?.username} {user?.role === 'ADMIN' ? '· 관리자' : ''}</p>
               <div className={styles.statRow}>
                 <Stat label="즐겨찾기" value={stats.favorites} to="/mypage/favorites" />
                 <Stat label="내 코스" value={stats.courses} to="/mypage/courses" />
