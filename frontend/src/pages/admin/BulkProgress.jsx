@@ -256,6 +256,14 @@ function GridCell({ cell, onClick }) {
   const title = cell
     ? `${cell.type} / ${cell.prefecture} / ${cell.status}${cell.stage ? ' / ' + cell.stage : ''}`
     : '미생성';
+  // running stage 이니셜: category→C, summary→S, geocode→G, save→V
+  const stageInitial = isRunning && cell?.stage ? (
+    cell.stage.startsWith('cat') ? 'C' :
+    cell.stage.startsWith('sum') ? 'S' :
+    cell.stage.startsWith('geo') || cell.stage.startsWith('nominatim') ? 'G' :
+    cell.stage.startsWith('save') || cell.stage.startsWith('persist') ? 'V' :
+    cell.stage[0].toUpperCase()
+  ) : null;
   return (
     <div
       onClick={cell ? onClick : undefined}
@@ -269,8 +277,12 @@ function GridCell({ cell, onClick }) {
         margin: '0 auto',
         opacity: cell ? 1 : 0.3,
         animation: isRunning ? 'pulse 1.2s ease-in-out infinite' : 'none',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        color: '#fff', fontSize: 10, fontWeight: 700,
       }}
-    />
+    >
+      {stageInitial}
+    </div>
   );
 }
 

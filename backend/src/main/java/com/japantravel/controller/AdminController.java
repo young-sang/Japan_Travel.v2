@@ -77,11 +77,15 @@ public class AdminController {
     public Map<String, Object> collectionMatrix() {
         Map<String, Integer> dest = destRepo.countsByPrefecture();
         Map<String, Integer> fest = festRepo.countsByPrefecture();
-        Map<String, Map<String, Integer>> rows = new LinkedHashMap<>();
+        Map<String, String> destAt = destRepo.maxRefreshedByPrefecture();
+        Map<String, String> festAt = festRepo.maxRefreshedByPrefecture();
+        Map<String, Map<String, Object>> rows = new LinkedHashMap<>();
         for (String p : PrefectureCatalog.ALL) {
-            Map<String, Integer> row = new LinkedHashMap<>();
+            Map<String, Object> row = new LinkedHashMap<>();
             row.put("destination", dest.getOrDefault(p, 0));
             row.put("festival", fest.getOrDefault(p, 0));
+            row.put("destinationAt", destAt.get(p));
+            row.put("festivalAt", festAt.get(p));
             rows.put(p, row);
         }
         return Map.of("prefectures", PrefectureCatalog.ALL, "rows", rows);
@@ -93,11 +97,24 @@ public class AdminController {
         if (req.type() == null || req.prefecture() == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "type, prefecture required"));
         }
-        long runId = runs.start(req.type(), req.prefecture(), "wikipedia");
-        collector.runAsync(runId, req.type(), req.prefecture());
+        var existingBulk = bulkRuns.findRunning();
+        if (existingBulk.isPresent() && (existingBulk.get().totalTasks() != null && existingBulk.get().totalTasks() > 1)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
+                    "code", "BULK_ALREADY_RUNNING",
+                    "bulkRunId", existingBulk.get().id(),
+                    "message", "대규모 수집이 진행 중입니다. 끝난 뒤 다시 시도하세요."));
+        }
+        long bulkRunId = collector.runBulkAsyncPairs(
+                List.of(new TypeAndPrefecture(req.type(), req.prefecture())));
+        Long runId = runs.findByBulkRunId(bulkRunId).stream()
+                .findFirst().map(CollectorRunStatus::id).orElse(null);
         auditService.log(currentUser, "COLLECTOR_RUN", "collector", null,
                 "type=" + req.type() + ",pref=" + req.prefecture());
-        return ResponseEntity.accepted().body(Map.of("runId", runId, "message", "수집 시작"));
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("runId", runId);
+        body.put("bulkRunId", bulkRunId);
+        body.put("message", "수집 시작");
+        return ResponseEntity.accepted().body(body);
     }
 
     @PostMapping("/collector/bulk")

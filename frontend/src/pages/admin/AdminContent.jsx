@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { api } from '../../api/client.js';
 import { PREFECTURES } from '../../data/prefectures.js';
 import EmptyStateCollector from '../../components/EmptyStateCollector.jsx';
@@ -17,9 +16,7 @@ export default function AdminContent() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null); // null = create, object = edit
   const [form, setForm] = useState(EMPTY_FORM);
-  const [bulkRunning, setBulkRunning] = useState(false);
   const toast = useToast();
-  const navigate = useNavigate();
 
   async function reload() {
     const prefArg = prefecture || undefined;
@@ -28,24 +25,6 @@ export default function AdminContent() {
     else setItems(await api.listCourses({ prefecture: prefArg }));
   }
   useEffect(() => { reload(); }, [tab, prefecture, triggerKey]);
-
-  async function runBulk() {
-    if (!confirm('47개 도도부현 × 2 카테고리 = 94개 작업을 큐잉합니다. 진행할까요?\n진행률은 "수집 현황" 페이지에서 확인됩니다.')) return;
-    setBulkRunning(true);
-    try {
-      const r = await api.runBulkCollector();
-      if (r?.conflict) {
-        toast.info(`이미 진행 중입니다 (bulk #${r.bulkRunId})`);
-      } else {
-        toast.success(`${r?.queued ?? 94}개 작업을 큐잉했습니다 (bulk #${r?.bulkRunId})`);
-      }
-      navigate('/admin/collection-status');
-    } catch (e) {
-      toast.error('일괄 수집 시작 실패');
-    } finally {
-      setBulkRunning(false);
-    }
-  }
 
   function openCreate() {
     setEditing(null);
@@ -114,10 +93,8 @@ export default function AdminContent() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, gap: 8, flexWrap: 'wrap' }}>
         <h2 style={{ margin: 0 }}>콘텐츠 관리</h2>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={runBulk} disabled={bulkRunning} style={{ ...btnPrimary, opacity: bulkRunning ? 0.6 : 1 }}>
-            🚀 전체 47×2 일괄 수집
-          </button>
+        <div style={{ fontSize: 12, color: '#888' }}>
+          전체 일괄 수집은 <a href="/admin/collection-status" style={{ color: '#e91e63' }}>수집 현황</a>에서 진행하세요.
         </div>
       </div>
 
@@ -137,13 +114,21 @@ export default function AdminContent() {
         )}
       </div>
 
-      {(tab === 'destinations' || tab === 'festivals') && prefecture && (
+      {(tab === 'destinations' || tab === 'festivals') && prefecture && items.length === 0 && (
         <div style={{ marginBottom: 20 }}>
           <EmptyStateCollector
             type={tab === 'destinations' ? 'destination' : 'festival'}
             prefecture={prefecture}
             onComplete={() => setTriggerKey((k) => k + 1)}
-            message={`${prefecture} ${tab === 'destinations' ? '관광지' : '축제'} Wikipedia 수집 (${items.length}건 보유 중)`}
+          />
+        </div>
+      )}
+      {(tab === 'destinations' || tab === 'festivals') && prefecture && items.length > 0 && (
+        <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'flex-end' }}>
+          <InlineRecollect
+            type={tab === 'destinations' ? 'destination' : 'festival'}
+            prefecture={prefecture}
+            onComplete={() => setTriggerKey((k) => k + 1)}
           />
         </div>
       )}
@@ -226,6 +211,43 @@ export default function AdminContent() {
   );
 }
 
+
+function InlineRecollect({ type, prefecture, onComplete }) {
+  const [running, setRunning] = useState(false);
+  const toast = useToast();
+  async function go() {
+    setRunning(true);
+    try {
+      const { runId } = await api.runCollector(type, prefecture);
+      // simple poll until terminal
+      const tick = async () => {
+        try {
+          const r = await api.collectorRun(runId);
+          if (['success', 'partial', 'failed', 'empty', 'aborted'].includes(r.status)) {
+            setRunning(false);
+            if (r.status === 'failed') toast.error('수집 실패');
+            else toast.success(`수집 완료 · 신규 ${r.itemsAdded}건`);
+            onComplete?.();
+            return;
+          }
+        } catch {}
+        setTimeout(tick, 1500);
+      };
+      setTimeout(tick, 1500);
+    } catch {
+      setRunning(false);
+      toast.error('수집 시작 실패');
+    }
+  }
+  return (
+    <button onClick={go} disabled={running} style={{
+      padding: '6px 12px', background: running ? '#eee' : '#fff3e0', color: running ? '#999' : '#e65100',
+      border: '1px solid #ffcc80', borderRadius: 4, cursor: running ? 'not-allowed' : 'pointer', fontSize: 12,
+    }}>
+      {running ? '수집 중...' : `🔄 ${prefecture} 다시 수집`}
+    </button>
+  );
+}
 
 const th = { padding: 8, textAlign: 'left', fontSize: 13, color: '#666' };
 const td = { padding: 8, fontSize: 13 };

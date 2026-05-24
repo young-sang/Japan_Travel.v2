@@ -38,7 +38,8 @@ export default function EmptyStateCollector({ type, prefecture, onComplete, mess
       }, 1500);
     } catch (e) {
       setRunning(false);
-      toast.error('수집 시작에 실패했습니다');
+      if (e?.status === 409) toast.error(e?.body?.message || '진행 중인 일괄 수집이 끝난 뒤 다시 시도해 주세요');
+      else toast.error('수집 시작에 실패했습니다');
     }
   }
 

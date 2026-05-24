@@ -109,6 +109,14 @@ public class DestinationRepository {
         return out;
     }
 
+    public java.util.Map<String, String> maxRefreshedByPrefecture() {
+        java.util.Map<String, String> out = new java.util.HashMap<>();
+        jdbc.query("SELECT prefecture, MAX(last_refreshed_at) AS t FROM destinations GROUP BY prefecture", rs -> {
+            out.put(rs.getString("prefecture"), rs.getString("t"));
+        });
+        return out;
+    }
+
     // ── manual CRUD (admin) ────────────────────────────────────────────────
     public long insert(Destination d) {
         String tagsJson;
