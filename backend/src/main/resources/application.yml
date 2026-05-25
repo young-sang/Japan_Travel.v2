@@ -29,6 +29,8 @@ collector:
   nominatim:
     base-url: https://nominatim.openstreetmap.org
     rate-limit-ms: 1100
+  kakao:
+    rest-key: ${KAKAO_REST_KEY:}  # 백필 일회성 용도. 빈 값이면 Kakao fallback 비활성.
 
 external:
   open-meteo:

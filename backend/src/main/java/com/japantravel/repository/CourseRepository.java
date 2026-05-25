@@ -30,12 +30,16 @@ public class CourseRepository {
             tags = mapper.readValue(rs.getString("tags"), new TypeReference<List<String>>(){});
             timeline = mapper.readValue(rs.getString("timeline_json"), new TypeReference<List<CourseStop>>(){});
         } catch (Exception e) { tags = List.of(); timeline = List.of(); }
+        Object latObj = rs.getObject("center_lat");
+        Object lngObj = rs.getObject("center_lng");
+        Object ownerObj = rs.getObject("owner_user_id");
         return new Course(
                 rs.getLong("id"), rs.getString("title"), rs.getString("prefecture"),
                 tags, rs.getString("duration"), rs.getString("image_path"),
-                (Double) rs.getObject("center_lat"), (Double) rs.getObject("center_lng"),
+                latObj == null ? null : ((Number) latObj).doubleValue(),
+                lngObj == null ? null : ((Number) lngObj).doubleValue(),
                 timeline, rs.getInt("is_user_created") == 1,
-                (Long) rs.getObject("owner_user_id"),
+                ownerObj == null ? null : ((Number) ownerObj).longValue(),
                 rs.getString("status"), rs.getString("created_at")
         );
     };
