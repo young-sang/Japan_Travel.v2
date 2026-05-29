@@ -1,0 +1,180 @@
+.page {
+  --accent-1: #ff6ec7;
+  --accent-2: #7c3aed;
+  --text-primary: #eef0ff;
+  --text-secondary: #b8bbd2;
+  --shadow: 0 32px 80px rgba(0, 0, 0, 0.32);
+
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(255, 110, 199, 0.18), transparent 22%),
+    radial-gradient(circle at top right, rgba(124, 58, 237, 0.18), transparent 20%),
+    linear-gradient(180deg, #090b18 0%, #10132a 100%);
+  color: var(--text-primary);
+  padding: 0;
+}
+
+.section {
+  max-width: 1200px;
+  margin: 40px auto 0;
+  padding: 40px 24px;
+  background: rgba(14, 17, 38, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 32px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+}
+
+.sectionHeader {
+  margin-bottom: 42px;
+  display: grid;
+  gap: 14px;
+}
+
+.mainTitle {
+  font-size: clamp(2.5rem, 4vw, 4rem);
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1.03;
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.subTitle {
+  max-width: 760px;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  line-height: 1.75;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 26px;
+}
+
+.tipCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: transform 0.55s ease, opacity 0.55s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  opacity: 0;
+  transform: translateY(18px);
+  text-decoration: none;
+  color: inherit;
+}
+
+.tipCard.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.tipCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top left, rgba(255, 110, 199, 0.25), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(124, 58, 237, 0.18), transparent 25%);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.tipCard:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 42px 95px rgba(0, 0, 0, 0.3);
+}
+
+.cardImageBox {
+  position: relative;
+  height: 250px;
+  overflow: hidden;
+}
+
+.cardImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s ease, filter 0.6s ease;
+  filter: saturate(1.05) contrast(1.02);
+}
+
+.tipCard:hover .cardImg {
+  transform: scale(1.08) rotate(0.3deg);
+}
+
+.cardInfo {
+  position: relative;
+  padding: 30px 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-height: 220px;
+}
+
+.cardInfo::before {
+  content: '';
+  position: absolute;
+  top: 18px;
+  left: 24px;
+  width: 60px;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+}
+
+.cardSubject {
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: 1.05;
+  color: #f7f7ff;
+}
+
+.cardText {
+  flex: 1;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.8;
+  word-break: keep-all;
+}
+
+@media (max-width: 1024px) {
+  .cardGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .section {
+    padding: 28px 18px;
+    margin: 40px 16px 0;
+  }
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+  .mainTitle {
+    font-size: 2.6rem;
+  }
+  .subTitle {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .cardImageBox {
+    height: 210px;
+  }
+  .cardInfo {
+    padding: 24px 18px 22px;
+  }
+}

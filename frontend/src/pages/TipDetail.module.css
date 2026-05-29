@@ -1,0 +1,46 @@
+.container {
+  max-width: 1100px;
+  margin: 32px auto;
+  padding: 24px;
+}
+
+.tipHero {
+  padding: 28px;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.tipHero h1 {
+  margin: 0 0 6px;
+  font-size: 28px;
+}
+
+.tipHero p {
+  margin: 0;
+  font-size: 15px;
+  opacity: 0.95;
+  line-height: 1.7;
+}
+
+.tipContent {
+  margin-top: 20px;
+  display: grid;
+  gap: 18px;
+}
+
+.card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  color: #111;
+  box-shadow: 0 6px 24px rgba(2, 6, 23, 0.06);
+}
+
+.card h3 {
+  margin: 0 0 8px;
+}
+
+.card p {
+  margin: 0;
+  line-height: 1.7;
+}

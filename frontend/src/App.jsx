@@ -7,6 +7,11 @@ import Destination from './pages/Destination.jsx';
 import Festival from './pages/Festival.jsx';
 import Course from './pages/Course.jsx';
 import Detail from './pages/Detail.jsx';
+import Hotplace from './pages/Hotplace.jsx';
+import News from './pages/News.jsx';
+import Tip from './pages/Tip.jsx';
+import TipDetail from './pages/TipDetail.jsx';
+import Top100 from './pages/Top100.jsx';
 import MyPage from './pages/MyPage.jsx';
 import CourseBuilder from './pages/CourseBuilder.jsx';
 import Admin from './pages/Admin.jsx';
@@ -30,6 +35,11 @@ export default function App() {
             <Route path="/destination" element={<Destination />} />
             <Route path="/festival" element={<Festival />} />
             <Route path="/course" element={<Course />} />
+            <Route path="/top100" element={<Top100 />} />
+            <Route path="/hotplace" element={<Hotplace />} />
+            <Route path="/news" element={<News />} />
+            <Route path="/tip" element={<Tip />} />
+            <Route path="/tip/:slug" element={<TipDetail />} />
             <Route path="/detail/:type/:id" element={<Detail />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />

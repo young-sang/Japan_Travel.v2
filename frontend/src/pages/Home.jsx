@@ -17,11 +17,10 @@ const SLIDES = [
 ];
 
 const QUICK = [
-  { emoji: '🗾', label: '일본 관광 100선', to: '/theme', badge: '100' },
-  { emoji: '🔥', label: '핫플레이스', to: '/destination' },
-  { emoji: '🎉', label: '축제', to: '/festival' },
-  { emoji: '🗺️', label: '여행코스', to: '/course' },
-  { emoji: '💡', label: '여행 팁', to: '/theme' },
+  { emoji: '🗾', label: '2025 일본 관광 100선', to: '/top100', badge: '100' },
+  { emoji: '🔥', label: '핫플레이스', to: '/hotplace' },
+  { emoji: '📰', label: '뉴스', to: '/news' },
+  { emoji: '💡', label: '여행 팁', to: '/tip' },
 ];
 
 export default function Home() {
