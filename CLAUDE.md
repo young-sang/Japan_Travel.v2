@@ -64,3 +64,6 @@ retry/perf work unless the feature explicitly needs it.
 - 팀은 cross-cutting 기능에만 사용. 단일 파일 수정·색상 변경 같은 건 그냥 단일 세션에서.
 - 한 번에 한 팀만. 새 기능 시작 전 이전 팀은 lead에게 "cleanup the team" 지시.
 - 팀 정의 파일은 만들지 않는다 (런타임에 lead가 스폰). 우리가 미리 정의하는 건 4종 역할(`.claude/agents/*.md`)뿐.
+
+## DB 규칙
+- db를 삭제하기 전에 백업본을 만들어 놓을 것.

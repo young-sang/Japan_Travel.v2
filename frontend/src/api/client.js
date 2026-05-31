@@ -64,6 +64,19 @@ export const api = {
   updateReview: (id, body) => req(`/api/reviews/${id}`, { method: 'PUT', body }),
   deleteReview: (id) => req(`/api/reviews/${id}`, { method: 'DELETE' }),
 
+  // posts (board)
+  listPosts: (page = 0, size = 20) => req(`/api/posts?page=${page}&size=${size}`),
+  getPost: (id) => req(`/api/posts/${id}`),
+  createPost: (body) => req('/api/posts', { method: 'POST', body }),
+  updatePost: (id, body) => req(`/api/posts/${id}`, { method: 'PUT', body }),
+  deletePost: (id) => req(`/api/posts/${id}`, { method: 'DELETE' }),
+  listComments: (postId) => req(`/api/posts/${postId}/comments`),
+  createComment: (postId, body) => req(`/api/posts/${postId}/comments`, { method: 'POST', body: { body } }),
+  deleteComment: (id) => req(`/api/comments/${id}`, { method: 'DELETE' }),
+  adminListPosts: (page = 0, size = 20) => req(`/api/admin/posts?page=${page}&size=${size}`),
+  adminDeletePost: (id) => req(`/api/admin/posts/${id}`, { method: 'DELETE' }),
+  adminDeleteComment: (id) => req(`/api/admin/comments/${id}`, { method: 'DELETE' }),
+
   // history
   history: () => req('/api/history'),
   touchHistory: (targetType, targetId) => req('/api/history', { method: 'POST', body: { targetType, targetId } }),

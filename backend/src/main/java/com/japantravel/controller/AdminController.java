@@ -16,6 +16,8 @@ import com.japantravel.dto.Dtos.Destination;
 import com.japantravel.dto.Dtos.FailureEntry;
 import com.japantravel.dto.Dtos.Festival;
 import com.japantravel.dto.Dtos.User;
+import com.japantravel.dto.Dtos.Post;
+import com.japantravel.dto.Dtos.PostPage;
 import com.japantravel.repository.*;
 import com.japantravel.security.CurrentUser;
 import com.japantravel.service.AuditService;
@@ -41,6 +43,7 @@ public class AdminController {
     private final CourseRepository courseRepo;
     private final UserDataRepository userData;
     private final UserRepository userRepo;
+    private final PostRepository postRepo;
     private final AuditLogRepository auditRepo;
     private final AuditService auditService;
     private final CurrentUser currentUser;
@@ -52,11 +55,37 @@ public class AdminController {
                            DestinationRepository d, FestivalRepository f, CourseRepository c,
                            UserDataRepository ud, UserRepository ur,
                            AuditLogRepository al, AuditService as,
-                           CurrentUser cu, CacheManager cm, ObjectMapper mapper) {
+                           CurrentUser cu, CacheManager cm, ObjectMapper mapper,
+                           PostRepository pr) {
         this.collector = collector; this.runs = runs; this.bulkRuns = bulkRuns;
         this.destRepo = d; this.festRepo = f; this.courseRepo = c; this.userData = ud;
         this.userRepo = ur; this.auditRepo = al; this.auditService = as;
         this.currentUser = cu; this.cacheManager = cm; this.mapper = mapper;
+        this.postRepo = pr;
+    }
+
+    // ── posts (admin) ─────────────────────────────────────────────────────
+    @GetMapping("/posts")
+    public PostPage adminListPosts(@RequestParam(defaultValue = "0") int page,
+                                   @RequestParam(defaultValue = "20") int size) {
+        if (page < 0) page = 0;
+        if (size <= 0 || size > 100) size = 20;
+        List<Post> items = postRepo.listPaged(page * size, size);
+        return new PostPage(items, postRepo.count(), page, size);
+    }
+
+    @DeleteMapping("/posts/{id}")
+    public ResponseEntity<Void> adminDeletePost(@PathVariable long id) {
+        if (!postRepo.deleteByAdmin(id)) return ResponseEntity.notFound().build();
+        auditService.log(currentUser, "POST_DELETE", "post", id, null);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/comments/{id}")
+    public ResponseEntity<Void> adminDeleteComment(@PathVariable long id) {
+        if (!postRepo.deleteCommentByAdmin(id)) return ResponseEntity.notFound().build();
+        auditService.log(currentUser, "POST_COMMENT_DELETE", "post_comment", id, null);
+        return ResponseEntity.noContent().build();
     }
 
     // ── stats ─────────────────────────────────────────────────────────────

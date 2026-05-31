@@ -75,4 +75,21 @@ public final class Dtos {
     ) {}
 
     public record BulkRunDetail(BulkRunSummary summary, java.util.List<CollectorRunDetail> children) {}
+
+    public record Post(
+            Long id, Long userId, String userName,
+            String title, String body,
+            String createdAt, String updatedAt, int commentCount
+    ) {}
+
+    public record PostCreate(String title, String body) {}
+
+    public record PostComment(
+            Long id, Long postId, Long userId, String userName,
+            String body, String createdAt
+    ) {}
+
+    public record CommentCreate(String body) {}
+
+    public record PostPage(List<Post> items, int total, int page, int size) {}
 }

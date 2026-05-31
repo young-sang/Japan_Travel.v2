@@ -10,7 +10,7 @@ import { useToast } from './ui/Toast.jsx';
 import styles from './Header.module.css';
 
 const NAV = [
-  { to: '/theme', label: '테마' },
+  { to: '/board', label: '자유게시판' },
   { to: '/destination', label: '여행지' },
   { to: '/festival', label: '축제' },
   { to: '/course', label: '여행코스' },

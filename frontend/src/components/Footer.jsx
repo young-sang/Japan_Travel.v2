@@ -9,7 +9,7 @@ export default function Footer() {
           <span className={styles.tagline}>일본 여행 가이드 · 학습용 프로젝트</span>
         </div>
         <nav className={styles.links} aria-label="푸터 네비게이션">
-          <a href="/theme">테마</a>
+          <a href="/board">자유게시판</a>
           <a href="/destination">여행지</a>
           <a href="/festival">축제</a>
           <a href="/course">코스</a>

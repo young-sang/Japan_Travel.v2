@@ -2,7 +2,9 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header.jsx';
 import Footer from './components/Footer.jsx';
 import Home from './pages/Home.jsx';
-import Theme from './pages/Theme.jsx';
+import Board from './pages/Board.jsx';
+import PostDetail from './pages/PostDetail.jsx';
+import PostEditor from './pages/PostEditor.jsx';
 import Destination from './pages/Destination.jsx';
 import Festival from './pages/Festival.jsx';
 import Course from './pages/Course.jsx';
@@ -31,7 +33,10 @@ export default function App() {
         <ErrorBoundary>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/theme" element={<Theme />} />
+            <Route path="/board" element={<Board />} />
+            <Route path="/board/new" element={<ProtectedRoute><PostEditor /></ProtectedRoute>} />
+            <Route path="/board/:id" element={<PostDetail />} />
+            <Route path="/board/:id/edit" element={<ProtectedRoute><PostEditor /></ProtectedRoute>} />
             <Route path="/destination" element={<Destination />} />
             <Route path="/festival" element={<Festival />} />
             <Route path="/course" element={<Course />} />

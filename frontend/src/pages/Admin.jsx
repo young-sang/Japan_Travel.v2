@@ -3,6 +3,7 @@ import AdminDashboard from './admin/AdminDashboard.jsx';
 import AdminContent from './admin/AdminContent.jsx';
 import CollectionStatus from './admin/CollectionStatus.jsx';
 import AdminReviews from './admin/AdminReviews.jsx';
+import AdminPosts from './admin/AdminPosts.jsx';
 import AdminSystem from './admin/AdminSystem.jsx';
 import AdminUsers from './admin/AdminUsers.jsx';
 import AdminAudit from './admin/AdminAudit.jsx';
@@ -12,6 +13,7 @@ const NAV = [
   { to: '/admin/content', label: '콘텐츠' },
   { to: '/admin/collection-status', label: '수집 현황' },
   { to: '/admin/reviews', label: '사용자 데이터' },
+  { to: '/admin/posts', label: '게시판' },
   { to: '/admin/users', label: '사용자' },
   { to: '/admin/audit', label: '감사 로그' },
   { to: '/admin/system', label: '시스템' },
@@ -43,6 +45,7 @@ export default function Admin() {
         <Route path="content" element={<AdminContent />} />
         <Route path="collection-status" element={<CollectionStatus />} />
         <Route path="reviews" element={<AdminReviews />} />
+        <Route path="posts" element={<AdminPosts />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="audit" element={<AdminAudit />} />
         <Route path="system" element={<AdminSystem />} />
