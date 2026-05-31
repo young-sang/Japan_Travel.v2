@@ -31,6 +31,10 @@ export default function CourseBuilder() {
   const [results, setResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
 
+  const [tab, setTab] = useState('search');
+  const [favs, setFavs] = useState(null);
+  const [favsLoading, setFavsLoading] = useState(false);
+
   useEffect(() => {
     if (editing) {
       api.getCourse(id)
@@ -47,23 +51,53 @@ export default function CourseBuilder() {
     if (!query.trim()) { setResults([]); return; }
     setSearchLoading(true);
     const t = setTimeout(() => {
-      api.listDestinations({ prefecture })
-        .then((all) => setResults(all.filter((d) => d.name.includes(query)).slice(0, 8)))
+      Promise.all([
+        api.listDestinations({ prefecture }).catch(() => []),
+        api.listFestivals({ prefecture }).catch(() => []),
+      ])
+        .then(([dests, fests]) => {
+          const tagged = [
+            ...dests.map((d) => ({ ...d, _type: 'destination' })),
+            ...fests.map((f) => ({ ...f, _type: 'festival' })),
+          ];
+          setResults(tagged.filter((x) => x.name?.includes(query)).slice(0, 10));
+        })
         .catch(() => setResults([]))
         .finally(() => setSearchLoading(false));
     }, 200);
     return () => clearTimeout(t);
   }, [query, prefecture]);
 
+  useEffect(() => {
+    if (tab !== 'favorites' || favs !== null) return;
+    setFavsLoading(true);
+    (async () => {
+      try {
+        const list = await api.listFavorites();
+        const enriched = await Promise.all(list
+          .filter((f) => f.targetType !== 'course')
+          .map(async (f) => {
+            try {
+              const fn = f.targetType === 'destination' ? api.getDestination : api.getFestival;
+              return { ...f, detail: await fn(f.targetId) };
+            } catch { return null; }
+          }));
+        setFavs(enriched.filter(Boolean));
+      } catch { setFavs([]); }
+      finally { setFavsLoading(false); }
+    })();
+  }, [tab, favs]);
+
   const stopsCount = stops.length;
   const stopSummary = useMemo(() => stops.map((s, i) => `${i + 1}. ${s.title}`).join(' → '), [stops]);
 
-  function addStop(d) {
+  function addStop(item, type = 'destination') {
     setStops((s) => [...s, {
       time: defaultTimeFor(s.length),
-      title: d.name,
-      desc: d.description?.slice(0, 80) || '',
-      lat: d.lat, lng: d.lng,
+      title: item.name,
+      desc: (item.description || '').slice(0, 80),
+      lat: item.lat, lng: item.lng,
+      targetType: type, targetId: item.id,
     }]);
     setQuery('');
   }
@@ -152,32 +186,84 @@ export default function CourseBuilder() {
           </div>
 
           <div className={styles.card}>
-            <h2 className={styles.cardTitle}>장소 검색</h2>
-            <Field label="검색어" htmlFor="stop-search">
-              <input
-                id="stop-search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={`${prefecture} 내 장소 검색`}
-              />
-            </Field>
-            <div className={styles.results}>
-              {searchLoading && <div className={styles.resultsLoading}><Spinner size={20} /></div>}
-              {!searchLoading && query.trim() && results.length === 0 && (
-                <p className={styles.resultsEmpty}>일치하는 장소가 없어요</p>
-              )}
-              {results.map((d) => (
-                <button
-                  key={d.id}
-                  type="button"
-                  className={styles.resultItem}
-                  onClick={() => addStop(d)}
-                >
-                  <span className={styles.resultName}>{d.name}</span>
-                  <span className={styles.resultAdd}>+ 추가</span>
-                </button>
-              ))}
+            <div className={styles.tabs}>
+              <button
+                type="button"
+                className={`${styles.tab} ${tab === 'search' ? styles.tabActive : ''}`}
+                onClick={() => setTab('search')}
+              >
+                검색
+              </button>
+              <button
+                type="button"
+                className={`${styles.tab} ${tab === 'favorites' ? styles.tabActive : ''}`}
+                onClick={() => setTab('favorites')}
+              >
+                즐겨찾기
+              </button>
             </div>
+
+            {tab === 'search' && (
+              <>
+                <Field label="검색어" htmlFor="stop-search">
+                  <input
+                    id="stop-search"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder={`${prefecture} 내 장소 검색`}
+                  />
+                </Field>
+                <div className={styles.results}>
+                  {searchLoading && <div className={styles.resultsLoading}><Spinner size={20} /></div>}
+                  {!searchLoading && query.trim() && results.length === 0 && (
+                    <p className={styles.resultsEmpty}>일치하는 장소가 없어요</p>
+                  )}
+                  {results.map((d) => (
+                    <button
+                      key={`${d._type}-${d.id}`}
+                      type="button"
+                      className={styles.resultItem}
+                      onClick={() => addStop(d, d._type)}
+                    >
+                      <span className={styles.resultName}>
+                        <span className={d._type === 'festival' ? styles.badgeFest : styles.badgeDest}>
+                          {d._type === 'festival' ? '축제' : '여행지'}
+                        </span>
+                        {d.name}
+                      </span>
+                      <span className={styles.resultAdd}>+ 추가</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {tab === 'favorites' && (
+              <div className={styles.results}>
+                {favsLoading && <div className={styles.resultsLoading}><Spinner size={20} /></div>}
+                {!favsLoading && favs && favs.length === 0 && (
+                  <p className={styles.resultsEmpty}>
+                    즐겨찾기가 없어요. <a href="/destination">여행지</a> 또는 <a href="/festival">축제</a>에서 추가해보세요.
+                  </p>
+                )}
+                {!favsLoading && favs && favs.map((f) => (
+                  <button
+                    key={`${f.targetType}-${f.targetId}`}
+                    type="button"
+                    className={styles.resultItem}
+                    onClick={() => addStop(f.detail, f.targetType)}
+                  >
+                    <span className={styles.resultName}>
+                      <span className={f.targetType === 'festival' ? styles.badgeFest : styles.badgeDest}>
+                        {f.targetType === 'festival' ? '축제' : '여행지'}
+                      </span>
+                      {f.detail.name}
+                    </span>
+                    <span className={styles.resultAdd}>+ 구간 추가</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
