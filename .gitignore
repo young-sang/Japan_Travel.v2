@@ -22,10 +22,13 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Backend (Maven / Java)
+# Backend (Gradle / Java)
+backend/build/
+backend/.gradle/
 backend/target/
 *.class
 *.jar
+!backend/gradle/wrapper/gradle-wrapper.jar
 *.war
 hs_err_pid*.log
 

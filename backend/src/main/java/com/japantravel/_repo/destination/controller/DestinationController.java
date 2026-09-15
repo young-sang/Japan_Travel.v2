@@ -1,4 +1,4 @@
-package com.japantravel.destination.controller;
+package com.japantravel.repo.destination.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 

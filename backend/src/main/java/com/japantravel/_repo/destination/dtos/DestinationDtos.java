@@ -1,4 +1,4 @@
-package com.japantravel.destination.dtos;
+package com.japantravel.repo.destination.dtos;
 
 import java.util.List;
 
