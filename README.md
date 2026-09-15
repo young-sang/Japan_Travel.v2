@@ -8,7 +8,7 @@ graduate project(`D:/01_Program/00_Project/새 폴더/graduate project/`)의 디
 
 ```
 Japan_Travel_v2/
-├── backend/     Spring Boot 3.3 (Java 17, SQLite, Caffeine)
+├── backend/     Spring Boot 3.3 (Java 17, Gradle, SQLite + JPA, Caffeine)
 ├── frontend/    Vite + React 18 + react-router + react-leaflet
 ├── data/        SQLite 파일 위치 (런타임 생성)
 └── docs/        기획서·아키텍처 문서
@@ -17,7 +17,7 @@ Japan_Travel_v2/
 ## 사전 요구사항
 
 - **Java 17+** (`java -version`)
-- **Maven 3.9+** (`mvn -v`)
+- Gradle 설치는 **불필요** — 래퍼(`backend/gradlew`)가 포함되어 있습니다
 - **Node 18+** (`node -v`)
 
 ## 실행
@@ -26,8 +26,10 @@ Japan_Travel_v2/
 
 ```bash
 cd backend
-mvn spring-boot:run
+./gradlew bootRun
 ```
+
+> Windows PowerShell 에서는 `.\gradlew.bat bootRun`.
 
 첫 부팅 시 `data/japan_travel.db` 가 자동 생성되고, schema.sql 이 적재됩니다. DB는 **비어 있는 상태로 시작**하며, `admin` 계정(비밀번호 `admin1234`, role=ADMIN)이 자동 시드됩니다.
 
