@@ -1,4 +1,4 @@
-package com.japantravel.config;
+package com.japantravel.common.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.cache.CacheManager;

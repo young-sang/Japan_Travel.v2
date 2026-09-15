@@ -27,6 +27,72 @@
 거친다. 그 결과 **"누가 이 도메인을 쓰는가"를 Service의 public 메서드 목록만 보면
 알 수 있게 된다.**
 
+## 함정: curl + 한글 쿼리 파라미터 (Task 0에서 실제로 밟음)
+
+Windows Git Bash에서 **curl 명령에 한글을 그대로 쓰면 서버에 온전히 도달하지 않는다.**
+
+```bash
+curl -s "localhost:8080/api/destinations?prefecture=도쿄도"
+#   → HTTP 400 (Tomcat이 URL의 raw 비ASCII 바이트를 거부)
+
+curl -s -G "localhost:8080/api/destinations" --data-urlencode "prefecture=도쿄도"
+#   → 200 이지만 [] (이미 깨진 바이트를 퍼센트 인코딩해서 보냄)
+```
+
+**반드시 퍼센트 인코딩된 ASCII URL을 쓴다.**
+
+```bash
+curl -s "localhost:8080/api/destinations?prefecture=%EB%8F%84%EC%BF%84%EB%8F%84"
+#   → 200, 22건 ✅
+```
+
+자주 쓰는 값:
+
+| 값 | 퍼센트 인코딩 |
+|---|---|
+| 도쿄도 | `%EB%8F%84%EC%BF%84%EB%8F%84` |
+| 교토부 | `%EA%B5%90%ED%86%A0%EB%B6%80` |
+| 나라현 | `%EB%82%98%EB%9D%BC%ED%98%84` |
+| 온천 | `%EC%98%A8%EC%B2%9C` |
+
+필요하면 직접 만든다: `python -c "import urllib.parse;print(urllib.parse.quote('오사카부'))"`
+
+**응답 확인도 마찬가지다.** 콘솔이 한글을 깨뜨려 보여주므로 `head -c`로 눈으로 읽지 말고
+파이썬으로 판정한다.
+
+```bash
+python -c "
+import json; d=json.load(open('out.json',encoding='utf-8'))
+print(len(d), json.dumps(d[0],ensure_ascii=True)[:200])
+"
+```
+
+## 기준선 (baseline)
+
+Task 0 시점의 응답을 스크래치패드에 떠 두었다. 이후 매 Task에서 **눈으로 비교하지 말고
+`diff`로 판정한다.**
+
+```
+<scratchpad>/baseline/
+  destinations.json         88096 bytes · 118건
+  destinations-tokyo.json   22건
+  festivals.json            18275 bytes
+  courses.json              847 bytes
+  destination-1.json
+  search-onsen.json         dest=2 fest=0 course=0
+  weather-kyoto.json        (값은 실시간이라 구조만 비교)
+```
+
+검증 예:
+
+```bash
+curl -s localhost:8080/api/destinations > /tmp/now.json
+diff <(python -m json.tool "$BL/destinations.json") <(python -m json.tool /tmp/now.json) \
+  && echo "동일 ✅"
+```
+
+`weather`·`fx`는 외부 API 실시간 값이라 내용이 매번 다르다. **키 구조만** 비교한다.
+
 ## 검증 루프
 
 테스트가 없다. 매 Task 끝에 이 3단계를 돌린다.
@@ -106,7 +172,7 @@ Task 1에서 실제로 만들어 보고 마음에 안 들면 top-level record로
   → `backend/src/main/java/com/japantravel/common/config/`
 - Delete: `backend/src/main/java/com/japantravel/controller/AdminController.java.tmp.7656.53fcf8a4b0e9`
 
-- [ ] **Step 1: 잔재 파일 삭제**
+- [x] **Step 1: 잔재 파일 삭제**
 
 `AdminController.java`와 바이트 단위로 동일한 복사본이고, `.gitignore`의 `*.tmp.*`에
 걸려 추적되지 않는다. 지워도 잃는 것이 없다.
@@ -115,7 +181,7 @@ Task 1에서 실제로 만들어 보고 마음에 안 들면 top-level record로
 rm "backend/src/main/java/com/japantravel/controller/AdminController.java.tmp.7656.53fcf8a4b0e9"
 ```
 
-- [ ] **Step 2: 디렉터리 생성 후 5개 파일 이동**
+- [x] **Step 2: 디렉터리 생성 후 5개 파일 이동**
 
 ```bash
 mkdir -p backend/src/main/java/com/japantravel/common/config
@@ -129,7 +195,7 @@ rmdir config
 `git mv`를 쓰는 이유: `git log --follow`로 파일 히스토리가 이어진다.
 `mv` + `git add`로도 결과는 같지만 rename 감지가 안 될 수 있다.
 
-- [ ] **Step 3: 5개 파일의 package 선언 수정**
+- [x] **Step 3: 5개 파일의 package 선언 수정**
 
 각 파일 **1행**을 바꾼다.
 
@@ -149,7 +215,7 @@ sed -i 's/^package com\.japantravel\.config;$/package com.japantravel.common.con
 grep -n "^package" *.java   # 5줄 전부 common.config 인지 확인
 ```
 
-- [ ] **Step 4: 컴파일**
+- [x] **Step 4: 컴파일**
 
 ```bash
 cd backend && mvn -q compile
@@ -157,7 +223,7 @@ cd backend && mvn -q compile
 
 기대: 출력 없이 종료(성공). 에러가 나면 package 선언 오타다.
 
-- [ ] **Step 5: 기동 + 스모크**
+- [x] **Step 5: 기동 + 스모크**
 
 ```bash
 cd backend && mvn spring-boot:run
@@ -177,7 +243,7 @@ curl -s -o /dev/null -w "%{http_code}\n" localhost:8080/api/favorites
 기대: `401` 또는 `403` (비로그인이므로 거부). `200`이 나오면 SecurityConfig가
 안 잡힌 것이다.
 
-- [ ] **Step 6: 커밋**
+- [x] **Step 6: 커밋**
 
 ```bash
 git add -A backend/src/main/java/com/japantravel
@@ -527,9 +593,10 @@ cd backend && mvn spring-boot:run
 
 ```bash
 # 조회 (비로그인 허용)
-curl -s "localhost:8080/api/destinations?prefecture=도쿄도" | head -c 300
+curl -s "localhost:8080/api/destinations?prefecture=%EB%8F%84%EC%BF%84%EB%8F%84" > /tmp/now.json
+python -c "import json;d=json.load(open('/tmp/now.json',encoding='utf-8'));print(len(d),'건 (기준선: 22건)')"
 curl -s -o /dev/null -w "%{http_code}\n" localhost:8080/api/destinations/1
-curl -s "localhost:8080/api/search?q=신사" | head -c 300
+curl -s "localhost:8080/api/search?q=%EC%98%A8%EC%B2%9C"   # 기준선: dest=2 fest=0 course=0
 
 # 관리자 경로가 여전히 보호되는지 (비로그인)
 curl -s -o /dev/null -w "%{http_code}\n" -X POST localhost:8080/api/admin/destinations \
@@ -599,7 +666,7 @@ destination의 거울이다. 구조가 거의 동일하므로 Task 1 코드를 �
 
 **스모크:**
 ```bash
-curl -s "localhost:8080/api/festivals?prefecture=교토부" | head -c 300
+curl -s "localhost:8080/api/festivals?prefecture=%EA%B5%90%ED%86%A0%EB%B6%80"
 curl -s -o /dev/null -w "%{http_code}\n" -X POST localhost:8080/api/admin/festivals \
   -H "Content-Type: application/json" --data-binary '{"name":"x"}'   # 401/403 기대
 ```
@@ -751,8 +818,8 @@ festival·course의 `deleteById`도 마찬가지일 가능성이 높다.
 
 **스모크:**
 ```bash
-curl -s "localhost:8080/api/search?q=온천" | head -c 300
-curl -s "localhost:8080/api/weather?prefecture=교토부"
+curl -s "localhost:8080/api/search?q=%EC%98%A8%EC%B2%9C"   # 기준선: dest=2 fest=0 course=0
+curl -s "localhost:8080/api/weather?prefecture=%EA%B5%90%ED%86%A0%EB%B6%80"
 curl -s localhost:8080/api/fx
 ```
 
@@ -791,7 +858,7 @@ curl -s localhost:8080/api/fx
 ```bash
 curl -s -b /tmp/c.txt -X POST localhost:8080/api/admin/collector/run \
   -H "Content-Type: application/json; charset=utf-8" \
-  --data-binary '{"type":"destination","prefecture":"나라현"}'
+  --data-binary '{"type":"destination","prefecture":"나라현"}'   # JSON 본문은 charset=utf-8 헤더가 있어 한글 리터럴이 통한다 (URL 파라미터와 달리)
 ```
 
 ---

@@ -1,4 +1,4 @@
-package com.japantravel.config;
+package com.japantravel.common.config;
 
 import com.japantravel.collector.WikipediaCollector;
 import com.japantravel.repository.BulkRunRepository;
