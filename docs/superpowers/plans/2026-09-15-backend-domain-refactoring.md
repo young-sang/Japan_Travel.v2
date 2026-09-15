@@ -1,12 +1,18 @@
 # 백엔드 도메인 리팩토링 실행 계획
 
-> **작업 방식:** 코드는 **사용자가 직접 수정한다.** Claude는 각 Task마다
-> ① 도메인 설명 → ② 작업 지시 → ③ (사용자 수정) → ④ 검증 → ⑤ 커밋 을 담당한다.
-> 체크박스(`- [ ]`)로 진행 상황을 추적한다.
+> **작업 방식 (2026-09-15 변경):** 기존 코드를 옮기는 리팩토링이 아니라,
+> **도메인마다 새로 설계해서 직접 작성한다.** 옛 코드는 참고 자료일 뿐 이식 대상이 아니다.
+>
+> 코드는 **사용자가 쓴다.** Claude는 **명세만** 제공한다 —
+> ① 도메인 설명 → ② 명세(계약·메서드 목록·규칙·주의점) → ③ (사용자 작성) → ④ 검증 → ⑤ 커밋.
+> 구현 코드는 사용자가 막혔을 때만 제공한다.
+>
+> 고정된 것은 둘뿐이다: **`schema.sql`**(DB에 데이터가 이미 있다)과
+> **`frontend/`**(이것이 API 계약을 결정한다). 그 사이는 사용자가 새로 설계한다.
 
 **설계 문서:** [2026-09-15-backend-domain-refactoring-design.md](../specs/2026-09-15-backend-domain-refactoring-design.md)
 
-**목표:** 계층 기준 패키지를 도메인 기준으로 재편하면서 프로젝트 코드를 이해한다.
+**목표:** 백엔드를 도메인 기준으로 새로 지으면서 프로젝트 코드를 이해한다.
 
 **아키텍처:** 도메인마다 `Controller` / `Service` / `Repository` / `Dtos` 4종을
 같은 패키지에 둔다. 관리자 API는 별도 `admin/` 패키지 없이 각 도메인의
@@ -254,390 +260,213 @@ git commit -m "refactor(common): config 5종을 common/config 패키지로 이�
 
 ## Task 1: `destination/` — 템플릿 단계
 
-**여기서 정한 모양이 나머지 8개 Task의 틀이 된다.** 서두르지 않는다.
+**옛 코드는 참고 자료다. 이식 대상이 아니다.** 명세를 읽고 직접 설계해서 쓴다.
+여기서 정한 모양이 나머지 8개 Task의 틀이 된다.
 
-이 Task는 세 가지를 동시에 확립한다:
-1. `Dtos.java`에서 도메인 DTO를 떼어내는 방법
-2. Service를 신설하고 Repository 직접 호출을 전부 걷어내는 방법
-3. `AdminController`에서 도메인 관리 API를 흡수하는 방법
+### 고정된 계약 (바꿀 수 없는 것)
 
-**Files:**
-- Create: `backend/src/main/java/com/japantravel/destination/DestinationDtos.java`
-- Create: `backend/src/main/java/com/japantravel/destination/DestinationService.java`
-- Create: `backend/src/main/java/com/japantravel/destination/DestinationAdminController.java`
-- Move: `controller/DestinationController.java` → `destination/DestinationController.java`
-- Move: `repository/DestinationRepository.java` → `destination/DestinationRepository.java`
-- Modify: `dto/Dtos.java` (Destination record 제거)
-- Modify: `controller/AdminController.java` (destination 관련 8곳 제거/위임)
-- Modify: `controller/SearchController.java` (Repository → Service)
-- Modify: `common/config/StartupRunner.java` (Repository → Service)
-- Modify: `collector/WikipediaCollector.java` (Repository → Service)
+**DB 테이블 `destinations`** — `schema.sql` 그대로. 118건이 이미 들어 있다.
+컬럼: `id` · `name` · `prefecture` · `tags`(JSON 문자열) · `lat` · `lng` ·
+`image_path` · `description` · `wiki_title` · `last_refreshed_at`
 
-### 현재 호출자 전수 조사 결과
+**HTTP API** — `frontend/src/api/client.js`가 부르는 대로.
 
-`DestinationRepository`를 부르는 곳은 정확히 여기뿐이다. Service는 이 목록을
-빠짐없이 덮어야 한다.
+| 메서드 | 경로 | 쿼리/본문 | 응답 |
+|---|---|---|---|
+| GET | `/api/destinations` | `prefecture?` · `tag?` | `Destination[]` |
+| GET | `/api/destinations/{id}` | — | `Destination` / 404 |
+| POST | `/api/admin/destinations` | `Destination` | 201 `{"id": <long>}` |
+| PUT | `/api/admin/destinations/{id}` | `Destination` | 204 / 404 |
+| DELETE | `/api/admin/destinations/{id}` | — | 204 |
 
-| 호출처 | 호출 메서드 |
+**JSON 필드명** — camelCase. Jackson이 record 컴포넌트명 그대로 쓴다.
+`id` · `name` · `prefecture` · `tags`(문자열 배열) · `lat` · `lng` ·
+`imagePath` · `description` · `wikiTitle` · `lastRefreshedAt`
+
+> `image_path` → `imagePath` 변환은 자동이 아니다. **record 컴포넌트를 `imagePath`로
+> 짓고 RowMapper에서 `rs.getString("image_path")`를 읽는다.** 이름이 틀리면 프론트의
+> 이미지가 전부 깨진다 — 기준선 `diff`가 잡아낸다.
+
+`/api/admin/**`는 `SecurityConfig`가 경로로 `hasRole("ADMIN")`을 건다.
+컨트롤러가 어느 패키지에 있든 자동 적용되므로 애너테이션은 필요 없다.
+
+### 만들 것
+
+`backend/src/main/java/com/japantravel/destination/` 아래 5개 파일.
+
+| 파일 | 책임 |
 |---|---|
-| `DestinationController` | `findAll(pref,tag)` · `findById(id)` |
-| `SearchController:27` | `findAll(null,null)` |
-| `StartupRunner:59` | `count()` |
-| `WikipediaCollector:261` | `upsertByWiki(...)` |
-| `AdminController:95,100` | `count()` · `distinctPrefectures()` |
-| `AdminController:107,109` | `countsByPrefecture()` · `maxRefreshedByPrefecture()` |
-| `AdminController:316,323,324,331` | `insert(d)` · `findById(id)` · `update(id,d)` · `deleteById(id)` |
+| `DestinationDtos.java` | `Destination` record 하나. 위 JSON 필드 명세대로 |
+| `DestinationRepository.java` | `destinations` 테이블 SQL **전담**. 다른 테이블은 `delete` 예외 |
+| `DestinationService.java` | 규칙 + 유일한 진입점. 아래 메서드 목록을 전부 제공 |
+| `DestinationController.java` | `/api/destinations` 조회 2종 |
+| `DestinationAdminController.java` | `/api/admin/destinations` 쓰기 3종 |
 
-- [ ] **Step 1: `DestinationDtos.java` 생성**
+### `DestinationService` public 메서드 명세
 
-`Dtos.java`의 `Destination` record를 **필드명·순서·타입 그대로** 옮긴다.
-한 글자라도 바꾸면 JSON이 바뀌고 프론트가 깨진다.
+이 목록이 **도메인의 외부 계약**이다. 빠짐없이 있어야 기존 호출처 5곳이 컴파일된다.
 
-```java
-package com.japantravel.destination;
+```
+List<Destination>       list(String prefecture, String tag)
+Optional<Destination>   findById(long id)
 
-import java.util.List;
+int                     count()
+List<String>            distinctPrefectures()
+Map<String,Integer>     countsByPrefecture()
+Map<String,String>      maxRefreshedByPrefecture()
 
-public final class DestinationDtos {
-    private DestinationDtos() {}
+boolean                 upsertByWiki(String name, String prefecture, List<String> tags,
+                                     Double lat, Double lng, String imagePath,
+                                     String description, String wikiTitle)
 
-    public record Destination(
-            Long id, String name, String prefecture, List<String> tags,
-            Double lat, Double lng, String imagePath, String description,
-            String wikiTitle, String lastRefreshedAt
-    ) {}
-}
+long                    create(Destination d)
+boolean                 update(long id, Destination d)
+void                    delete(long id)
 ```
 
-- [ ] **Step 2: `Dtos.java`에서 `Destination` record 삭제**
+**동작 명세:**
 
-`backend/src/main/java/com/japantravel/dto/Dtos.java`의 8~12행을 지운다.
+- `list` — `prefecture`·`tag` 둘 다 선택. null이거나 빈 문자열이면 그 조건은 무시.
+  `tags`가 JSON 문자열이라 태그 필터는 `LIKE '%"<tag>"%'` 방식. 정렬은 `id DESC`.
+- `upsertByWiki` — `wiki_title`로 찾아 **있으면 UPDATE, 없으면 INSERT**.
+  **새로 INSERT했으면 `true`**를 반환 (수집기가 추가/갱신 건수를 세는 근거).
+  두 경우 모두 `last_refreshed_at = datetime('now')`.
+- `update` — 대상이 없으면 아무것도 하지 않고 `false`.
+- `create`/`update`/`delete` — **감사 로그를 남긴다.** 액션명은
+  `CONTENT_CREATE` · `CONTENT_UPDATE` · `CONTENT_DELETE`, 대상 타입은 `"destination"`.
+  create/update는 상세에 `"name=" + d.name()`, delete는 null.
+- `delete` — **연쇄 삭제.** 스키마에 `ON DELETE CASCADE`가 없어서 손으로 지운다.
+  `favorites` · `reviews` · `history`에서 `target_type='destination' AND target_id=?`
+  인 행을 먼저 지우고 마지막에 `destinations` 행을 지운다.
+  **순서가 중요하다** (외래키 제약이 없어 실제로는 순서 무관하지만, 읽는 사람에게
+  의도가 드러난다).
 
-```java
-    public record Destination(
-            Long id, String name, String prefecture, List<String> tags,
-            Double lat, Double lng, String imagePath, String description,
-            String wikiTitle, String lastRefreshedAt
-    ) {}
-```
+### 규칙을 어디에 둘 것인가
 
-이 시점부터 컴파일이 깨진다. 정상이다. Step 7까지 계속 깨져 있다.
+이 도메인의 규칙은 둘뿐이고, 둘 다 **Service**에 둔다.
 
-- [ ] **Step 3: Repository 이동 + package/import 수정**
+1. **감사 로그** — "여행지를 만들면 로그가 남는다"는 컨트롤러의 사정이 아니라
+   도메인의 규칙이다. Service에 두면 누가 부르든 로그가 남는다.
+2. **연쇄 삭제** — SQL이므로 Repository에 둔다. Service는 호출만.
 
-```bash
-mkdir -p backend/src/main/java/com/japantravel/destination
-cd backend/src/main/java/com/japantravel
-git mv repository/DestinationRepository.java destination/DestinationRepository.java
-```
+컨트롤러는 **HTTP 번역만** 한다: 파라미터 꺼내기, 상태 코드 정하기, 404/204 판정.
+비즈니스 판단은 하지 않는다.
 
-파일 안에서 2줄을 바꾼다.
+### 기존 호출처 5곳 — Service로 갈아끼운다
 
-```java
-// 1행
-package com.japantravel.repository;          // 변경 전
-package com.japantravel.destination;         // 변경 후
+옛 코드가 `DestinationRepository`를 직접 부르던 곳. 새 Service를 주입받게 고친다.
 
-// import 줄
-import com.japantravel.dto.Dtos.Destination;              // 변경 전
-import com.japantravel.destination.DestinationDtos.Destination;  // 변경 후
-```
+| 파일 | 현재 | 바꿀 것 |
+|---|---|---|
+| `controller/SearchController.java:27` | `destRepo.findAll(null,null)` | `destService.list(null,null)` |
+| `common/config/StartupRunner.java:59` | `destRepo.count()` | `destService.count()` |
+| `collector/WikipediaCollector.java:261` | `destRepo.upsertByWiki(...)` | `destService.upsertByWiki(...)` |
+| `controller/AdminController.java:95,100` | `destRepo.count()` · `distinctPrefectures()` | `destService.…` |
+| `controller/AdminController.java:107,109` | `destRepo.countsByPrefecture()` · `maxRefreshedByPrefecture()` | `destService.…` |
 
-**같은 패키지이므로 import를 아예 지우고 `DestinationDtos.Destination`으로 쓰거나,
-`import static`이 아닌 중첩 클래스 import를 그대로 남겨도 된다.** 후자가 기존
-코드 변경이 적으므로 권장한다.
+`AdminController`의 생성자는 인자가 14개다. `DestinationRepository d` 자리의
+**타입만** `DestinationService`로 바꾼다 (인자를 빼면 대입 줄이 엉킨다).
 
-Repository 내부 코드는 **한 줄도 바꾸지 않는다.** SQL·메서드 시그니처 전부 그대로다.
+### 지울 것
 
-- [ ] **Step 4: `DestinationService.java` 생성**
+새 파일이 다 되면 삭제한다. **Spring은 같은 경로에 컨트롤러가 둘이면 기동에 실패하므로
+공존이 불가능하다.**
 
-Step 1의 호출자 표를 그대로 덮는다. 지금은 대부분 Repository로 위임만 한다.
-**관리자 쓰기 3종(create/update/delete)에는 감사 로그가 함께 들어간다** —
-`AdminController`에 흩어져 있던 것을 여기로 모은다. 이게 "규칙이 Service로
-올라간다"의 실제 모습이다.
+- `controller/DestinationController.java`
+- `repository/DestinationRepository.java`
+- `dto/Dtos.java`의 `Destination` record (8~12행)
+- `controller/AdminController.java`의 destination CRUD 3개 메서드 (314~334행)
+  및 `destRepo` 필드
 
-```java
-package com.japantravel.destination;
+### 주의점
 
-import com.japantravel.destination.DestinationDtos.Destination;
-import com.japantravel.security.CurrentUser;
-import com.japantravel.service.AuditService;
-import org.springframework.stereotype.Service;
+- **`tags` 왕복.** DB에는 JSON 문자열(`["신사","역사"]`), API에는 배열이다.
+  Repository에서 Jackson으로 양방향 변환한다. 파싱 실패 시 빈 리스트로 떨어뜨린다
+  (옛 코드가 그렇게 한다 — 깨진 행 하나가 목록 전체를 죽이지 않게).
+- **`lat`/`lng`는 null 가능.** `rs.getDouble()`은 null을 `0.0`으로 만든다.
+  `(Double) rs.getObject("lat")`을 쓴다. 이걸 놓치면 좌표 없는 여행지가
+  **아프리카 앞바다(0,0)에 찍힌다.**
+- **INSERT 시 생성된 id가 필요하다** (201 응답 본문). `KeyHolder`를 쓰거나
+  `last_insert_rowid()`를 조회한다.
+- **`wiki_title`은 수동 생성 시 null이다.** NOT NULL 제약이 없는지 확인할 것.
+- `CurrentUser`·`AuditService`는 아직 옛 패키지(`security/`·`service/`)에 있다.
+  Task 3~4에서 옮겨지므로 import 2줄이 나중에 바뀐다 — 예정된 일이다.
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+### 검증
 
-@Service
-public class DestinationService {
-
-    private final DestinationRepository repo;
-    private final AuditService auditService;
-    private final CurrentUser currentUser;
-
-    public DestinationService(DestinationRepository repo,
-                              AuditService auditService,
-                              CurrentUser currentUser) {
-        this.repo = repo;
-        this.auditService = auditService;
-        this.currentUser = currentUser;
-    }
-
-    // ── 조회 ───────────────────────────────────────────────────────────
-    public List<Destination> list(String prefecture, String tag) {
-        return repo.findAll(prefecture, tag);
-    }
-
-    public Optional<Destination> findById(long id) {
-        return repo.findById(id);
-    }
-
-    // ── 통계 (관리자 대시보드·수집 현황) ────────────────────────────────
-    public int count() {
-        return repo.count();
-    }
-
-    public List<String> distinctPrefectures() {
-        return repo.distinctPrefectures();
-    }
-
-    public Map<String, Integer> countsByPrefecture() {
-        return repo.countsByPrefecture();
-    }
-
-    public Map<String, String> maxRefreshedByPrefecture() {
-        return repo.maxRefreshedByPrefecture();
-    }
-
-    // ── 수집기 진입점 ──────────────────────────────────────────────────
-    /** Wikipedia title 기준 UPSERT. 새로 추가되면 true. */
-    public boolean upsertByWiki(String name, String prefecture, List<String> tags,
-                                Double lat, Double lng, String imagePath,
-                                String description, String wikiTitle) {
-        return repo.upsertByWiki(name, prefecture, tags, lat, lng,
-                imagePath, description, wikiTitle);
-    }
-
-    // ── 관리자 쓰기 (감사 로그 포함) ────────────────────────────────────
-    public long create(Destination d) {
-        long id = repo.insert(d);
-        auditService.log(currentUser, "CONTENT_CREATE", "destination", id, "name=" + d.name());
-        return id;
-    }
-
-    /** 대상이 없으면 false. */
-    public boolean update(long id, Destination d) {
-        if (repo.findById(id).isEmpty()) return false;
-        repo.update(id, d);
-        auditService.log(currentUser, "CONTENT_UPDATE", "destination", id, "name=" + d.name());
-        return true;
-    }
-
-    public void delete(long id) {
-        repo.deleteById(id);
-        auditService.log(currentUser, "CONTENT_DELETE", "destination", id, null);
-    }
-}
-```
-
-`CurrentUser`와 `AuditService`는 아직 옛 패키지에 있다. Task 3~4에서 이 2줄이
-바뀐다 — 예정된 일이다.
-
-- [ ] **Step 5: `DestinationController` 이동 + Service 사용**
-
-```bash
-cd backend/src/main/java/com/japantravel
-git mv controller/DestinationController.java destination/DestinationController.java
-```
-
-파일 전체를 이렇게 바꾼다. **`@RequestMapping("/api/destinations")`과 메서드
-시그니처는 그대로다** — URL과 쿼리 파라미터가 계약이다.
-
-```java
-package com.japantravel.destination;
-
-import com.japantravel.destination.DestinationDtos.Destination;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
-@RestController
-@RequestMapping("/api/destinations")
-public class DestinationController {
-
-    private final DestinationService service;
-    public DestinationController(DestinationService service) { this.service = service; }
-
-    @GetMapping
-    public List<Destination> list(@RequestParam(required = false) String prefecture,
-                                  @RequestParam(required = false) String tag) {
-        return service.list(prefecture, tag);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Destination> one(@PathVariable long id) {
-        return service.findById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
-    }
-}
-```
-
-- [ ] **Step 6: `DestinationAdminController.java` 생성**
-
-`AdminController`의 314~334행(`/destinations` 3개 엔드포인트)을 여기로 옮긴다.
-**경로는 `/api/admin/destinations` 그대로 유지한다.** 감사 로그는 Service로
-올라갔으므로 여기엔 없다.
-
-```java
-package com.japantravel.destination;
-
-import com.japantravel.destination.DestinationDtos.Destination;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
-
-@RestController
-@RequestMapping("/api/admin/destinations")
-public class DestinationAdminController {
-
-    private final DestinationService service;
-    public DestinationAdminController(DestinationService service) { this.service = service; }
-
-    @PostMapping
-    public ResponseEntity<Map<String, Object>> create(@RequestBody Destination d) {
-        long id = service.create(d);
-        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("id", id));
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Void> update(@PathVariable long id, @RequestBody Destination d) {
-        if (!service.update(id, d)) return ResponseEntity.notFound().build();
-        return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable long id) {
-        service.delete(id);
-        return ResponseEntity.noContent().build();
-    }
-}
-```
-
-> **권한은 자동으로 따라온다 (확인됨):** `SecurityConfig`는 **경로 기반**이다 —
-> `.requestMatchers("/api/admin/**").hasRole("ADMIN")`. 클래스에 `@PreAuthorize`가
-> 붙어 있지 않으므로, 새 컨트롤러를 `/api/admin/destinations`에 두기만 하면
-> 같은 규칙이 적용된다. 옮길 애너테이션은 없다.
->
-> 이것이 **관리자 API를 도메인으로 흩어도 안전한 이유**다. 경로 규약(`/api/admin/**`)만
-> 지키면 컨트롤러가 어느 패키지에 있든 권한은 동일하다. Step 9에서 실제로 확인한다.
-
-- [ ] **Step 7: 나머지 4개 호출처를 Service로 전환**
-
-`AdminController.java`:
-- destination CRUD 3개 메서드(314~334행)와 `destRepo` 필드·생성자 인자를 제거
-- 남은 통계 호출 4곳을 `destService`로 교체: 95·100·107·109행
-- `import com.japantravel.repository.*` 는 그대로 두되
-  `import com.japantravel.destination.DestinationService;` 추가,
-  `import com.japantravel.dto.Dtos.Destination;` 제거
-
-`SearchController.java:27`:
-```java
-// 변경 전
-private final DestinationRepository destRepo;
-var dests = destRepo.findAll(null, null).stream()
-
-// 변경 후
-private final DestinationService destService;
-var dests = destService.list(null, null).stream()
-```
-
-`common/config/StartupRunner.java:59`:
-```java
-int existing = destService.count();   // destRepo.count() 에서 변경
-```
-
-`collector/WikipediaCollector.java:261`:
-```java
-isNew = destService.upsertByWiki(     // destRepo.upsertByWiki(...) 에서 변경
-```
-
-네 파일 모두 생성자 주입 타입을 `DestinationRepository` → `DestinationService`로
-바꾸고 import를 정리한다.
-
-- [ ] **Step 8: 컴파일 + 검증**
+- [ ] **컴파일**
 
 ```bash
 cd backend && mvn -q compile
 ```
 
-기대: 성공. 실패하면 남은 `DestinationRepository` 직접 참조가 있다는 뜻이다.
-
-**불변식 확인 — 이게 이번 Task의 진짜 산출물이다:**
+- [ ] **불변식 — 이번 Task의 진짜 산출물**
 
 ```bash
-cd "d:/01_Program/00_Project/~2026.06/05_Capstone/Japan_Travel.v2"
 grep -rn "DestinationRepository" backend/src/main/java --include=*.java
 ```
 
 기대: `destination/DestinationRepository.java`(자기 자신)와
-`destination/DestinationService.java` **두 곳에서만** 나와야 한다.
-다른 곳에서 나오면 전환이 덜 된 것이다.
+`destination/DestinationService.java` **두 곳에서만** 나온다.
 
-- [ ] **Step 9: 기동 + 스모크**
+- [ ] **기준선 대조**
 
 ```bash
-cd backend && mvn spring-boot:run
+BL=<scratchpad>/baseline
+curl -s localhost:8080/api/destinations > /tmp/now.json
+python -c "
+import json
+a=json.load(open(rf'$BL/destinations.json',encoding='utf-8'))
+b=json.load(open('/tmp/now.json',encoding='utf-8'))
+print('건수', len(a), '->', len(b))
+print('동일' if a==b else '차이 발생')
+if a!=b and a and b: print('키 비교', sorted(a[0]), sorted(b[0]))
+"
 ```
 
-```bash
-# 조회 (비로그인 허용)
-curl -s "localhost:8080/api/destinations?prefecture=%EB%8F%84%EC%BF%84%EB%8F%84" > /tmp/now.json
-python -c "import json;d=json.load(open('/tmp/now.json',encoding='utf-8'));print(len(d),'건 (기준선: 22건)')"
-curl -s -o /dev/null -w "%{http_code}\n" localhost:8080/api/destinations/1
-curl -s "localhost:8080/api/search?q=%EC%98%A8%EC%B2%9C"   # 기준선: dest=2 fest=0 course=0
+기대: `118 -> 118`, `동일`. 차이가 나면 **키 비교** 출력이 어느 필드명이
+틀렸는지 알려준다.
 
-# 관리자 경로가 여전히 보호되는지 (비로그인)
+- [ ] **나머지 스모크**
+
+```bash
+curl -s "localhost:8080/api/destinations?prefecture=%EB%8F%84%EC%BF%84%EB%8F%84" > /tmp/t.json
+python -c "import json;print(len(json.load(open('/tmp/t.json',encoding='utf-8'))),'건 (기준선 22)')"
+
+curl -s -o /dev/null -w "%{http_code}\n" localhost:8080/api/destinations/1        # 200
+curl -s -o /dev/null -w "%{http_code}\n" localhost:8080/api/destinations/999999    # 404
 curl -s -o /dev/null -w "%{http_code}\n" -X POST localhost:8080/api/admin/destinations \
-  -H "Content-Type: application/json" --data-binary '{"name":"x"}'
+  -H "Content-Type: application/json" --data-binary '{"name":"x"}'                # 401
 ```
 
-기대:
-- 조회 3건이 Task 1 이전과 **동일한 JSON**
-- 마지막 POST는 `401` 또는 `403`. **`201`이 나오면 관리자 API가 무방비로 열린 것이다 —
-  즉시 중단하고 SecurityConfig를 확인한다.**
-
-브라우저에서 `localhost:5173`을 열어 여행지 목록·상세·검색이 뜨는지도 본다.
-
-- [ ] **Step 10: 프론트 무변경 확인 + 커밋**
+- [ ] **프론트 무변경 + 커밋**
 
 ```bash
-git diff --stat frontend/          # 출력이 비어 있어야 한다
+git diff --stat frontend/     # 비어 있어야 한다
 git add -A backend/src/main/java
-git commit -m "refactor(destination): destination 도메인 패키지로 재편
-
-- DestinationDtos 분리, DestinationService 신설
-- AdminController의 /api/admin/destinations 를 DestinationAdminController 로 이관
-- 감사 로그를 Service 로 이동
-- StartupRunner/WikipediaCollector/SearchController 가 Repository 대신 Service 사용"
+git commit -m "feat(destination): destination 도메인 신규 작성"
 ```
-
 ---
 
 ## Task 2 이후 — 공통 절차
 
-Task 2부터는 Task 1에서 확립한 패턴을 적용한다. 계획서에 전체 코드를 싣지 않는
-이유는, 패턴을 스스로 적용해 보는 것이 이 작업의 목적이기 때문이다.
+Task 2부터는 Task 1에서 확립한 모양을 따른다. **계획서에도 대화에도 구현 코드는
+싣지 않는다** — 명세를 읽고 직접 설계해 쓰는 것이 이 작업의 목적이기 때문이다.
+막혔을 때만 Claude가 코드를 제공한다.
 
-**각 Task 시작 시 Claude가 먼저 제공하는 것:**
+**각 Task 시작 시 Claude가 제공하는 명세:**
 
 1. **도메인 설명** — 무슨 일을 하는가 / 어떤 비즈니스 규칙이 있는가 / 누가 의존하는가
-2. **호출자 전수 조사표** — Task 1의 표와 같은 형식. Service가 덮어야 할 메서드 목록
-3. **파일 이동/생성 목록** — 정확한 경로
-4. **주의점** — 이 도메인 고유의 함정
+2. **고정된 계약** — DB 테이블 컬럼, HTTP 경로·메서드·상태코드, JSON 필드명
+   (이 둘만 고정이고 나머지는 사용자가 설계한다)
+3. **Service public 메서드 명세** — 시그니처 + 동작 설명. 구현은 없음
+4. **규칙을 어디에 둘 것인가** — Service / Repository / Controller 중 어디에
+5. **기존 호출처 목록** — 새 Service로 갈아끼울 곳
+6. **지울 것** — 옛 파일. 공존하면 Spring 기동이 실패한다
+7. **주의점** — 이 도메인 고유의 함정
 
-**사용자가 수행하는 것:** Task 1의 Step 1~10과 같은 흐름.
+**사용자가 수행하는 것:** 새 패키지에 파일을 직접 작성하고, 호출처를 갈아끼우고,
+옛 파일을 지운다.
 
 **매 Task 공통 검증:**
 
