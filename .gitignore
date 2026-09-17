@@ -55,3 +55,6 @@ data/*.db-wal
 data/*.db-shm
 data/*.bak_*
 *.bak_*.pptx
+
+# 시드 원천 (옛 db 사본, git 에는 pre-greenfield 태그로 보존돼 있음)
+data/legacy_*.db

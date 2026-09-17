@@ -11,7 +11,8 @@ spring:
   application:
     name: japan-travel-backend
   datasource:
-    url: jdbc:sqlite:${user.dir}/../data/japan_travel.db?journal_mode=WAL&busy_timeout=10000&synchronous=NORMAL
+    # foreign_keys=on 이 없으면 SQLite 는 FK 를 전부 무시한다 (ON DELETE CASCADE 가 동작하지 않음)
+    url: jdbc:sqlite:${user.dir}/../data/japan_travel.db?foreign_keys=on&journal_mode=WAL&busy_timeout=10000&synchronous=NORMAL
     driver-class-name: org.sqlite.JDBC
     hikari:
       maximum-pool-size: 4
@@ -28,18 +29,7 @@ spring:
     init:
       mode: always
       schema-locations: classpath:schema.sql
-      continue-on-error: true
-
-collector:
-  auto-bootstrap: false      # 부팅 시 자동 수집 여부 (true면 빈 DB일 때 도쿄도 관광지 1회 수집)
-  user-agent: "JapanTravelV2/0.1 (internal prototype)"
-  wikipedia:
-    base-url: https://ko.wikipedia.org
-  nominatim:
-    base-url: https://nominatim.openstreetmap.org
-    rate-limit-ms: 1100
-  kakao:
-    rest-key: ${KAKAO_REST_KEY:}  # 백필 일회성 용도. 빈 값이면 Kakao fallback 비활성.
+      continue-on-error: false   # 스키마 오류를 조용히 넘기지 않는다
 
 external:
   open-meteo:

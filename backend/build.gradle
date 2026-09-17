@@ -24,7 +24,6 @@ dependencies {
 
     // Persistence
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-jdbc'      // 전환 중인 옛 JdbcTemplate 코드용. Task 10에서 제거
     implementation 'org.hibernate.orm:hibernate-community-dialects'         // SQLite 는 공식 dialect 가 없음
     runtimeOnly 'org.xerial:sqlite-jdbc:3.46.1.0'
 
