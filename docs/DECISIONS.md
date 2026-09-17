@@ -42,6 +42,7 @@
 | [D-016](#d-016--baseline-diff-를-스모크-스크립트로-대체한다) | baseline diff 를 스모크 스크립트로 대체한다 | 2026-09-17 | 확정 |
 | [D-017](#d-017--날짜-타입api-경로prefecture-제약은-task-1-에서-정한다) | 날짜 타입·API 경로·prefecture 제약은 Task 1 에서 정한다 | 2026-09-17 | 보류 |
 | [D-018](#d-018--재작성은-greenfield-브랜치에서-한다) | 재작성은 greenfield 브랜치에서 한다 | 2026-09-17 | 확정 |
+| [D-019](#d-019--config-클래스와-security-의존성을-지운다) | config 클래스와 security 의존성을 지운다 | 2026-09-17 | 확정 |
 
 ---
 
@@ -340,3 +341,25 @@ curl 스크립트가 **유일한 회귀 안전망**이다. 새 도메인을 시�
 
 **합칠 때** — 프론트까지 맞춘 뒤(Task 7) `main` 으로 병합한다. 그 시점에는 `main` 의
 옛 백엔드가 전부 대체되므로 충돌이 아니라 통째 교체에 가깝다.
+
+---
+
+### D-019 · config 클래스와 security 의존성을 지운다
+
+**2026-09-17 · 확정**
+
+`common/config/` 를 통째로 지운다 (`SecurityConfig` · `WebConfig`). 개념을 공부한 뒤
+직접 넣기 위해서다.
+
+**함께 뺀 것** — `spring-boot-starter-security` · `spring-security-test` 의존성.
+설정 클래스만 지우면 Spring Boot 자동설정이 켜져 HTTP Basic 이 붙고 **모든
+엔드포인트가 401** 이 된다. "아무것도 없는 상태" 가 아니라 "기본값이 적용된 상태" 가
+되므로, 의존성과 설정을 같이 빼고 같이 넣는다.
+
+**지금 없는 것**
+- 인증·세션·권한 (Task 2 에서 의존성과 함께 추가)
+- CORS (Task 7 에서 프론트를 붙일 때 필요해진다)
+- `WebClient.Builder` 명시 빈 (Spring Boot 가 자동설정하므로 Task 6 에 당장 문제는 없다)
+
+**남아 있는 미사용 의존성** — `spring-boot-starter-cache` · `caffeine`. `CacheConfig` 를
+지웠으므로 지금은 쓰이지 않는다. 캐시가 필요해지는 Task 6 에서 쓸지 뺄지 정한다.
