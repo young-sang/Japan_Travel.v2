@@ -47,3 +47,11 @@ backend/cookie.txt
 # Claude Code 로컬 설정
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
+
+# 검증 아티팩트 (그린필드 재작성)
+baseline/
+c.txt
+data/*.db-wal
+data/*.db-shm
+data/*.bak_*
+*.bak_*.pptx
