@@ -76,6 +76,11 @@
 
 ## 스키마
 
+> **이 절은 목표 상태(지도)이고, 한 번에 다 만들지 않는다.** 각 테이블은 그것이
+> 필요한 도메인 Task 를 시작할 때 `schema.sql` 에 추가한다 — `docs/DECISIONS.md`
+> 의 D-020 참조. 아래 `PRAGMA` 한 줄은 의도 표시이며, 실제로 FK 를 켜는 것은
+> `application.yml` 의 JDBC URL 이다 (PRAGMA 는 연결마다 적용되므로).
+
 ```sql
 PRAGMA foreign_keys = ON;   -- SQLite 는 이것 없이는 FK 를 전부 무시한다
 
@@ -396,7 +401,7 @@ curl "localhost:8080/api/places?prefecture=%EB%8F%84%EC%BF%84%EB%8F%84"  # → 2
 
 | # | Task | 내용 | 규모 |
 |---|---|---|---|
-| 0 | 기반 정리 | `git tag pre-greenfield` · 옛 백엔드 삭제 · `_repo.common` → `common` 이동 · 새 `schema.sql` · 시드 스크립트 · `foreign_keys=on` | 중간 |
+| 0 | 기반 정리 | `git tag pre-greenfield` · 옛 백엔드 삭제 · `_repo.common` → `common` 이동 · `foreign_keys=on` | 중간 |
 | 1 | `place` | **템플릿.** 목록 · 상세 · 필터(지역·태그) · `place_tags` 조인 | 중간 |
 | 2 | `user` | 가입 · 로그인 · 로그아웃 · 내 정보 · `SecurityConfig` | 중간 |
 | 3 | `favorite` `review` `history` | place 를 참조하는 작은 도메인 3개. 패턴 반복 | 중간 |
