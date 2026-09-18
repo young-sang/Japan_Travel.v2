@@ -49,6 +49,7 @@
 | [D-023](#d-023--지역과-태그를-참조-테이블로-둠다) | 지역과 태그를 참조 테이블로 둠다 | 2026-09-18 | 확정 |
 | [D-024](#d-024--태그를-1차-범위에서-뺀다) | 태그를 1차 범위에서 뺀다 | 2026-09-18 | 확정 |
 | [D-025](#d-025--참조-테이블의-키를-id-로-둠다) | 참조 테이블의 키를 id 로 둠다 | 2026-09-18 | 확정 |
+| [D-026](#d-026--mysql-로-옮기고-lombok-을-도입한다) | MySQL 로 옮기고 Lombok 을 도입한다 | 2026-09-18 | 확정 |
 | [D-026](#d-026--pomxml-을-지워-빌드-도구를-gradle-하나로-굳힌다) | pom.xml 을 지워 빌드 도구를 Gradle 하나로 굳힌다 | 2026-09-18 | 확정 |
 | [D-027](#d-027--lombok-을-쓴다) | Lombok 을 쓴다 | 2026-09-18 | 확정 |
 
@@ -640,3 +641,42 @@ getter 타이핑이 아니라고 봤다.
 **대가** — IDE 에 Lombok 플러그인이 필요하고 (IntelliJ 는 기본 번들), 어노테이션 처리가
 꺼져 있으면 IDE 에서만 빨간 줄이 뜬다. [D-026](#d-026--pomxml-을-지워-빌드-도구를-gradle-하나로-굳힌다)
 에서 겪은 것과 같은 "Gradle 은 되는데 IDE 만 안 되는" 증상이 나올 수 있는 지점이다.
+
+---
+
+### D-026 · MySQL 로 옮기고 Lombok 을 도입한다
+
+**2026-09-18 · 확정** · [D-002](#d-002--maven--gradle-jdbctemplate--jpa) 의 SQLite 부분과
+[D-017](#d-017--날짜-타입api-경로prefecture-제약은-task-1-에서-정한다) 의 날짜 항목을 해결한다
+
+DB 를 SQLite 에서 **MySQL 8** 로 바꾼다. 그리고 보일러플레이트를 줄이기 위해
+**Lombok** 을 쓴다.
+
+**MySQL 로 옮긴 이유** — 최종 목적지가 MySQL 이고, 코드가 5개 파일 · 데이터가 0 인
+지금이 가장 싸다. "양쪽에서 다 도는 이식 가능한 DDL" 은 반쪽짜리다 —
+`AUTO_INCREMENT` 하나만으로도 교집합이 깨지므로 어차피 옮길 때 다시 써야 한다.
+
+**같이 해결되는 것**
+- SQLite 는 공식 Hibernate dialect 가 없어 커뮤니티 구현을 쓰고 있었다 (D-002 의
+  리스크). MySQL 은 공식 dialect 가 있다.
+- 날짜를 `TEXT` 로 두고 자바 타입을 미뤄뒀는데(D-017), MySQL 에는 `DATETIME` 이
+  있으므로 `LocalDateTime` 을 그냥 쓴다.
+- `PRAGMA foreign_keys` 같은 SQLite 특유의 함정이 없다. InnoDB 는 FK 를 기본으로
+  강제한다.
+
+**MySQL 에서 반드시 다른 것 (SQLite 감각으로 쓰면 틀린다)**
+- **컬럼 뒤에 붙인 `REFERENCES` 를 MySQL 은 무시한다.** 문법 에러도 나지 않고 FK 가
+  그냥 안 만들어진다. 테이블 수준에 `FOREIGN KEY (...) REFERENCES ...` 로 써야 한다.
+- `TEXT` 컬럼에는 길이 없이 인덱스(UNIQUE 포함)를 걸 수 없다 → `VARCHAR(n)`.
+- `CREATE INDEX IF NOT EXISTS` 문법이 없다. FK 컬럼은 InnoDB 가 인덱스를 자동
+  생성하므로 대개 불필요하다.
+- `INSERT OR IGNORE` → `INSERT IGNORE`.
+
+**Lombok** — 엔티티의 getter 와 기본 생성자를 줄인다. 단 **엔티티에는 `@Getter` 와
+`@NoArgsConstructor(access = PROTECTED)` 까지만** 쓴다.
+`@Data` · `@ToString` · `@EqualsAndHashCode` 는 JPA 엔티티에서 사고를 낸다 —
+`toString()` 이 LAZY 연관을 건드려 세션 밖에서 예외를 내거나 양방향 연관에서 무한
+재귀에 빠지고, `hashCode` 는 id 가 null 인 저장 전 시점에 동작이 이상해진다.
+
+**남은 일** — `application.yml` 의 datasource 와 `build.gradle` 의 MySQL 드라이버는
+사용자가 직접 연결한다. 그때까지 앱은 기동되지 않는다.
