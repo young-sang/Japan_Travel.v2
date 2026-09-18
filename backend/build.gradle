@@ -37,7 +37,13 @@ dependencies {
     // JSON
     implementation 'com.fasterxml.jackson.core:jackson-databind'
 
+    // Lombok — 버전은 Spring Boot BOM 이 관리한다
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
