@@ -49,6 +49,7 @@
 | [D-023](#d-023--지역과-태그를-참조-테이블로-둠다) | 지역과 태그를 참조 테이블로 둠다 | 2026-09-18 | 확정 |
 | [D-024](#d-024--태그를-1차-범위에서-뺀다) | 태그를 1차 범위에서 뺀다 | 2026-09-18 | 확정 |
 | [D-025](#d-025--참조-테이블의-키를-id-로-둠다) | 참조 테이블의 키를 id 로 둠다 | 2026-09-18 | 확정 |
+| [D-026](#d-026--pomxml-을-지워-빌드-도구를-gradle-하나로-굳힌다) | pom.xml 을 지워 빌드 도구를 Gradle 하나로 굳힌다 | 2026-09-18 | 확정 |
 
 ---
 
@@ -573,3 +574,39 @@ N:M 정션이라 조인이 하나 더 붙는데, 첫 도메인에서 배울 것�
 **컬럼명** — `prefecture` 가 아니라 `prefecture_id`. 값이 이름이 아니라 번호라는 것이
 이름에서 드러나야 한다. `destinations` 의 유니크 제약도 `UNIQUE (name, prefecture_id)`
 로 따라간다.
+
+---
+
+### D-026 · pom.xml 을 지워 빌드 도구를 Gradle 하나로 굳힌다
+
+**2026-09-18 · 확정** · [D-002](#d-002--maven--gradle-jdbctemplate--jpa) 를 뒤집는 것이
+아니라 **끝내지 않고 남겨둔 절반을 마무리**하는 결정
+
+D-002 에서 Maven → Gradle 로 옮기기로 했지만 `backend/pom.xml` 을 지우지 않아 빌드
+파일이 두 개인 채로 3일이 지났다. 그 사이 두 파일의 의존성이 서로 갈라졌다.
+
+| | build.gradle | pom.xml |
+|---|---|---|
+| JPA | `spring-boot-starter-data-jpa` | **없음** (`starter-jdbc` 만) |
+| SQLite dialect | `hibernate-community-dialects` | 없음 |
+| Security | 없음 | `starter-security` |
+
+**터진 방식** — IntelliJ 가 `pom.xml` 을 보고 프로젝트를 임포트해
+(`.idea/misc.xml` 의 `MavenProjectsManager`) IDE 클래스패스에 `jakarta.persistence-api`
+가 없었고, `@Entity` 가 해석되지 않았다. Gradle 로는 정상 컴파일되는데 IDE 만 빨간 줄이
+뜨는, 원인을 짚기 어려운 형태로 나타났다. **빌드 파일이 둘이면 갈라진다는 것 자체보다,
+갈라졌을 때 증상이 엉뚱한 곳에서 나온다는 것이 비용이다.**
+
+**한 것** — `pom.xml` 삭제, `backend/target/` 삭제, `.idea/misc.xml` 에서
+`MavenProjectsManager` 제거. 덤으로 `languageLevel` 이 `JDK_24` 로 잘못 잡혀 있어
+`JDK_17` 로 맞췄다.
+
+**기각한 대안 — Maven 쪽에 data-jpa 를 추가해 양쪽을 맞춰 유지한다.** 두 파일을 계속
+동기화해야 하고, 이번에 갈라진 것이 바로 그 동기화가 안 된 결과다. 한쪽을 지우는 것이
+같은 사고를 구조적으로 막는다.
+
+**security 는 주석으로 남긴다** — 코드에서 `org.springframework.security` 를 쓰는
+곳은 현재 한 군데도 없다. 다만 프로젝트 안에서 인증이 쓰일 예정이라 지우지 않고
+`build.gradle` 에 주석으로 남겨, 도입 시점에 주석만 풀면 되게 했다. 프로젝트
+`CLAUDE.md` 의 "security 는 명시 요청 없으면 넣지 않는다" 와도 어긋나지 않는다 —
+활성화된 의존성은 아니다.
