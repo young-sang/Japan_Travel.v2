@@ -11,15 +11,17 @@ spring:
   application:
     name: japan-travel-backend
   datasource:
-    # foreign_keys=on 이 없으면 SQLite 는 FK 를 전부 무시한다 (ON DELETE CASCADE 가 동작하지 않음)
-    url: jdbc:sqlite:${user.dir}/../data/japan_travel.db?foreign_keys=on&journal_mode=WAL&busy_timeout=10000&synchronous=NORMAL
-    driver-class-name: org.sqlite.JDBC
+    # characterEncoding=UTF-8 이 없으면 도도부현 한글 시드가 깨진다
+    url: jdbc:mysql://localhost:3306/japan_travel?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    username: root
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
-      maximum-pool-size: 4
+      maximum-pool-size: 10
   jpa:
     hibernate:
       ddl-auto: none
-    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    # MySQL 은 Hibernate 6 이 dialect 를 자동으로 잡으므로 database-platform 을 적지 않는다
     open-in-view: false
     show-sql: true
     properties:
@@ -29,6 +31,9 @@ spring:
     init:
       mode: always
       schema-locations: classpath:schema.sql
+      # 없으면 schema.sql 을 플랫폼 기본 인코딩(한국어 Windows = MS949)으로 읽어
+      # 도도부현 한글 시드가 깨진 채로 INSERT 된다
+      encoding: UTF-8
       continue-on-error: false   # 스키마 오류를 조용히 넘기지 않는다
 
 external:

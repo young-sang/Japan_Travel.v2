@@ -24,8 +24,7 @@ dependencies {
 
     // Persistence
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.hibernate.orm:hibernate-community-dialects'         // SQLite 는 공식 dialect 가 없음
-    runtimeOnly 'org.xerial:sqlite-jdbc:3.46.1.0'
+    runtimeOnly 'com.mysql:mysql-connector-j'                               // 버전은 Spring Boot BOM 이 관리한다
 
     // Security — 현재 미사용. 인증/인가 도입 시 주석 해제 (pom.xml 에서 이관)
     // implementation 'org.springframework.boot:spring-boot-starter-security'

@@ -1,4 +1,4 @@
-package com.japantravel._repo.common.error;
+package com.japantravel.common.error;
 
 public class ForbiddenException extends RuntimeException{
     public ForbiddenException(String message){

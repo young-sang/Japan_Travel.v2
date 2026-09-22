@@ -18,9 +18,9 @@ unless explicitly requested.
 이 프로젝트는 4종 역할의 서브에이전트가 정의되어 있다 (`.claude/agents/`):
 
 - `api-designer` — REST 계약(`/api/...` 경로, DTO, 상태코드) 설계자. 새 기능의 **첫 번째** 산출물 담당.
-- `backend-engineer` — Spring Boot 3.3 / Java 17 / Gradle. 신규 코드는 `backend/src/main/java/com/japantravel/_repo/<domain>/{controller,service}/**`, 옛 계층 패키지는 정리 대상.
+- `backend-engineer` — Spring Boot 3.3 / Java 17 / Gradle. 코드는 `backend/src/main/java/com/japantravel/<domain>/{controller,service}/**` (D-029 로 `_repo` 접두사 폐기).
 - `frontend-engineer` — React 18 / Vite. `frontend/src/**`. graduate project의 디자인을 그대로 보존.
-- `db-specialist` — SQLite + Spring Data JPA. `backend/src/main/resources/schema.sql` + `backend/.../_repo/<domain>/{entity,repository}/**`.
+- `db-specialist` — MySQL 8 + Spring Data JPA. `backend/src/main/resources/schema.sql` + `backend/.../<domain>/{entity,repository}/**`.
 
 ### 같은 세션 안에서 (표준 subagent 위임)
 

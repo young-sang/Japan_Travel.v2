@@ -1,4 +1,4 @@
-package com.japantravel._repo.common.error;
+package com.japantravel.common.error;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

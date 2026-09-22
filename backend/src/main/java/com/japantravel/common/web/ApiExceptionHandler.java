@@ -1,8 +1,8 @@
-package com.japantravel._repo.common.web;
+package com.japantravel.common.web;
 
-import com.japantravel._repo.common.error.ConflictException;
-import com.japantravel._repo.common.error.ForbiddenException;
-import com.japantravel._repo.common.error.NotFoundException;
+import com.japantravel.common.error.ConflictException;
+import com.japantravel.common.error.ForbiddenException;
+import com.japantravel.common.error.NotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
