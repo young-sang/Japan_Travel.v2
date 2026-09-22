@@ -1,4 +1,4 @@
--- Task 1 · destination 도메인 (MySQL)
+-- destination · festival 도메인 (MySQL)
 
 CREATE TABLE IF NOT EXISTS prefectures (
   id   BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -16,6 +16,23 @@ CREATE TABLE IF NOT EXISTS destinations (
   created_at    DATETIME NOT NULL,
   UNIQUE (name, prefecture_id),
   FOREIGN KEY (prefecture_id) REFERENCES prefectures(id)
+);
+
+CREATE TABLE IF NOT EXISTS festivals (
+  id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+  name          VARCHAR(200) NOT NULL,
+  prefecture_id BIGINT NOT NULL,
+  month         INT NOT NULL,
+  date_text     VARCHAR(100),
+  description   TEXT,
+  lat           DOUBLE,
+  lng           DOUBLE,
+  image_path    VARCHAR(500),
+  created_at    DATETIME NOT NULL,
+  UNIQUE (name, prefecture_id),
+  FOREIGN KEY (prefecture_id) REFERENCES prefectures(id),
+  -- MySQL 은 8.0.16 부터 CHECK 를 실제로 강제한다 (그 이전은 파싱만 하고 무시)
+  CHECK (month BETWEEN 1 AND 12)
 );
 
 INSERT IGNORE INTO prefectures(name) VALUES
