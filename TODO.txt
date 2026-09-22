@@ -1,3 +1,17 @@
 신고 기능
 테스트 데이터 추가
 즐겨찾기와 일정 짜기의 동기화
+--- 리팩토링 완료 후 검토 (D-032) ---
+외부 API 프록시 — 1차에서 통째로 뺌
+  [날씨] GET /api/weather (Open-Meteo)
+    - 헤더 위젯이 아니라 "여행지/축제 상세의 날씨" 로 설계할 것.
+      헤더 위젯인 채로 옮기면 환율을 뺀 이유가 그대로 적용된다.
+    - destinations/festivals 에 이미 lat/lng 가 있다
+  [환율] GET /api/fx (Frankfurter, 100 JPY -> KRW)
+    - 읽고 끝이라 다른 기능과 엮이지 않는다. 우선순위 가장 낮음
+  [캐시] 위 둘을 되살릴 때 같이 검토 (D-031)
+    - TTL 은 옛 7일을 쓰지 말 것. 날씨 30분 / 환율 1시간 부터 검토
+    - 수집기용 캐시 3종(wikiSummary/wikiCategoryMembers/nominatimSearch)은
+      수집기를 되살릴 때만 필요
+  [프론트] WeatherWidget.jsx / FxWidget.jsx 가 호출할 곳이 없어진다.
+    프론트 정렬 단계에서 걷어내거나 비활성화 (D-008)
