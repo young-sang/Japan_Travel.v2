@@ -2,7 +2,7 @@ package com.japantravel.common.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.japantravel.common.error.ErrorCode;
-import com.japantravel.common.error.ErrorResponse;
+import com.japantravel.common.web.ApiResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -54,7 +54,7 @@ public class SecurityConfig {
             response.setStatus(ErrorCode.UNAUTHORIZED.getStatus().value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-            objectMapper.writeValue(response.getWriter(), ErrorResponse.of(ErrorCode.UNAUTHORIZED));
+            objectMapper.writeValue(response.getWriter(), ApiResponse.fail(ErrorCode.UNAUTHORIZED));
         };
     }
 }

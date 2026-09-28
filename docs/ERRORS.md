@@ -4,20 +4,32 @@
 코드의 정의는 [`common/error/ErrorCode.java`](../backend/src/main/java/com/japantravel/common/error/ErrorCode.java),
 응답으로 바꾸는 곳은 [`common/web/ApiExceptionHandler.java`](../backend/src/main/java/com/japantravel/common/web/ApiExceptionHandler.java)
 와 [`common/security/SecurityConfig.java`](../backend/src/main/java/com/japantravel/common/security/SecurityConfig.java)
-의 `AuthenticationEntryPoint` 이다. 결정 배경은 [D-034](DECISIONS.md).
+의 `AuthenticationEntryPoint` 이다. 결정 배경은 [D-034](DECISIONS.md) (에러 체계) ·
+[D-035](DECISIONS.md) (응답 봉투).
 
 ## 응답 모양
 
-모든 에러는 상태 코드와 상관없이 같은 본문이다.
+성공이든 에러든 모든 응답은 같은 봉투(`ApiResponse`)에 담긴다. 키는 항상 `success` · `data` ·
+`error` 세 개이고, 빈 쪽은 `null` 이다. 상태 코드는 본문에 싣지 않고 HTTP 상태 줄에만 있다.
 
 ```json
-{ "code": "DESTINATION_NOT_FOUND", "message": "여행지를 찾을 수 없습니다" }
+// 에러 — HTTP 404
+{ "success": false,
+  "data": null,
+  "error": { "code": "DESTINATION_NOT_FOUND", "message": "여행지를 찾을 수 없습니다" } }
+
+// 성공 — HTTP 200 (참고)
+{ "success": true, "data": { "id": 1, ... }, "error": null }
 ```
+
+`error` 의 값은 `ApiError(code, message)` 이다.
 
 - `code` — `ErrorCode` enum 이름. **프론트는 이 값으로 분기한다.**
 - `message` — enum 에 적힌 고정 문구. 사람이 읽는 용도이고, 던지는 쪽에서 덮어쓰지 않는다.
   그래서 문제가 된 값(`id`, `prefecture`, `month`)은 응답에 실리지 않는다. 클라이언트는
   자기가 보낸 요청을 알고 있다.
+- 에러가 여러 개인 경우(`@Valid` 도입 후 필드 검증)는 `error` 를 배열로 만들지 않고
+  `error.fields` 목록을 추가해 확장한다 (D-035). 지금은 없다.
 
 ## 코드 추가 규칙
 

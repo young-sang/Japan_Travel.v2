@@ -1,5 +1,6 @@
 package com.japantravel.user.controller;
 
+import com.japantravel.common.web.ApiResponse;
 import com.japantravel.user.dto.AuthResponse;
 import com.japantravel.user.dto.LoginRequest;
 import com.japantravel.user.dto.SignupRequest;
@@ -24,18 +25,18 @@ public class AuthController {
 
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
-    public AuthResponse signup(@RequestBody SignupRequest req) {
-        return authService.signup(req);
+    public ApiResponse<AuthResponse> signup(@RequestBody SignupRequest req) {
+        return ApiResponse.ok(authService.signup(req));
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody LoginRequest req) {
-        return authService.login(req);
+    public ApiResponse<AuthResponse> login(@RequestBody LoginRequest req) {
+        return ApiResponse.ok(authService.login(req));
     }
 
 //  토큰이 없으면 SecurityConfig 에서 이미 401 로 끝나므로, 여기 도착하면 userId 는 항상 있다.
     @GetMapping("/me")
-    public UserResponse me(@AuthenticationPrincipal Long userId) {
-        return authService.me(userId);
+    public ApiResponse<UserResponse> me(@AuthenticationPrincipal Long userId) {
+        return ApiResponse.ok(authService.me(userId));
     }
 }

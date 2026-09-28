@@ -1,5 +1,6 @@
 package com.japantravel.destination.controller;
 
+import com.japantravel.common.web.ApiResponse;
 import com.japantravel.destination.dto.DestinationResponse;
 import com.japantravel.destination.service.DestinationService;
 import lombok.RequiredArgsConstructor;
@@ -19,12 +20,12 @@ public class DestinationController {
     private final DestinationService destinationService;
 
     @GetMapping
-    public List<DestinationResponse> list(@RequestParam(required = false) String prefecture) {
-        return destinationService.findAll(prefecture);
+    public ApiResponse<List<DestinationResponse>> list(@RequestParam(required = false) String prefecture) {
+        return ApiResponse.ok(destinationService.findAll(prefecture));
     }
 
     @GetMapping("/{id}")
-    public DestinationResponse detail(@PathVariable Long id) {
-        return destinationService.findById(id);
+    public ApiResponse<DestinationResponse> detail(@PathVariable Long id) {
+        return ApiResponse.ok(destinationService.findById(id));
     }
 }

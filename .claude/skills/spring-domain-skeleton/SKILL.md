@@ -268,26 +268,44 @@ public class {{Domain}}Controller {
 }
 ```
 
-Service 를 호출하고 반환값을 그대로 돌려주는 얇은 계층이다. 엔티티를 보지 않는다.
+Service 를 호출하고 반환값을 **`ApiResponse.ok(...)` 로 감싸** 돌려주는 얇은 계층이다
+([D-035](../../../docs/DECISIONS.md)). 엔티티를 보지 않는다. 메서드를 추가할 때의 모양:
+
+```java
+@GetMapping("/{id}")
+public ApiResponse<{{Domain}}Response> detail(@PathVariable Long id) {
+    return ApiResponse.ok({{domain}}Service.findById(id));
+}
+```
+
+- 반환 타입은 `ApiResponse<DTO>` 또는 `ApiResponse<List<DTO>>`. `ResponseEntity` 는 쓰지 않는다.
+- 201 은 `@ResponseStatus(HttpStatus.CREATED)` 로 준다.
+- 돌려줄 데이터가 없으면(`DELETE` 등) 200 + `data: null`. 204 를 쓰지 않는다. 인자 없는
+  `ApiResponse.ok()` 가 아직 없으면 그때 `common/web/ApiResponse` 에 추가한다.
 
 ---
 
 ## 에러 규칙 — 도메인마다 다르게 하지 않는다
 
 `com.japantravel.common.web.ApiExceptionHandler` 가 전부 번역한다. 컨트롤러에서
-`try/catch` 를 쓰지 않는다.
+`try/catch` 를 쓰지 않는다. 서비스는 `throw new ApiException(ErrorCode.XXX)` 하나로 던진다
+([D-034](../../../docs/DECISIONS.md)). 상태별 예외 클래스는 없다.
 
 | 상황 | 상태 | 던지는 것 |
 |---|---|---|
-| id 로 찾았는데 없음 | 404 | `NotFoundException` |
-| 참조 값이 존재하지 않음 (없는 현 이름 등) | 404 | `NotFoundException` |
-| 필터 결과가 0건 (대상은 실재함) | 200 `[]` | 던지지 않는다 |
-| 값이 허용 범위 밖 (`month=13`) | 400 | `IllegalArgumentException` |
+| id 로 찾았는데 없음 | 404 | `ApiException(ErrorCode.<DOMAIN>_NOT_FOUND)` |
+| 참조 값이 존재하지 않음 (없는 현 이름 등) | 404 | `ApiException(ErrorCode.PREFECTURE_NOT_FOUND)` 등 |
+| 필터 결과가 0건 (대상은 실재함) | 200 `data: []` | 던지지 않는다 |
+| 값이 허용 범위 밖 (`month=13`) | 400 | `ApiException(ErrorCode.INVALID_…)` — `IllegalArgumentException` 은 500 이 된다 |
 | 타입이 맞지 않음 (`month=abc`) | 400 | Spring 이 던짐, 핸들러가 이미 처리 |
-| 남의 것을 건드림 | 403 | `ForbiddenException` |
-| 중복 | 409 | `ConflictException` |
+| 남의 것을 건드림 | 403 | `ApiException(ErrorCode.FORBIDDEN)` — 처음 쓸 때 enum 에 추가 |
+| 중복 | 409 | `ApiException(ErrorCode.<무엇>_TAKEN)` 등 |
 
-본문은 `{"message": "..."}` 형식이다.
+**새 에러가 필요하면** `common/error/ErrorCode` 에 `(HttpStatus, 고정 문구)` 로 추가하고
+`docs/ERRORS.md` 에 "어디서 · 무엇 때문에" 를 적는다. 쓰는 곳 없는 코드는 미리 넣지 않는다.
+메시지는 고정 문구만 쓴다 — 던질 때 덮어쓰지 않는다.
+
+본문은 봉투 `{"success":false,"data":null,"error":{"code","message"}}` 형식이다.
 
 ---
 

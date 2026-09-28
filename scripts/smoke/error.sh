@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# 에러 응답 스모크 (D-016, D-034). 앱이 8080 에 떠 있어야 한다.
+# 응답 봉투 스모크 (D-016, D-034, D-035). 앱이 8080 에 떠 있어야 한다.
 # 사용: bash scripts/smoke/error.sh
 #
 # 판정 기준 (docs/ERRORS.md)
-#   - 상태 코드가 ErrorCode 의 상태와 같다
-#   - Content-Type 이 application/json
-#   - 본문이 정확히 {"code":"<코드>","message":"<고정 문구>"} — 키는 두 개뿐, 한글이 깨지지 않는다
+#   - Content-Type 이 application/json, 본문 키는 항상 success · data · error 세 개 (이 순서, 빈 쪽은 null)
+#   - 에러: 상태 코드가 ErrorCode 의 상태와 같고, 본문이 정확히
+#       {"success":false,"data":null,"error":{"code":"<코드>","message":"<고정 문구>"}}  — 한글이 깨지지 않는다
+#   - 성공: {"success":true,"data":<배열 또는 객체>,"error":null}
 #
 # 한글은 URL 에서는 퍼센트 인코딩하고, 요청 본문에는 쓰지 않는다 — Git Bash curl 에서 깨져 400 이 난다 (D-016 환경 함정).
 #   없는현 = %EC%97%86%EB%8A%94%ED%98%84 · 도쿄도 = %EB%8F%84%EC%BF%84%EB%8F%84
@@ -15,6 +16,7 @@ TMP="$(mktemp)"
 trap 'rm -f "$TMP"' EXIT
 pass=0
 fail=0
+skipped=0
 
 # ErrorCode 의 고정 문구. enum 과 docs/ERRORS.md 가 바뀌면 여기도 바뀌어야 한다 — 이것이 계약이다.
 declare -A MSG=(
@@ -43,13 +45,14 @@ req() {
   BODY="$(cat "$TMP")"
 }
 
-ok()  { pass=$((pass + 1)); echo "  OK    $1"; }
+ok()   { pass=$((pass + 1)); echo "  OK    $1"; }
+skip() { skipped=$((skipped + 1)); echo "  SKIP  $1"; }
 bad() { fail=$((fail + 1)); echo "  FAIL  $1"; echo "        status=$STATUS ctype=$CTYPE"; echo "        body=$BODY"; }
 
 # expect_error <라벨> <상태> <코드>  — 직전 req 의 결과를 판정한다
 expect_error() {
   local label="$1" status="$2" code="$3"
-  local want="{\"code\":\"$code\",\"message\":\"${MSG[$code]}\"}"
+  local want="{\"success\":false,\"data\":null,\"error\":{\"code\":\"$code\",\"message\":\"${MSG[$code]}\"}}"
   if [[ "$STATUS" == "$status" && "$CTYPE" == application/json* && "$BODY" == "$want" ]]; then
     ok "$label → $status $code"
   else
@@ -57,14 +60,26 @@ expect_error() {
   fi
 }
 
-# expect_status <라벨> <상태> [본문에 포함돼야 할 문자열]  — 정상 흐름 회귀용
-expect_status() {
-  local label="$1" status="$2" contains="${3:-}"
-  if [[ "$STATUS" == "$status" && "$BODY" == *"$contains"* ]]; then
-    ok "$label → $status"
+# expect_ok <라벨> <상태> <list|object> [본문에 포함돼야 할 문자열...]  — 성공 봉투를 판정한다
+#   list   → {"success":true,"data":[ ... ],"error":null}
+#   object → {"success":true,"data":{ ... },"error":null}
+expect_ok() {
+  local label="$1" status="$2" kind="$3"; shift 3
+  local open='['; [[ "$kind" == object ]] && open='{'
+  local head="{\"success\":true,\"data\":$open" tail=',"error":null}'
+  local missing="" s
+  for s in "$@"; do [[ "$BODY" == *"$s"* ]] || missing+=" $s"; done
+  if [[ "$STATUS" == "$status" && "$CTYPE" == application/json* \
+        && "$BODY" == "$head"* && "$BODY" == *"$tail" && -z "$missing" ]]; then
+    ok "$label → $status $kind"
   else
-    bad "$label → 기대 $status${contains:+ (본문에 $contains)}"
+    bad "$label → 기대 $status ${head}…${tail}${missing:+ (본문에 없음:$missing)}"
   fi
+}
+
+# first_id  — 직전 req 의 목록 봉투에서 첫 원소의 id 를 뽑는다 (DTO 의 첫 필드가 id)
+first_id() {
+  sed -n 's/^{"success":true,"data":\[{"id":\([0-9]*\),.*/\1/p' <<< "$BODY"
 }
 
 JSON=(-H 'Content-Type: application/json')
@@ -75,7 +90,7 @@ PASS="pw_$RUN"
 echo "== 준비: 테스트 사용자 가입"
 req POST /api/auth/signup "${JSON[@]}" -d "{\"username\":\"$USER\",\"password\":\"$PASS\",\"nickname\":\"smoke\"}"
 TOKEN="$(sed -n 's/.*"token":"\([^"]*\)".*/\1/p' <<< "$BODY")"
-expect_status "가입" 201 '"token":"'
+expect_ok "S6 가입 (201)" 201 object '"token":"' "\"user\":{" "\"username\":\"$USER\""
 AUTH=(-H "Authorization: Bearer $TOKEN")
 
 echo "== 서비스가 던지는 에러"
@@ -135,22 +150,40 @@ echo "== 그 밖의 예외"
 req POST /api/auth/signup "${JSON[@]}" -d "{\"username\":\"smoke_null_$RUN\",\"password\":null,\"nickname\":\"x\"}"
 expect_error "16 가입, password null (서버 콘솔에 스택트레이스가 찍혀야 한다)" 500 INTERNAL_ERROR
 
-echo "== 회귀: 정상 흐름은 그대로"
+echo "== 성공 응답 (봉투)"
 req GET /api/destinations
-expect_status "여행지 목록" 200 '['
+expect_ok "S1 여행지 목록" 200 list
+DEST_ID="$(first_id)"
 req GET "/api/destinations?prefecture=%EB%8F%84%EC%BF%84%EB%8F%84"
-expect_status "여행지 목록, 도쿄도" 200 '['
+expect_ok "S2 여행지 목록, 도쿄도" 200 list
+# 여행지·축제는 아직 시드가 없다 (TODO "테스트 데이터 추가"). 목록이 비면 상세는 확인할 수 없으므로 건너뛴다.
+if [[ -n "$DEST_ID" ]]; then
+  req GET "/api/destinations/$DEST_ID"
+  expect_ok "S3 여행지 상세 (id=$DEST_ID)" 200 object "\"data\":{\"id\":$DEST_ID,"
+else
+  skip "S3 여행지 상세 — destinations 데이터 없음"
+fi
 req GET "/api/festivals?month=4"
-expect_status "축제 목록, month=4" 200 '['
+expect_ok "S4 축제 목록, month=4" 200 list
+req GET /api/festivals
+FEST_ID="$(first_id)"
+if [[ -n "$FEST_ID" ]]; then
+  req GET "/api/festivals/$FEST_ID"
+  expect_ok "S5 축제 상세 (id=$FEST_ID)" 200 object "\"data\":{\"id\":$FEST_ID,"
+else
+  skip "S5 축제 상세 — festivals 데이터 없음"
+fi
 req POST /api/auth/login "${JSON[@]}" -d "{\"username\":\"$USER\",\"password\":\"$PASS\"}"
-expect_status "로그인" 200 '"token":"'
+expect_ok "S7 로그인" 200 object '"token":"'
 req GET /api/auth/me "${AUTH[@]}"
-expect_status "/me" 200 "\"username\":\"$USER\""
+expect_ok "S8 /me" 200 object "\"username\":\"$USER\""
 
 echo
+suffix=""
+(( skipped > 0 )) && suffix=" · 건너뜀 $skipped"
 if (( fail == 0 )); then
-  echo "== 전부 통과 ($pass)"
+  echo "== 전부 통과 ($pass)$suffix"
 else
-  echo "== 실패 $fail / $((pass + fail))"
+  echo "== 실패 $fail / $((pass + fail))$suffix"
 fi
 exit $(( fail > 0 ))

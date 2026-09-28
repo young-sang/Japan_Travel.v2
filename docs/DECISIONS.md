@@ -58,7 +58,8 @@
 | [D-031](#d-031--외부-api-캐시를-1차에서-뺀다) | 외부 API 캐시를 1차에서 뺀다 | 2026-09-22 | 번복됨 → D-032 |
 | [D-032](#d-032--외부-api-프록시날씨환율를-1차에서-뺀다) | 외부 API 프록시(날씨·환율)를 1차에서 뺀다 | 2026-09-22 | 확정 |
 | [D-033](#d-033--인증은-jwt--spring-security-로-한다) | 인증은 JWT + Spring Security 로 한다 | 2026-09-28 | 확정 |
-| [D-034](#d-034--에러-응답을-errorcode-enum-하나로-통일한다) | 에러 응답을 ErrorCode enum 하나로 통일한다 | 2026-09-28 | 확정 |
+| [D-034](#d-034--에러-응답을-errorcode-enum-하나로-통일한다) | 에러 응답을 ErrorCode enum 하나로 통일한다 | 2026-09-28 | 확정 (응답 최상위 모양은 D-035) |
+| [D-035](#d-035--모든-응답을-apiresponse-봉투로-감싼다) | 모든 응답을 ApiResponse 봉투로 감싼다 | 2026-09-28 | 확정 |
 
 > 번호 주의 — `D-026` 이 두 건에 중복으로 붙어 있다 (MySQL 이전 / pom.xml 삭제).
 > 양쪽 다 커밋 메시지에 이미 쓰여서 소급 수정하면 이력과 어긋나므로 그대로 둔다.
@@ -888,7 +889,7 @@ Access 토큰 하나(24시간)만 쓴다.
 
 ### D-034 · 에러 응답을 ErrorCode enum 하나로 통일한다
 
-**2026-09-28 · 확정** · 코드별 설명: [ERRORS.md](ERRORS.md)
+**2026-09-28 · 확정** · 코드별 설명: [ERRORS.md](ERRORS.md) · 응답 최상위 모양은 [D-035](#d-035--모든-응답을-apiresponse-봉투로-감싼다) 에서 봉투로 바뀜 (`ErrorResponse` → `ApiError`)
 
 모든 에러 응답의 본문을 `ErrorResponse(code, message)` 하나로 쓴다. 발생할 수 있는 에러는
 `common/error/ErrorCode` enum 에 `(HttpStatus, 고정 메시지)` 로 미리 정의하고, 서비스는
@@ -942,3 +943,59 @@ Spring MVC 예외 5종(400·404·405·415)을 받고, 나머지는 catch-all 에
   판단으로 지우고 [ERRORS.md](ERRORS.md) 로 옮겼다. enum 은 목록만 보이게 짧게 둔다.
 - **`@Valid` 입력 검증 · `AccessDeniedHandler`** — 프로젝트 `CLAUDE.md` 방침과 1차에 권한 분기가
   없다는 이유로 넣지 않았다.
+
+---
+
+### D-035 · 모든 응답을 ApiResponse 봉투로 감싼다
+
+**2026-09-28 · 확정** · 응답 모양: [ERRORS.md](ERRORS.md#응답-모양)
+
+성공과 에러 모두 `ApiResponse<T>(success, data, error)` 하나로 감싼다.
+
+```json
+{ "success": true,  "data": <DTO 또는 배열>, "error": null }
+{ "success": false, "data": null, "error": { "code": "...", "message": "..." } }
+```
+
+- 키는 항상 세 개, 빈 쪽은 `null`. HTTP 상태 코드는 지금과 같다 (200 · 201 · 4xx · 500).
+- 컨트롤러가 `ApiResponse.ok(...)` 를 **직접** 반환한다. 서비스는 봉투를 모르고 DTO 만 반환한다.
+  에러는 `ApiExceptionHandler` 와 `SecurityConfig` EntryPoint 가 `ApiResponse.fail(ErrorCode)` 로 쓴다.
+- D-034 의 `ErrorResponse(code, message)` 는 응답 전체가 아니라 봉투의 `error` 값이 되었으므로
+  `ApiError` 로 이름을 바꿨다. `ErrorCode` · `ApiException` 체계는 그대로다.
+
+**이유** — 사용자 판단. 프론트가 성공·실패를 같은 모양으로 받아 `success` 로 분기하고,
+`data` / `error` 자리가 고정돼 있으면 응답 처리 코드를 한 곳에 모을 수 있다.
+
+**함께 정한 규칙**
+- **본문에 `status` 를 넣지 않는다.** 상태는 HTTP 상태 줄에만. `success` 와 `error.code` 로 본문만
+  봐도 결과를 알 수 있고, 두 곳에 두면 어긋날 수 있다.
+- **돌려줄 데이터가 없는 성공(`DELETE` 등)은 200 + `data: null`.** 204 를 쓰면 봉투 규칙의 유일한
+  예외가 되고, 빈 본문에 `res.json()` 을 부르면 에러라 프론트가 204 를 따로 분기해야 한다.
+  대가로 본문이 매번 실린다. 인자 없는 `ApiResponse.ok()` 는 첫 `DELETE` 를 만들 때 추가한다.
+- **에러가 여러 개인 경우는 `error.fields` 로 확장한다.** `@Valid` 를 넣을 때
+  `ApiError` 에 `fields: [{field, message}]` 를 추가한다. `error` 를 배열로 만들지 않는다 —
+  에러가 하나뿐인 나머지 13종까지 `errors[0]` 을 꺼내야 하게 된다. 필드 추가는 하위 호환이라
+  지금 미리 넣지 않는다.
+
+**대가**
+- 현재 프론트의 모든 API 호출이 깨진다. [D-008](#d-008--프론트를-백엔드에-맞춘다-전제-3개-해제)
+  에 따라 Task 7 에서 프론트가 맞춘다.
+- 새 컨트롤러 메서드마다 `ApiResponse.ok(...)` 를 잊지 않아야 한다. `spring-domain-skeleton`
+  스킬의 컨트롤러 절에 규칙으로 넣었다.
+- `/error` 로 넘어가는 필터 단계의 인증 외 예외는 여전히 Spring 기본 본문이다 (D-034 와 같음).
+
+**기각한 대안**
+- **성공만 감싸기** (`{data}`, 에러는 `{code, message}` 그대로) — 에러 쪽을 안 건드려도 되지만
+  응답 모양이 둘이 된다.
+- **봉투 없음** (지금 관례를 문서로만 굳힘) — 변경이 없지만 프론트가 성공·에러를 서로 다른
+  모양으로 다뤄야 한다.
+- **목록만 감싸기** (`{items: [...]}`) — 페이징 자리는 생기지만 통일이 목적이 아니다.
+- **본문에 `status`** — 위 규칙 참조.
+- **`errors` 배열** — 위 규칙 참조.
+- **`ResponseBodyAdvice` 로 자동 포장** — 컨트롤러를 안 고쳐도 되지만 봉투가 코드에 보이지 않고,
+  `String` 반환 시 `ClassCastException`, 이미 봉투인 에러의 이중 포장 방지 등을 따로 챙겨야 한다.
+  발표에서 "어디서 감싸지나" 를 설명하기 어렵다.
+- **모든 메서드에서 `ResponseEntity<ApiResponse<T>>`** — 상태를 바꿀 일은 핸들러뿐이고,
+  가입의 201 은 `@ResponseStatus` 로 충분하다.
+- **`ErrorResponse` 이름 유지** — 이름이 "응답 전체" 를 뜻하는데 이제 일부다. Spring 의
+  `org.springframework.web.ErrorResponse`(응답 전체를 뜻함)와 이름은 같고 뜻은 달라진다.

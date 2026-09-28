@@ -1,5 +1,6 @@
 package com.japantravel.festival.controller;
 
+import com.japantravel.common.web.ApiResponse;
 import com.japantravel.festival.dto.FestivalResponse;
 import com.japantravel.festival.service.FestivalService;
 import lombok.RequiredArgsConstructor;
@@ -19,13 +20,13 @@ public class FestivalController {
     private final FestivalService festivalService;
 
     @GetMapping
-    public List<FestivalResponse> list(@RequestParam(required = false) String prefecture,
+    public ApiResponse<List<FestivalResponse>> list(@RequestParam(required = false) String prefecture,
                                        @RequestParam(required = false) Integer month) {
-        return festivalService.findAll(prefecture, month);
+        return ApiResponse.ok(festivalService.findAll(prefecture, month));
     }
 
     @GetMapping("/{id}")
-    public FestivalResponse detail(@PathVariable Long id) {
-        return festivalService.findById(id);
+    public ApiResponse<FestivalResponse> detail(@PathVariable Long id) {
+        return ApiResponse.ok(festivalService.findById(id));
     }
 }
