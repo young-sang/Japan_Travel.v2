@@ -1,15 +1,13 @@
 server:
   port: 8080
-  servlet:
-    session:
-      timeout: 7d
-      cookie:
-        same-site: lax
-        http-only: true
 
 spring:
   application:
     name: japan-travel-backend
+  autoconfigure:
+    # 사용자 조회는 AuthService 가 직접 한다 (UserDetailsService 없음). 이걸 빼지 않으면
+    # Boot 가 인메모리 user 계정을 만들고 기동 로그에 "generated security password" 를 찍는다
+    exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
   datasource:
     # characterEncoding=UTF-8 이 없으면 도도부현 한글 시드가 깨진다
     url: jdbc:mysql://localhost:3306/japan_travel?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
@@ -35,6 +33,11 @@ spring:
       # 도도부현 한글 시드가 깨진 채로 INSERT 된다
       encoding: UTF-8
       continue-on-error: false   # 스키마 오류를 조용히 넘기지 않는다
+
+jwt:
+  # HS256 은 32바이트 이상이어야 한다 (짧으면 기동 시 WeakKeyException). 기본값은 개발용
+  secret: ${JWT_SECRET:japan-travel-dev-secret-key-0123456789abcdef}
+  expiration: 24h
 
 external:
   open-meteo:

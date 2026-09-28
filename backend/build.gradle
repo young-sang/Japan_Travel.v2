@@ -26,8 +26,13 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     runtimeOnly 'com.mysql:mysql-connector-j'                               // 버전은 Spring Boot BOM 이 관리한다
 
-    // Security — 현재 미사용. 인증/인가 도입 시 주석 해제 (pom.xml 에서 이관)
-    // implementation 'org.springframework.boot:spring-boot-starter-security'
+    // Security — SecurityConfig 와 함께 넣는다 (D-019, D-033)
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // JWT — Spring Boot BOM 에 없어 버전을 직접 적는다. api 만 컴파일에 쓰고 구현은 런타임에 붙는다
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 
     // Cache
     implementation 'org.springframework.boot:spring-boot-starter-cache'

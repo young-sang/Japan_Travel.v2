@@ -1,4 +1,14 @@
--- destination · festival 도메인 (MySQL)
+-- destination · festival · user 도메인 (MySQL)
+
+CREATE TABLE IF NOT EXISTS users (
+  id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+  username      VARCHAR(50)  NOT NULL UNIQUE,
+  password_hash VARCHAR(100) NOT NULL,          -- BCrypt 는 60자 고정
+  nickname      VARCHAR(50)  NOT NULL,
+  role          VARCHAR(20)  NOT NULL DEFAULT 'USER',
+  created_at    DATETIME     NOT NULL,
+  CHECK (role IN ('USER', 'ADMIN'))
+);
 
 CREATE TABLE IF NOT EXISTS prefectures (
   id   BIGINT AUTO_INCREMENT PRIMARY KEY,

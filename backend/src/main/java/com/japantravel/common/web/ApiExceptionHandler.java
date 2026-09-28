@@ -3,6 +3,7 @@ package com.japantravel.common.web;
 import com.japantravel.common.error.ConflictException;
 import com.japantravel.common.error.ForbiddenException;
 import com.japantravel.common.error.NotFoundException;
+import com.japantravel.common.error.UnauthorizedException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -12,6 +13,13 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+//  컨트롤러 · 서비스에서 난 401 (로그인 실패 등). 필터 단계의 401 은 여기까지 오지 않고
+//  SecurityConfig 의 AuthenticationEntryPoint 가 같은 모양으로 쓴다.
+    @ExceptionHandler
+    public ResponseEntity<?> unauthorized(UnauthorizedException ex){
+        return ResponseEntity.status(401).body(Map.of("message", ex.getMessage()));
+    }
 
     @ExceptionHandler
     public ResponseEntity<?> notFound(NotFoundException ex){
