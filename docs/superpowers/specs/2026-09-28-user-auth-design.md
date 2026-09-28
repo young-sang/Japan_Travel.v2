@@ -89,7 +89,7 @@ public record AuthResponse(String token, UserResponse user) { }
 | 상태 | 조건 | 본문 |
 |---|---|---|
 | 201 | 가입 성공 | `AuthResponse` |
-| 409 | `username` 중복 | `{"message": "...", "code": "USERNAME_TAKEN"}` |
+| 409 | `username` 중복 | `{"code": "USERNAME_TAKEN", "message": "이미 사용 중인 아이디입니다"}` |
 
 - 가입 직후 토큰을 준다. 옛 프론트가 가입 후 곧바로 `setUser(u)` 를 하던 흐름과 같다.
 - 중복은 **Service 에서 `existsByUsername` 로 먼저 확인**한다. UNIQUE 위반 예외를 잡아서
@@ -103,7 +103,7 @@ public record AuthResponse(String token, UserResponse user) { }
 | 상태 | 조건 | 본문 |
 |---|---|---|
 | 200 | 성공 | `AuthResponse` |
-| 401 | 아이디가 없거나 비밀번호가 틀림 | `{"message": "아이디 또는 비밀번호가 올바르지 않습니다"}` |
+| 401 | 아이디가 없거나 비밀번호가 틀림 | `{"code": "LOGIN_FAILED", "message": "아이디 또는 비밀번호가 올바르지 않습니다"}` |
 
 **두 경우를 같은 메시지로 묶는다.** 나누면 "이 아이디는 가입돼 있다" 를 알려주게 된다.
 이건 보안 기능을 새로 넣는 것이 아니라 메시지를 하나로 쓰는 것뿐이라 비용이 없다.
@@ -113,7 +113,7 @@ public record AuthResponse(String token, UserResponse user) { }
 | 상태 | 조건 | 본문 |
 |---|---|---|
 | 200 | 유효한 토큰 | `UserResponse` |
-| 401 | 토큰 없음 · 만료 · 위조 | `{"message": "로그인이 필요합니다"}` |
+| 401 | 토큰 없음 · 만료 · 위조 | `{"code": "UNAUTHORIZED", "message": "로그인이 필요합니다"}` |
 
 토큰의 `sub`(userId) 로 DB 에서 다시 읽는다. 토큰이 발급된 뒤 사용자가 지워졌으면 404 가
 아니라 **401** 로 본다 — 프론트 입장에서는 "로그인이 풀린 것" 이다.
@@ -125,9 +125,9 @@ Spring Security 는 인증 실패 시 **필터 단계에서** 응답을 끝내�
 
 | 발생 위치 | 처리 |
 |---|---|
-| 필터 체인 (토큰 없이 보호된 경로 접근) | `AuthenticationEntryPoint` 를 `SecurityConfig` 에 등록해 `{"message"}` 로 쓴다 |
+| 필터 체인 (토큰 없이 보호된 경로 접근) | `AuthenticationEntryPoint` 를 `SecurityConfig` 에 등록해 `ErrorResponse.of(ErrorCode.UNAUTHORIZED)` 로 쓴다 |
 | 컨트롤러 · 서비스 (로그인 실패) | `common/error/UnauthorizedException` 을 새로 만들고 `ApiExceptionHandler` 에 401 핸들러를 추가한다 |
-
+| 컨트롤러 · 서비스 (로그인 실패 등) | `throw new ApiException(ErrorCode.LOGIN_FAILED)` 를 `ApiExceptionHandler` 가 받는다 ([D-034](../../DECISIONS.md), [ERRORS.md](../../ERRORS.md)). 처음에는 `UnauthorizedException` 을 따로 만들었으나 D-034 에서 `ApiException` 하나로 합쳤다 |
 ---
 
 ## 5. JWT

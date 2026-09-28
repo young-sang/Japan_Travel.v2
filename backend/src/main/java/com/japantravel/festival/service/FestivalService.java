@@ -1,6 +1,7 @@
 package com.japantravel.festival.service;
 
-import com.japantravel.common.error.NotFoundException;
+import com.japantravel.common.error.ApiException;
+import com.japantravel.common.error.ErrorCode;
 import com.japantravel.festival.dto.FestivalResponse;
 import com.japantravel.festival.entity.Festival;
 import com.japantravel.festival.repository.FestivalRepository;
@@ -25,7 +26,7 @@ public class FestivalService {
         boolean noPrefecture = (prefecture == null || prefecture.isBlank());
 //      없는 현 이름은 404. 실재하는 현인데 0건이면 빈 목록으로 내려간다.
         if (!noPrefecture && !prefectureRepository.existsByName(prefecture)) {
-            throw new NotFoundException("그런 현이 없습니다: " + prefecture);
+            throw new ApiException(ErrorCode.PREFECTURE_NOT_FOUND);
         }
 
         List<Festival> found;
@@ -45,13 +46,13 @@ public class FestivalService {
     public FestivalResponse findById(Long id) {
         return festivalRepository.findById(id)
                 .map(FestivalResponse::from)
-                .orElseThrow(() -> new NotFoundException("축제를 찾을 수 없습니다: " + id));
+                .orElseThrow(() -> new ApiException(ErrorCode.FESTIVAL_NOT_FOUND));
     }
 
 //  13월은 애초에 존재할 수 없는 잘못된 요청이므로 404 가 아니라 400 이다.
     private void validateMonth(Integer month) {
         if (month != null && (month < 1 || month > 12)) {
-            throw new IllegalArgumentException("month 는 1~12 여야 합니다: " + month);
+            throw new ApiException(ErrorCode.INVALID_MONTH);
         }
     }
 }

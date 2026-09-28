@@ -1,6 +1,8 @@
 package com.japantravel.common.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.japantravel.common.error.ErrorCode;
+import com.japantravel.common.error.ErrorResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -15,7 +17,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 @Configuration
 public class SecurityConfig {
@@ -50,10 +51,10 @@ public class SecurityConfig {
 //  필터 단계의 401 은 @RestControllerAdvice 까지 오지 않으므로 여기서 같은 모양의 JSON 을 쓴다.
     private AuthenticationEntryPoint unauthorizedEntryPoint(ObjectMapper objectMapper) {
         return (request, response, ex) -> {
-            response.setStatus(401);
+            response.setStatus(ErrorCode.UNAUTHORIZED.getStatus().value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-            objectMapper.writeValue(response.getWriter(), Map.of("message", "로그인이 필요합니다"));
+            objectMapper.writeValue(response.getWriter(), ErrorResponse.of(ErrorCode.UNAUTHORIZED));
         };
     }
 }

@@ -58,6 +58,7 @@
 | [D-031](#d-031--외부-api-캐시를-1차에서-뺀다) | 외부 API 캐시를 1차에서 뺀다 | 2026-09-22 | 번복됨 → D-032 |
 | [D-032](#d-032--외부-api-프록시날씨환율를-1차에서-뺀다) | 외부 API 프록시(날씨·환율)를 1차에서 뺀다 | 2026-09-22 | 확정 |
 | [D-033](#d-033--인증은-jwt--spring-security-로-한다) | 인증은 JWT + Spring Security 로 한다 | 2026-09-28 | 확정 |
+| [D-034](#d-034--에러-응답을-errorcode-enum-하나로-통일한다) | 에러 응답을 ErrorCode enum 하나로 통일한다 | 2026-09-28 | 확정 |
 
 > 번호 주의 — `D-026` 이 두 건에 중복으로 붙어 있다 (MySQL 이전 / pom.xml 삭제).
 > 양쪽 다 커밋 메시지에 이미 쓰여서 소급 수정하면 이력과 어긋나므로 그대로 둔다.
@@ -882,3 +883,62 @@ Access 토큰 하나(24시간)만 쓴다.
 - **Spring Security 없이 `HttpSession`/필터를 직접 작성** — "로그인 필요" 판정이
   엔드포인트마다 흩어진다. 이후 도메인 5개가 모두 인증을 쓰므로 한 곳에서 규칙으로
   관리하는 편이 낫다.
+
+---
+
+### D-034 · 에러 응답을 ErrorCode enum 하나로 통일한다
+
+**2026-09-28 · 확정** · 코드별 설명: [ERRORS.md](ERRORS.md)
+
+모든 에러 응답의 본문을 `ErrorResponse(code, message)` 하나로 쓴다. 발생할 수 있는 에러는
+`common/error/ErrorCode` enum 에 `(HttpStatus, 고정 메시지)` 로 미리 정의하고, 서비스는
+`throw new ApiException(ErrorCode.XXX)` 하나로 던진다. `ApiExceptionHandler` 는 이것과
+Spring MVC 예외 5종(400·404·405·415)을 받고, 나머지는 catch-all 에서 500 으로 바꾼다.
+필터 단계 401 은 `SecurityConfig` 의 EntryPoint 가 같은 `ErrorResponse` 로 쓴다.
+
+**이유** — 3단계(favorite/review/history)부터 도메인이 늘어나기 전에 에러 모양을 한 번에
+굳힌다. 지금은 `{"message"}` · `{"code","message"}` · Spring 기본 `{timestamp,status,...}`
+세 가지가 섞여 나가서, 프론트가 에러를 한 가지 방식으로 다룰 수 없다. `code` 가 있으면
+프론트는 문구가 아니라 코드로 분기하고, enum 하나가 "이 API 가 낼 수 있는 에러 목록" 이 된다.
+
+**함께 정한 규칙**
+- **메시지는 enum 의 고정 문구만.** 던지는 쪽에서 덮어쓰지 않는다. 그래서 문제가 된 값
+  (`: 42`, `: 도쿄도`, `: 13`) 이 응답에서 빠진다. 클라이언트는 자기가 보낸 요청을 안다.
+- **코드는 던지는 곳을 만들 때 추가한다.** 쓰는 곳 없는 코드는 미리 넣지 않는다.
+  그래서 `FORBIDDEN`(course 소유권)과 `MISSING_PARAMETER`(필수 `@RequestParam`)는 아직 없다.
+- **`IllegalArgumentException` → 400 일괄 매핑을 없앤다.** 의도한 400 은 전부 `ErrorCode` 로
+  던진다. 일괄 매핑은 라이브러리가 던진 IAE(예: BCrypt 의 `rawPassword cannot be null`)까지
+  "클라이언트 잘못" 으로 가려서, 서버 버그를 400 뒤에 숨긴다. 이제 그런 경우는 500 이다.
+- **500 catch-all 에서만 `log.error` 를 남긴다.** 프로젝트 `CLAUDE.md` 의 "로깅 넣지 않음" 에
+  대한 **명시적 예외**(사용자 승인). 응답에 원인을 싣지 않으므로 로그마저 없으면 500 의
+  원인을 찾을 방법이 없다. 다른 곳에는 로그를 넣지 않는다.
+- **Security 가 경로 판정보다 먼저다.** 비공개 경로의 없는 URL · 틀린 메서드는 로그인 전이면
+  404 · 405 가 아니라 401 이다. 그대로 둔다.
+
+**대가**
+- 옛 핸들러가 주던 상세 메시지(`"id 값이 올바르지 않습니다: abc"` 등)가 사라진다.
+- 목록에 없는 Spring 예외(406 등)는 500 으로 나간다. 현재 발생 경로는 없다.
+- 필터 단계에서 난 인증 외 예외는 여전히 Spring 기본 본문이다 (`/error`). 그런 필터가 없다.
+- 고정 문구가 `ErrorCode` 와 `scripts/smoke/error.sh` 두 곳에 있다. 문구가 계약이므로 일부러
+  스모크가 검사하게 했다.
+
+**기각한 대안**
+- **상태별 예외 하위 클래스 유지** (`NotFoundException` 등 5개 + `ErrorCode`) — 상태가 예외
+  클래스와 `ErrorCode` 두 곳에 중복되고, `new NotFoundException(LOGIN_FAILED)` 처럼 어긋나게
+  써도 컴파일된다. 하위 클래스 5개를 지우고 `ApiException` 하나로 합쳤다.
+- **`BusinessException(ErrorCode)` + 도메인별 하위 클래스** (`DestinationNotFoundException` 등) —
+  흔한 방식이고 상태는 `ErrorCode` 한 곳이라 위 문제는 없다. 하위 클래스가 값을 하는 건 그 예외만
+  `catch` 해 복구하거나 · 추가 데이터를 싣거나 · 핸들러에서 따로 다룰 때인데 지금은 셋 다 없어서
+  빈 클래스만 코드 수만큼 는다. 기각이 아니라 보류: 그런 필요가 생긴 예외 하나만
+  `extends ApiException` 으로 추가하면 되고, 핸들러는 부모 타입을 잡으므로 기존 코드는 안 바뀐다.
+- **메시지 덮어쓰기 허용** (`new ApiException(code, "...: 42")`) — 어떤 값이 문제였는지 보이지만,
+  문구가 던지는 곳마다 달라져 enum 이 목록 역할을 못 한다. 사용자 판단으로 고정 문구만 쓴다.
+- **도메인별 enum** (`ErrorCode` interface + `DestinationErrorCode` 등) — 도메인 경계는 깔끔하지만
+  전체 목록을 보려면 여러 파일을 열어야 한다. `common` 에 enum 하나, 주석 구역으로 나눈다.
+- **`ResponseEntityExceptionHandler` 상속** — Spring 예외 ~15종을 한 번에 받지만 기본이
+  ProblemDetail 이라 `handleExceptionInternal` 을 덮어쓰고 상태→`ErrorCode` 표를 따로 둬야 한다.
+  실제로 쓰는 것은 5종이라 핸들러를 하나씩 두는 편이 읽기 쉽다.
+- **enum 에 코드별 주석** — 처음에는 enum 항목마다 "어디서 · 무엇 때문에" 를 달았으나, 사용자
+  판단으로 지우고 [ERRORS.md](ERRORS.md) 로 옮겼다. enum 은 목록만 보이게 짧게 둔다.
+- **`@Valid` 입력 검증 · `AccessDeniedHandler`** — 프로젝트 `CLAUDE.md` 방침과 1차에 권한 분기가
+  없다는 이유로 넣지 않았다.

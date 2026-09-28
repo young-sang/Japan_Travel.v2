@@ -1,7 +1,7 @@
 package com.japantravel.user.service;
 
-import com.japantravel.common.error.ConflictException;
-import com.japantravel.common.error.UnauthorizedException;
+import com.japantravel.common.error.ApiException;
+import com.japantravel.common.error.ErrorCode;
 import com.japantravel.common.security.JwtProvider;
 import com.japantravel.user.dto.AuthResponse;
 import com.japantravel.user.dto.LoginRequest;
@@ -27,7 +27,7 @@ public class AuthService {
     public AuthResponse signup(SignupRequest req) {
 //      UNIQUE 위반 예외를 잡아 바꾸지 않고 먼저 확인한다. 동시 가입은 DB UNIQUE 가 막는다 (500).
         if (userRepository.existsByUsername(req.username())) {
-            throw new ConflictException("USERNAME_TAKEN", "이미 사용 중인 아이디입니다: " + req.username(), null);
+            throw new ApiException(ErrorCode.USERNAME_TAKEN);
         }
         User user = userRepository.save(
                 new User(req.username(), passwordEncoder.encode(req.password()), req.nickname()));
@@ -39,7 +39,7 @@ public class AuthService {
     public AuthResponse login(LoginRequest req) {
         User user = userRepository.findByUsername(req.username())
                 .filter(u -> passwordEncoder.matches(req.password(), u.getPasswordHash()))
-                .orElseThrow(() -> new UnauthorizedException("아이디 또는 비밀번호가 올바르지 않습니다"));
+                .orElseThrow(() -> new ApiException(ErrorCode.LOGIN_FAILED));
         return issue(user);
     }
 
@@ -47,7 +47,7 @@ public class AuthService {
     public UserResponse me(Long userId) {
         return userRepository.findById(userId)
                 .map(UserResponse::from)
-                .orElseThrow(() -> new UnauthorizedException("로그인이 필요합니다"));
+                .orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED));
     }
 
     private AuthResponse issue(User user) {

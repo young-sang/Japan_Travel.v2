@@ -1,6 +1,7 @@
 package com.japantravel.destination.service;
 
-import com.japantravel.common.error.NotFoundException;
+import com.japantravel.common.error.ApiException;
+import com.japantravel.common.error.ErrorCode;
 import com.japantravel.destination.dto.DestinationResponse;
 import com.japantravel.destination.entity.Destination;
 import com.japantravel.destination.repository.DestinationRepository;
@@ -27,7 +28,7 @@ public class DestinationService {
         }
 //      없는 현 이름은 404. 실재하는 현인데 0건이면 빈 목록으로 내려간다.
         if (!prefectureRepository.existsByName(prefecture)) {
-            throw new NotFoundException("그런 현이 없습니다: " + prefecture);
+            throw new ApiException(ErrorCode.PREFECTURE_NOT_FOUND);
         }
         return toResponses(destinationRepository.findByPrefectureNameOrderByIdDesc(prefecture));
     }
@@ -35,7 +36,7 @@ public class DestinationService {
     public DestinationResponse findById(Long id) {
         return destinationRepository.findById(id)
                 .map(DestinationResponse::from)
-                .orElseThrow(() -> new NotFoundException("여행지를 찾을 수 없습니다: " + id));
+                .orElseThrow(() -> new ApiException(ErrorCode.DESTINATION_NOT_FOUND));
     }
 
     private List<DestinationResponse> toResponses(List<Destination> found) {
