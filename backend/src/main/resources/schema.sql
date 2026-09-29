@@ -1,4 +1,4 @@
--- destination · festival · user · favorite · review 도메인 (MySQL)
+-- destination · festival · user · favorite · review · course 도메인 (MySQL)
 
 CREATE TABLE IF NOT EXISTS users (
   id            BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -93,6 +93,39 @@ CREATE TABLE IF NOT EXISTS review_festivals (
   FOREIGN KEY (user_id)     REFERENCES users(id)     ON DELETE CASCADE,
   FOREIGN KEY (festival_id) REFERENCES festivals(id) ON DELETE CASCADE,
   CHECK (rating BETWEEN 1 AND 5)
+);
+
+-- course (Task 4) — 정류장은 여행지·축제 중 하나를 가리킨다 (D-042 · D-044)
+CREATE TABLE IF NOT EXISTS courses (
+  id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+  title         VARCHAR(200) NOT NULL,
+  description   TEXT,
+  prefecture_id BIGINT       NOT NULL,
+  image_path    VARCHAR(500),
+  owner_user_id BIGINT,                          -- NULL = 기본 제공 코스 (D-041)
+  is_public     BOOLEAN      NOT NULL,
+  created_at    DATETIME     NOT NULL,
+  updated_at    DATETIME,                        -- 수정할 때만 채운다
+  FOREIGN KEY (prefecture_id) REFERENCES prefectures(id),
+  FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- destination_id · festival_id 중 정확히 하나는 서비스가 판정한다.
+-- MySQL 은 참조 동작(CASCADE)이 걸린 컬럼을 CHECK 에 쓸 수 없다 (에러 3823).
+CREATE TABLE IF NOT EXISTS course_stops (
+  id             BIGINT AUTO_INCREMENT PRIMARY KEY,
+  course_id      BIGINT       NOT NULL,
+  day_no         INT          NOT NULL,
+  seq            INT          NOT NULL,
+  destination_id BIGINT,
+  festival_id    BIGINT,
+  memo           VARCHAR(500),
+  UNIQUE (course_id, day_no, seq),
+  FOREIGN KEY (course_id)      REFERENCES courses(id)      ON DELETE CASCADE,
+  FOREIGN KEY (destination_id) REFERENCES destinations(id) ON DELETE CASCADE,
+  FOREIGN KEY (festival_id)    REFERENCES festivals(id)    ON DELETE CASCADE,
+  CHECK (day_no >= 1),
+  CHECK (seq >= 1)
 );
 
 INSERT IGNORE INTO prefectures(name) VALUES
