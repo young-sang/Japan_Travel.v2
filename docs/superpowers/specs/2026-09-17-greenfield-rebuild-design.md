@@ -7,6 +7,28 @@
 > **대체한다.** 그 둘은 "프론트·API 계약·스키마는 고정, 백엔드 내부만 새로 짓는다" 가
 > 전제였다. 전제 셋이 모두 풀렸으므로 폐기한다.
 
+> **이후 바뀐 것 (2026-09-29 기준)** — 본문은 작성 당시 그대로 둔다. 아래 결정들이 본문의 일부를
+> 대체하므로 함께 읽는다. 현재 상태는 [API.md](../../API.md) · [SCHEMA.md](../../SCHEMA.md) 가 기준이다.
+>
+> - `place` 통합 → **`destination` · `festival` 두 도메인으로 다시 나눔** (D-022). 활동 테이블은 3종 × 2대상 = 6개.
+> - 태그 · `place_tags` · `course_tags` 는 1차에서 뺌 (D-024). 지역은 `prefectures` 참조 테이블 (D-023 · D-025).
+> - SQLite → **MySQL 8**, 날짜는 `DATETIME` / `LocalDateTime` (D-026). 본문의 SQLite · `foreign_keys` · 날짜 보류 항목은 해당 없음.
+> - 코드는 Claude 가 쓰고 설계는 사용자가 한다 (D-028). "각 Task 의 진행 절차" 의 2번이 바뀜.
+> - 인증은 세션이 아니라 **JWT** (D-033). 로그아웃 API 없음.
+> - Task 6 의 `weather` · `exchange` 와 캐시는 1차에서 뺌 (D-031 · D-032). `search` 만 남음.
+> - "열린 결정" 3개는 모두 닫힘 — API 경로는 `/api/destinations` · `/api/festivals` 유지, 날짜는 D-026, prefecture 는 참조 테이블.
+>
+> | # | Task | 상태 |
+> |---|---|---|
+> | 0 | 기반 정리 | 완료 |
+> | 1 | `destination` · `festival` (조회 2개씩) | 완료 — 제안·승인은 인증 이후로 미룸 (D-030) |
+> | 2 | `user` | 완료 |
+> | 3 | `favorite` `review` `history` | **다음** |
+> | 4 | `course` | |
+> | 5 | `post` | |
+> | 6 | `search` | |
+> | 7 | 프론트 맞추기 | |
+
 ## 목적
 
 기존 앱을 **기능 명세서로 삼아** 백엔드와 DB 스키마를 처음부터 새로 짓는다.

@@ -1,205 +1,137 @@
-# REST API 엔드포인트
+# REST API
 
-Japan Travel v2 백엔드 (`com.japantravel.controller`)
-세션 쿠키 기반 인증, SQLite, Spring Boot 3.3 / Java 17.
+Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 브랜치.
+**지금 실제로 동작하는 엔드포인트만** 적는다. 아직 만들지 않은 도메인은 맨 아래 "예정" 에만 둔다.
 
-권한 범례:
-- 🌐 공개 (비로그인 가능)
-- 🔑 로그인 필요
-- 👤 본인 검증 (작성자만)
-- 🛠 관리자 (ROLE_ADMIN)
+- 에러 코드 전체 목록 → [ERRORS.md](ERRORS.md)
+- 테이블 → [SCHEMA.md](SCHEMA.md)
+- 결정 배경 → [DECISIONS.md](DECISIONS.md)
 
 ---
 
-## 🔐 인증 — `AuthController`
+## 공통 규칙
 
-| 메서드 | 경로 | 권한 | 설명 |
-|---|---|---|---|
-| POST | `/api/auth/signup` | 🌐 | 회원가입 |
-| POST | `/api/auth/login` | 🌐 | 로그인 (세션 쿠키 발급) |
-| POST | `/api/auth/logout` | 🔑 | 로그아웃 |
-| GET | `/api/auth/me` | 🔑 | 현재 사용자 정보 |
+### 응답 봉투 (D-035)
 
-## 🗾 콘텐츠 조회
+성공이든 에러든 모든 응답은 `ApiResponse` 에 담긴다. 키는 항상 세 개이고 빈 쪽은 `null` 이다.
+상태 코드는 본문에 싣지 않고 HTTP 상태 줄에만 있다.
 
-### Destinations — `DestinationController`
-| 메서드 | 경로 | 권한 | 설명 |
-|---|---|---|---|
-| GET | `/api/destinations?prefecture=&tag=` | 🌐 | 여행지 목록 (필터) |
-| GET | `/api/destinations/{id}` | 🌐 | 여행지 상세 |
+```json
+// 성공
+{ "success": true,  "data": { ... },  "error": null }
 
-### Festivals — `FestivalController`
-| 메서드 | 경로 | 권한 | 설명 |
-|---|---|---|---|
-| GET | `/api/festivals` | 🌐 | 축제 목록 |
-| GET | `/api/festivals/{id}` | 🌐 | 축제 상세 |
-
-### Courses — `CourseController`
-| 메서드 | 경로 | 권한 | 설명 |
-|---|---|---|---|
-| GET | `/api/courses` | 🌐 | 코스 목록 |
-| GET | `/api/courses/{id}` | 🌐 | 코스 상세 |
-| POST | `/api/courses` | 🔑 | 코스 생성 |
-| PUT | `/api/courses/{id}` | 👤 | 코스 수정 |
-| DELETE | `/api/courses/{id}` | 👤 | 코스 삭제 |
-
-### Search — `SearchController`
-| 메서드 | 경로 | 권한 | 설명 |
-|---|---|---|---|
-| GET | `/api/search?q=` | 🌐 | 통합 검색 (destinations + festivals + courses) |
-
-## 📝 자유게시판 — `PostController`
-
-| 메서드 | 경로 | 권한 | 설명 |
-|---|---|---|---|
-| GET | `/api/posts?page=&size=` | 🌐 | 게시글 목록 (PostPage: items/total/page/size) |
-| GET | `/api/posts/{id}` | 🌐 | 게시글 상세 |
-| POST | `/api/posts` | 🔑 | 글 작성 (body: PostCreate) |
-| PUT | `/api/posts/{id}` | 👤 | 글 수정 |
-| DELETE | `/api/posts/{id}` | 👤 | 글 삭제 |
-| GET | `/api/posts/{id}/comments` | 🌐 | 댓글 목록 |
-| POST | `/api/posts/{id}/comments` | 🔑 | 댓글 작성 (body: CommentCreate) |
-| DELETE | `/api/comments/{id}` | 👤 | 댓글 삭제 |
-
-상태코드: 200 (조회/수정), 201 (생성), 204 (삭제), 401 (비로그인), 403 (타인 글), 404 (없음).
-
-## 💗 사용자 데이터 — `UserDataController`
-
-### Favorites
-| 메서드 | 경로 | 권한 | 설명 |
-|---|---|---|---|
-| GET | `/api/favorites` | 🔑 | 내 즐겨찾기 |
-| POST | `/api/favorites` | 🔑 | 즐겨찾기 추가 |
-| DELETE | `/api/favorites/{type}/{id}` | 🔑 | 즐겨찾기 제거 |
-
-### Reviews
-| 메서드 | 경로 | 권한 | 설명 |
-|---|---|---|---|
-| GET | `/api/reviews?type=&id=` | 🌐 | 대상별 리뷰 목록 |
-| POST | `/api/reviews` | 🔑 | 리뷰 작성 |
-| PUT | `/api/reviews/{id}` | 👤 | 리뷰 수정 |
-| DELETE | `/api/reviews/{id}` | 👤 / 🛠 | 리뷰 삭제 (관리자도 가능) |
-
-### History
-| 메서드 | 경로 | 권한 | 설명 |
-|---|---|---|---|
-| GET | `/api/history` | 🔑 | 방문 기록 |
-| POST | `/api/history` | 🔑 | 방문 기록 추가 |
-| DELETE | `/api/history` | 🔑 | 방문 기록 전체 삭제 |
-
-## 🌤 외부 프록시 — `ProxyController`
-
-| 메서드 | 경로 | 권한 | 설명 |
-|---|---|---|---|
-| GET | `/api/weather?lat=&lng=` | 🌐 | Open-Meteo 현재 날씨 (7일 캐시) |
-| GET | `/api/fx` | 🌐 | Frankfurter 100 JPY → KRW (7일 캐시) |
-
----
-
-## 🛠 관리자 — `AdminController`
-
-모든 엔드포인트는 ROLE_ADMIN 필요.
-
-### 게시판 모더레이션
-| 메서드 | 경로 | 설명 |
-|---|---|---|
-| GET | `/api/admin/posts?page=&size=` | 전체 글 목록 |
-| DELETE | `/api/admin/posts/{id}` | 관리자 글 삭제 (audit_log: POST_DELETE) |
-| DELETE | `/api/admin/comments/{id}` | 관리자 댓글 삭제 (audit_log: POST_COMMENT_DELETE) |
-
-### 통계 · 수집 매트릭스
-| 메서드 | 경로 | 설명 |
-|---|---|---|
-| GET | `/api/admin/stats` | 6종 카운트 (여행지·축제·코스·즐겨찾기·리뷰·도도부현) |
-| GET | `/api/admin/collection-matrix` | 47×2 도도부현×타입 보유/실패 매트릭스 |
-
-### Wikipedia 수집기
-| 메서드 | 경로 | 설명 |
-|---|---|---|
-| POST | `/api/admin/collector/run` | 단일 (도도부현+타입) 수집 |
-| POST | `/api/admin/collector/bulk` | 47×2 = 94건 일괄 수집 |
-| GET | `/api/admin/collector/runs?limit=` | 최근 수집 로그 |
-| GET | `/api/admin/collector/runs/{id}` | 단일 수집 상세 |
-| POST | `/api/admin/collector/runs/{id}/retry` | 단일 수집 재시도 |
-| GET | `/api/admin/collector/bulk-runs` | bulk 실행 목록 |
-| GET | `/api/admin/collector/bulk-runs/{id}` | bulk 1건 상세 (children 포함) |
-| POST | `/api/admin/collector/bulk-runs/{id}/retry-failed` | 실패분만 재시도 |
-
-### 콘텐츠 CRUD
-| 메서드 | 경로 | 설명 |
-|---|---|---|
-| POST | `/api/admin/destinations` | 여행지 추가 |
-| PUT | `/api/admin/destinations/{id}` | 여행지 수정 |
-| DELETE | `/api/admin/destinations/{id}` | 여행지 삭제 |
-| POST | `/api/admin/festivals` | 축제 추가 |
-| PUT | `/api/admin/festivals/{id}` | 축제 수정 |
-| DELETE | `/api/admin/festivals/{id}` | 축제 삭제 |
-
-### 사용자 관리
-| 메서드 | 경로 | 설명 |
-|---|---|---|
-| GET | `/api/admin/users` | 전체 사용자 + 사용량 통계 (즐겨찾기/리뷰/코스/히스토리 수) |
-| PATCH | `/api/admin/users/{id}/role` | 역할 변경 (USER↔ADMIN) |
-| DELETE | `/api/admin/users/{id}` | 계정 + 전체 사용자 데이터 삭제 |
-
-### 감사 로그 · 캐시
-| 메서드 | 경로 | 설명 |
-|---|---|---|
-| GET | `/api/admin/audit?userId=&action=&from=&to=&page=&size=` | 감사 로그 (필터 + 페이지네이션) |
-| GET | `/api/admin/cache/stats` | Caffeine 5종 캐시 통계 (히트/미스/히트율/크기) |
-| POST | `/api/admin/cache/invalidate?name=` | 캐시 무효화 (name 생략 시 전체) |
-
----
-
-## DTO (`com.japantravel.dto.Dtos`)
-
-### 자유게시판
-```java
-record Post(Long id, Long userId, String userName, String title, String body,
-            String createdAt, String updatedAt, int commentCount)
-record PostCreate(String title, String body)
-record PostComment(Long id, Long postId, Long userId, String userName, String body, String createdAt)
-record CommentCreate(String body)
-record PostPage(List<Post> items, int total, int page, int size)
+// 에러
+{ "success": false, "data": null,
+  "error": { "code": "DESTINATION_NOT_FOUND", "message": "여행지를 찾을 수 없습니다" } }
 ```
 
-### 그 외 주요 record
-`Destination`, `Festival`, `Course`, `Review`, `Favorite`, `HistoryEntry`, `User`, `AuditEntry`, `CollectorRun`, `BulkRun`, `Stats`, `CollectionMatrix` 등.
+프론트는 `error.code` 로 분기한다 (D-034). 코드별 설명은 [ERRORS.md](ERRORS.md).
+
+### 인증 (D-033)
+
+- JWT Access 토큰 하나(24시간). 가입·로그인 응답의 `data.token` 을 받아
+  `Authorization: Bearer <token>` 헤더로 보낸다.
+- **로그아웃 API 는 없다.** 프론트가 토큰을 버리는 것이 로그아웃이다. 서버는 토큰을 무효화하지 않는다.
+- 기본은 **닫혀 있다.** 아래 표에서 🌐 인 경로만 토큰 없이 열리고, 나머지는 전부 🔑 이다
+  (`SecurityConfig` 의 `anyRequest().authenticated()`).
+- 토큰이 없거나 · 위조 · 만료면 `401 UNAUTHORIZED`. 로그인 전에는 없는 경로·틀린 메서드도
+  404/405 가 아니라 401 이 나간다 ([ERRORS.md](ERRORS.md) 의 `UNAUTHORIZED` 항목).
+
+권한 표기: 🌐 공개 · 🔑 로그인 필요
 
 ---
 
-## 캐시 (`CacheConfig`)
+## 인증 — `AuthController` (`/api/auth`)
 
-Caffeine 인메모리, `expireAfterWrite=7d`, `maximumSize=2000`.
+| 메서드 | 경로 | 권한 | 성공 | 설명 |
+|---|---|---|---|---|
+| POST | `/api/auth/signup` | 🌐 | 201 | 회원가입. 가입과 동시에 토큰을 준다 |
+| POST | `/api/auth/login` | 🌐 | 200 | 로그인 |
+| GET | `/api/auth/me` | 🔑 | 200 | 토큰 주인의 정보 |
 
-| 이름 | 키 | 용도 |
-|---|---|---|
-| `wikiSummary` | 페이지 제목 | Wikipedia 페이지 요약 (extract, 좌표, 썸네일) |
-| `wikiCategoryMembers` | 카테고리명 | 카테고리 내 페이지 제목 목록 |
-| `nominatimSearch` | 검색어 | 장소명 → 좌표 변환 (Nominatim 1요청/초 제한 회피) |
-| `weather` | `"lat,lng"` | Open-Meteo 현재 날씨 |
-| `fx` | `'jpy_krw'` | 100 JPY → KRW 환율 |
+**요청**
+
+```json
+// POST /api/auth/signup — SignupRequest
+{ "username": "tanaka", "password": "pw1234", "nickname": "다나카" }
+
+// POST /api/auth/login — LoginRequest
+{ "username": "tanaka", "password": "pw1234" }
+```
+
+**응답 `data`**
+
+```json
+// signup · login — AuthResponse
+{ "token": "eyJhbGciOi...",
+  "user": { "id": 1, "username": "tanaka", "nickname": "다나카", "role": "USER" } }
+
+// me — UserResponse
+{ "id": 1, "username": "tanaka", "nickname": "다나카", "role": "USER" }
+```
+
+**에러** — `USERNAME_TAKEN`(409, signup) · `LOGIN_FAILED`(401, login) · `UNAUTHORIZED`(401, me)
 
 ---
 
-## 외부 API 클라이언트
+## 여행지 — `DestinationController` (`/api/destinations`)
 
-| 클라이언트 | 베이스 URL | 용도 | Throttle |
+| 메서드 | 경로 | 권한 | 설명 |
 |---|---|---|---|
-| `WikipediaClient` | `https://ko.wikipedia.org/api/rest_v1`, `/w/api.php` | 관광지·축제 수집 | summary 600ms, action 1100ms |
-| `NominatimClient` | OSM Nominatim | 좌표 백필 | 1요청/초 (이용약관) |
-| `OpenMeteoClient` | open-meteo.com | 날씨 | - |
-| `FrankfurterClient` | frankfurter.app | 환율 | - |
+| GET | `/api/destinations?prefecture=` | 🌐 | 목록. 최신순(`id` 내림차순) |
+| GET | `/api/destinations/{id}` | 🌐 | 상세 |
+
+- `prefecture` — 선택. 현 **이름**(예: `교토부`). 없는 이름이면 `404 PREFECTURE_NOT_FOUND`,
+  실재하는 현인데 0건이면 빈 목록 `[]`.
+- 태그 필터(`?tag=`)는 1차에서 뺐다 (D-024).
+
+**응답 `data`** — 목록은 배열, 상세는 객체 하나. 둘 다 `DestinationResponse` 이다.
+
+```json
+{ "id": 12, "name": "...", "prefecture": "교토부",
+  "description": "...", "lat": 34.99, "lng": 135.78,
+  "imagePath": "...", "createdAt": "2026-09-22T10:00:00" }
+```
+
+**에러** — `PREFECTURE_NOT_FOUND`(404) · `DESTINATION_NOT_FOUND`(404) · `TYPE_MISMATCH`(400, `id` 가 숫자 아님)
 
 ---
 
-## 합계
+## 축제 — `FestivalController` (`/api/festivals`)
 
-**총 53개 엔드포인트** / 9개 컨트롤러
+| 메서드 | 경로 | 권한 | 설명 |
+|---|---|---|---|
+| GET | `/api/festivals?prefecture=&month=` | 🌐 | 목록. 월 오름차순, 같은 월은 최신순 |
+| GET | `/api/festivals/{id}` | 🌐 | 상세 |
 
-| 권한 | 개수 |
-|---|---|
-| 🌐 공개 | 11 |
-| 🔑 로그인 | 12 |
-| 👤 본인 | 6 |
-| 🛠 관리자 | 24 |
+- `prefecture` — 선택. 규칙은 여행지와 같다.
+- `month` — 선택. 1~12. 범위 밖이면 `400 INVALID_MONTH`, 숫자가 아니면 `400 TYPE_MISMATCH`.
+- 두 필터는 함께 쓸 수 있다 (AND).
+
+**응답 `data`** — `FestivalResponse`
+
+```json
+{ "id": 3, "name": "...", "prefecture": "교토부",
+  "month": 7, "dateText": "7월 중",
+  "description": "...", "lat": 35.00, "lng": 135.77,
+  "imagePath": "...", "createdAt": "2026-09-22T10:00:00" }
+```
+
+**에러** — `PREFECTURE_NOT_FOUND`(404) · `FESTIVAL_NOT_FOUND`(404) · `INVALID_MONTH`(400) · `TYPE_MISMATCH`(400)
+
+---
+
+## 예정 (아직 없음)
+
+[재작성 설계 문서](superpowers/specs/2026-09-17-greenfield-rebuild-design.md) 의 Task 순서를 따른다.
+경로와 모양은 각 Task 를 시작할 때 설계 스펙에서 정하고, **구현이 끝나면 위로 옮긴다.**
+
+| Task | 도메인 | 대략의 범위 |
+|---|---|---|
+| 3 | `favorite` · `review` · `history` | 즐겨찾기 · 리뷰 · 방문기록 |
+| 4 | `course` | 코스 목록 · 상세 · 사용자 코스 CRUD, 소유권 판정 |
+| 5 | `post` | 게시판 글 + 댓글 |
+| 6 | `search` | 통합 검색 |
+| — | destination 제안·승인 | 인증 이후로 미룸 (D-030) |
+
+1차에서 뺀 것 — 날씨·환율 프록시(D-032), 관리자 API 전부(D-009).
