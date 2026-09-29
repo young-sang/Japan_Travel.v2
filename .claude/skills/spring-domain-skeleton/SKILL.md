@@ -69,21 +69,19 @@ grep -rl "@SpringBootApplication" --include=*.java backend/src/main/java
 grep -n "CREATE TABLE" backend/src/main/resources/schema.sql
 ```
 
-**현재 schema.sql 에 있는 테이블은 3개뿐이다** — `prefectures` · `destinations` ·
-`festivals`. 나머지 도메인은 **테이블을 먼저 추가해야 한다.** 스키마는 도메인별로
-늘려가는 것이 방침이다 (D-020).
+**어떤 테이블이 있는지는 매번 위 grep 으로 확인한다.** 이 문서에 현재 목록을 적지
+않는다 — 도메인마다 늘어나므로 적는 순간 낡는다. 테이블이 아직 없는 도메인은
+**테이블을 먼저 추가해야 한다.** 스키마는 도메인별로 늘려가는 것이 방침이다 (D-020).
 
-옛 스키마 기준의 이름 규칙 (그린필드에서 재확인 필요):
+도메인별 테이블 이름 규칙:
 
 | 도메인 | 테이블 | 비고 |
 |---|---|---|
-| `destination` | `destinations` | 있음 |
-| `festival` | `festivals` | 있음 |
-| `course` | `courses` | 미생성 |
+| `destination` · `festival` · `user` | `destinations` · `festivals` · `users` | 도메인 하나에 테이블 하나 |
+| `favorite` · `review` · `history` | `<도메인>_destinations` · `<도메인>_festivals` | **대상별로 2개** (D-022 · D-036). 5단계의 변형 규칙을 따른다 |
+| `course` | `courses` + `course_stops` | 테이블 2개. `course_tags` 는 없다 (D-024) |
 | `post` | `posts` + `post_comments` | 테이블 2개 |
-| `user` | `users` | 인증은 Task 2 (D-019) |
-| `favorite` · `review` | 대상별로 분리 — `favorite_destinations` 등 | **D-022 의 대가** |
-| `search` · `weather` · `exchange` | 없음 | **엔티티·리포지토리를 만들지 않는다** |
+| `search` | 없음 | **엔티티·리포지토리를 만들지 않는다** |
 
 **대응하는 테이블이 없으면** `entity` 와 `repository` 를 만들지 않고
 `controller` · `service` · `dto` 셋만 만든다. 생성 전에 사용자에게 알린다.
@@ -109,9 +107,11 @@ Spring 은 빈 이름을 **클래스 단순명**에서 만든다. 패키지가 �
 `ConflictingBeanDefinitionException` 으로 **앱이 아예 뜨지 않는다.**
 
 ```bash
-grep -rn "class <Domain>Controller\|class <Domain>Service\|interface <Domain>Repository" \
+grep -rnE "class <Domain>(Controller|Service)\b|interface <Domain>\w*Repository\b" \
   backend/src/main/java --include=*.java
 ```
+
+`<Domain>\w*Repository` 는 대상별 리포지토리(`<Domain>DestinationRepository` 등)까지 잡는다.
 
 **하나라도 충돌하면 아무 파일도 만들지 않고 중단한다.** 부분 생성은 하지 않는다.
 여러 도메인을 한 번에 요청받았을 때도 하나라도 충돌하면 전체를 중단한다.
@@ -125,6 +125,19 @@ com/japantravel/<domain>/
 ├── repository/<Domain>Repository.java   (테이블이 있는 경우만)
 ├── entity/<Domain>.java                 (테이블이 있는 경우만)
 └── dto/<Domain>Response.java
+```
+
+**변형 — 활동 도메인(`favorite` · `review` · `history`)** 은 대상별로 테이블이 2개이므로
+`entity` 와 `repository` 를 **대상마다 하나씩** 만든다 (D-036). 컨트롤러·서비스는 도메인당
+하나다. 기준 형태는 `favorite` 패키지다.
+
+```
+com/japantravel/<domain>/
+├── controller/<Domain>Controller.java
+├── service/<Domain>Service.java
+├── repository/<Domain>DestinationRepository.java · <Domain>FestivalRepository.java
+├── entity/<Domain>Destination.java · <Domain>Festival.java     @Table(name = "<domain>_destinations") 등
+└── dto/<Domain>…Response.java                                  모양은 설계 스펙이 정한다
 ```
 
 **DTO 는 record 하나당 파일 하나다.** 옛 `Dtos.java` 한 파일에 몰아넣는 방식은
