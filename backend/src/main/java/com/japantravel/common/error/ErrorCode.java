@@ -24,6 +24,12 @@ public enum ErrorCode {
     USERNAME_TAKEN(HttpStatus.CONFLICT, "이미 사용 중인 아이디입니다"),
     LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 올바르지 않습니다"),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다"),
+//  남의 것을 건드림. 도메인 이름을 붙이지 않는다 — review · course · post 가 같이 쓴다
+    FORBIDDEN(HttpStatus.FORBIDDEN, "권한이 없습니다"),
+
+//  review
+    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "리뷰를 찾을 수 없습니다"),
+    INVALID_RATING(HttpStatus.BAD_REQUEST, "별점은 1~5 여야 합니다"),
 
 //  Spring 이 던지는 요청 오류 (ApiExceptionHandler 가 변환)
     TYPE_MISMATCH(HttpStatus.BAD_REQUEST, "요청 값의 형식이 올바르지 않습니다"),

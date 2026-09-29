@@ -1,4 +1,4 @@
--- destination · festival · user · favorite 도메인 (MySQL)
+-- destination · festival · user · favorite · review 도메인 (MySQL)
 
 CREATE TABLE IF NOT EXISTS users (
   id            BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -65,6 +65,34 @@ CREATE TABLE IF NOT EXISTS favorite_festivals (
   UNIQUE (user_id, festival_id),
   FOREIGN KEY (user_id)     REFERENCES users(id)     ON DELETE CASCADE,
   FOREIGN KEY (festival_id) REFERENCES festivals(id) ON DELETE CASCADE
+);
+
+-- review (Task 3) — 대상별 테이블 (D-036). UNIQUE 없음 — 같은 대상에 여러 개 쓸 수 있다 (D-013)
+-- updated_at 은 수정할 때만 채운다
+CREATE TABLE IF NOT EXISTS review_destinations (
+  id             BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id        BIGINT   NOT NULL,
+  destination_id BIGINT   NOT NULL,
+  rating         INT      NOT NULL,
+  comment        TEXT,
+  created_at     DATETIME NOT NULL,
+  updated_at     DATETIME,
+  FOREIGN KEY (user_id)        REFERENCES users(id)        ON DELETE CASCADE,
+  FOREIGN KEY (destination_id) REFERENCES destinations(id) ON DELETE CASCADE,
+  CHECK (rating BETWEEN 1 AND 5)
+);
+
+CREATE TABLE IF NOT EXISTS review_festivals (
+  id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id     BIGINT   NOT NULL,
+  festival_id BIGINT   NOT NULL,
+  rating      INT      NOT NULL,
+  comment     TEXT,
+  created_at  DATETIME NOT NULL,
+  updated_at  DATETIME,
+  FOREIGN KEY (user_id)     REFERENCES users(id)     ON DELETE CASCADE,
+  FOREIGN KEY (festival_id) REFERENCES festivals(id) ON DELETE CASCADE,
+  CHECK (rating BETWEEN 1 AND 5)
 );
 
 INSERT IGNORE INTO prefectures(name) VALUES

@@ -34,8 +34,8 @@
 ## 코드 추가 규칙
 
 그 에러를 **던지는 코드를 만들 때** enum 과 이 문서에 함께 추가한다. 쓰는 곳 없는 코드를
-미리 넣지 않는다. 예) `FORBIDDEN` 은 course 의 소유권 판정을 만들 때, `MISSING_PARAMETER` 는
-필수 `@RequestParam` 을 처음 쓸 때(search 의 `q` 등) 추가한다.
+미리 넣지 않는다. 예) `MISSING_PARAMETER` 는 필수 `@RequestParam` 을 처음 쓸 때(search 의 `q` 등)
+추가한다. (`FORBIDDEN` 은 course 에서 추가할 예정이었으나 review 가 먼저 써서 거기서 추가했다.)
 
 ## 목록
 
@@ -48,6 +48,9 @@
 | `USERNAME_TAKEN` | 409 | 서비스 | 가입 시 아이디 중복 |
 | `LOGIN_FAILED` | 401 | 서비스 | 아이디 없음 또는 비밀번호 틀림 |
 | `UNAUTHORIZED` | 401 | 필터 · 서비스 | 로그인이 필요한데 유효한 토큰이 없음 |
+| `FORBIDDEN` | 403 | 서비스 | 남의 리소스를 고치거나 지우려 함 |
+| `REVIEW_NOT_FOUND` | 404 | 서비스 | 없는 리뷰 id, 또는 경로의 대상에 딸리지 않은 리뷰 |
+| `INVALID_RATING` | 400 | 서비스 | 별점이 없거나 1~5 밖 |
 | `TYPE_MISMATCH` | 400 | Spring | 경로·쿼리 값의 타입 변환 실패 |
 | `MALFORMED_REQUEST` | 400 | Spring | 요청 본문 JSON 을 읽지 못함 |
 | `UNSUPPORTED_MEDIA_TYPE` | 415 | Spring | 본문의 Content-Type 이 JSON 이 아님 |
@@ -110,14 +113,36 @@
    토큰이 없음 · 위조 · 만료 · `Bearer ` 접두사 누락 모두 여기다. `JwtAuthenticationFilter` 는
    잘못된 토큰을 거절하지 않고 익명으로 통과시키고, 막을지는 `SecurityConfig` 의 URL 규칙이 정한다.
    이 단계는 `@RestControllerAdvice` 보다 앞이라 핸들러를 거치지 않고 EntryPoint 가 직접 쓴다.
-2. **`AuthService.me` · `FavoriteService.findUser`** (즐겨찾기 추가) — 토큰은 유효한데 그 사용자가 삭제됐다.
-   프론트에게는 "로그인이 풀린 것" 이므로 404 가 아니라 401 이다. 즐겨찾기 추가에서 이 확인을 빼면
-   FK 위반으로 `INTERNAL_ERROR`(500) 가 된다.
+2. **`AuthService.me` · `FavoriteService.findUser` · `ReviewService.findUser`** (즐겨찾기 추가 · 리뷰 작성)
+   — 토큰은 유효한데 그 사용자가 삭제됐다. 프론트에게는 "로그인이 풀린 것" 이므로 404 가 아니라 401 이다.
+   쓰기에서 이 확인을 빼면 FK 위반으로 `INTERNAL_ERROR`(500) 가 된다.
 
 > **Security 가 경로 판정보다 먼저다.** 로그인 전에는 없는 경로(`GET /api/nope`)도,
 > 틀린 메서드(`DELETE /api/destinations/1`)도 `API_NOT_FOUND` · `METHOD_NOT_ALLOWED` 가 아니라
 > `UNAUTHORIZED` 가 나간다. 공개 경로(`GET /api/destinations/**`, `GET /api/festivals/**`,
 > `POST /api/auth/signup`, `POST /api/auth/login`) 에서만 로그인 없이 404 · 405 를 볼 수 있다.
+
+### `FORBIDDEN` — 403
+
+- **어디서** `ReviewService.checkOwner` (리뷰 `PUT` · `DELETE`)
+- **무엇 때문에** 로그인은 했지만 그 리뷰의 작성자가 아니다.
+- **아닌 경우** 리뷰가 없으면 403 이 아니라 `REVIEW_NOT_FOUND` 다. 존재 확인이 작성자 확인보다 먼저다.
+- 도메인 이름을 붙이지 않은 범용 코드다. course · post 의 소유권 판정도 이것을 쓴다.
+
+### `REVIEW_NOT_FOUND` — 404
+
+- **어디서** `ReviewService.update*` · `delete*` (`PUT` · `DELETE /api/{destinations|festivals}/{id}/reviews/{reviewId}`)
+- **무엇 때문에** 그 id 의 리뷰가 없거나, 있어도 **경로의 대상에 딸린 리뷰가 아니다**
+  (`/api/destinations/1/reviews/7` 인데 리뷰 7 은 여행지 2 의 것). 경로의 대상 자체가 없어도 이것이다.
+- **아닌 경우** 리뷰 목록·작성에서 대상이 없으면 `DESTINATION_NOT_FOUND` · `FESTIVAL_NOT_FOUND`.
+- 리뷰 삭제는 멱등이 아니라 두 번째 삭제도 이것이다 (D-037).
+
+### `INVALID_RATING` — 400
+
+- **어디서** `ReviewService.validateRating` (리뷰 `POST` · `PUT`)
+- **무엇 때문에** `rating` 이 없거나(`null`) 1~5 밖이다. DB 에도 `CHECK` 가 있지만 거기까지 가면 500 이
+  되므로 서비스에서 먼저 거른다.
+- **아닌 경우** `rating: "abc"` 처럼 숫자가 아니면 본문을 읽지 못해 `MALFORMED_REQUEST` 다.
 
 ---
 

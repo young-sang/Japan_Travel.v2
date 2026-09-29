@@ -150,6 +150,52 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 
 ---
 
+## 리뷰 — `ReviewController` (대상 아래 중첩)
+
+설계: [2026-09-29-review-api-design.md](superpowers/specs/2026-09-29-review-api-design.md) · 경로 D-037 · 중복 허용 D-013
+
+| 메서드 | 경로 | 권한 | 성공 | 설명 |
+|---|---|---|---|---|
+| GET | `/api/destinations/{id}/reviews` | 🌐 | 200 | 여행지의 리뷰 목록. 최신순 |
+| POST | `/api/destinations/{id}/reviews` | 🔑 | 201 | 리뷰 작성 |
+| PUT | `/api/destinations/{id}/reviews/{reviewId}` | 🔑 작성자 | 200 | 리뷰 수정 (두 필드 모두 덮어씀) |
+| DELETE | `/api/destinations/{id}/reviews/{reviewId}` | 🔑 작성자 | 200 | 리뷰 삭제. 멱등 아님 — 두 번째는 404 |
+
+`/api/festivals/{id}/reviews...` 도 같은 4개.
+
+- 즐겨찾기(`/api/favorites/...`)와 경로 모양이 다른 이유는 D-037 — 리뷰 목록은 공개라 대상 아래에 두면
+  기존 공개 규칙(`GET /api/destinations/**`)에 그대로 들어간다.
+- 리뷰 id 는 대상 종류별로 따로 매겨진다. 경로의 대상에 딸리지 않은 리뷰 id 는 404 다.
+- 한 사용자가 같은 대상에 여러 개 쓸 수 있다.
+
+**요청** — `ReviewRequest` (POST · PUT). `comment` 는 선택.
+
+```json
+{ "rating": 5, "comment": "..." }
+```
+
+작성자와 대상은 본문에서 받지 않는다 — 작성자는 토큰, 대상은 경로에서 온다. 본문에 넣어도 무시된다.
+
+**응답 `data`** — `ReviewResponse` (목록은 배열, POST · PUT 은 하나, DELETE 는 `null`)
+
+```json
+{ "id": 7, "userId": 1, "nickname": "다나카",
+  "rating": 5, "comment": "...",
+  "createdAt": "2026-09-29T20:00:00", "updatedAt": null }
+```
+
+- `userId` — 프론트가 `/api/auth/me` 의 `id` 와 비교해 내 리뷰에만 수정·삭제 버튼을 보인다.
+- `updatedAt` — 수정한 적이 없으면 `null`.
+
+**에러**
+- `INVALID_RATING`(400, 별점 없음 또는 1~5 밖) · `MALFORMED_REQUEST`(400, 별점이 숫자 아님)
+- `DESTINATION_NOT_FOUND` · `FESTIVAL_NOT_FOUND`(404, 목록 · 작성에서 대상 없음)
+- `REVIEW_NOT_FOUND`(404, 수정 · 삭제에서 리뷰 없음 또는 대상 불일치)
+- `FORBIDDEN`(403, 남의 리뷰) · `UNAUTHORIZED`(401)
+- 판정 순서: 별점 → 리뷰 존재 → 작성자
+
+---
+
 ## 예정 (아직 없음)
 
 [재작성 설계 문서](superpowers/specs/2026-09-17-greenfield-rebuild-design.md) 의 Task 순서를 따른다.
@@ -157,7 +203,7 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 
 | Task | 도메인 | 대략의 범위 |
 |---|---|---|
-| 3 | `review` · `history` | 리뷰 · 방문기록 (favorite 는 완료) |
+| 3 | `history` | 방문기록 (favorite · review 는 완료) |
 | 4 | `course` | 코스 목록 · 상세 · 사용자 코스 CRUD, 소유권 판정 |
 | 5 | `post` | 게시판 글 + 댓글 |
 | 6 | `search` | 통합 검색 |
