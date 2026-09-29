@@ -139,7 +139,7 @@ D-010 시점에 쓰였으므로, `places` 를 가리키는 부분은 아래처�
 
 | Task | 테이블 | 비고 |
 |---|---|---|
-| 3 | `history_destinations` · `history_festivals` | favorite · review 는 위에 있다. 모양은 favorite 와 같다 (id + UNIQUE, D-036) |
+| 보류 | `history_destinations` · `history_festivals` | D-038 로 미룸. 만들 때는 favorite 와 같은 모양 (id + UNIQUE, D-036) + `visited_at` |
 | 4 | `courses` · `course_stops` | `course_stops` 가 destination · festival 중 무엇을 가리킬지는 Task 4 에서 정한다. `course_tags` 는 태그를 뺐으므로 없다 (D-024) |
 | 5 | `posts` · `post_comments` | |
 

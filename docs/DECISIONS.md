@@ -62,6 +62,7 @@
 | [D-035](#d-035--모든-응답을-apiresponse-봉투로-감싼다) | 모든 응답을 ApiResponse 봉투로 감싼다 | 2026-09-28 | 확정 |
 | [D-036](#d-036--활동-테이블은-6개-키는-id--unique) | 활동 테이블은 6개, 키는 id + UNIQUE | 2026-09-29 | 확정 |
 | [D-037](#d-037--리뷰-경로는-대상-아래에-중첩한다-favorite-와-다르게) | 리뷰 경로는 대상 아래에 중첩한다 (favorite 와 다르게) | 2026-09-29 | 확정 |
+| [D-038](#d-038--history-최근-본-장소-를-뒤로-미룬다) | history(최근 본 장소)를 뒤로 미룬다 | 2026-09-29 | 보류 |
 
 > 번호 주의 — `D-026` 이 두 건에 중복으로 붙어 있다 (MySQL 이전 / pom.xml 삭제).
 > 양쪽 다 커밋 메시지에 이미 쓰여서 소급 수정하면 이력과 어긋나므로 그대로 둔다.
@@ -1024,7 +1025,7 @@ Task 3 을 시작하며 두 가지를 정했다.
 
 **1. 테이블은 D-022 대로 3종 × 대상 2개 = 6개.**
 `favorite_destinations` · `favorite_festivals` · `review_destinations` · `review_festivals` ·
-`history_destinations` · `history_festivals`. 도메인 패키지는 셋(`favorite` · `review` · `history`)이고
+`history_destinations` · `history_festivals` (history 2개는 [D-038](#d-038--history-최근-본-장소-를-뒤로-미룬다) 로 보류). 도메인 패키지는 셋(`favorite` · `review` · `history`)이고
 패키지마다 엔티티가 2개다 (예: `favorite/entity/FavoriteDestination`, `FavoriteFestival`).
 진행은 `favorite` → `review` → `history` 순서로 하나씩 한다 (Task 1 의 destination → festival 과 같은 방식).
 
@@ -1070,3 +1071,33 @@ Task 3 을 시작하며 두 가지를 정했다.
 **기각한 대안** — favorite 처럼 `/api/reviews/{destinations|festivals}/...` 에 모으기. 두 도메인의 모양은
 같아지지만 공개 GET 을 위해 `SecurityConfig` 에 규칙을 따로 추가해야 하고, 공개·비공개가 같은 접두사
 아래 섞인다.
+
+---
+
+### D-038 · history (최근 본 장소) 를 뒤로 미룬다
+
+**2026-09-29 · 보류** · Task 3 은 favorite · review 로 닫는다
+
+Task 3 의 세 번째 도메인 `history` 를 지금 만들지 않는다. 언제 할지는 정하지 않았다 —
+Task 4 ~ 6 을 마친 뒤 Task 7 (프론트 맞추기) 전에 다시 본다.
+
+**이유** — 사용자 판단.
+
+**미룬 시점에 확인된 것** (다시 시작할 때 처음부터 조사하지 않도록 남긴다)
+- 이름은 "방문기록" 이지만 실제로는 **"최근 본 장소"** 다. 상세 페이지를 열 때 프론트
+  (`Detail.jsx`) 가 자동으로 `POST /api/history` 를 부른다. 실제 여행 기록이 아니다.
+- 옛 동작: 대상당 1행 **upsert** (다시 보면 `visited_at` 만 갱신) · 목록은 `visited_at DESC` ·
+  삭제는 **전체만** (`DELETE /api/history`), 한 건 삭제 없음.
+- 마이페이지 `HistoryTab.jsx` 가 여행지·축제를 **섞어서** "오늘 / 어제 / 지난 7일 / 이전" 으로 묶는다.
+- 옛 응답은 `{targetType, targetId, visitedAt}` 뿐이라 프론트가 항목마다 상세 API 를 다시 불렀다 (N+1).
+- 테이블 모양은 [D-036](#d-036--활동-테이블은-6개-키는-id--unique) 대로 `history_destinations` ·
+  `history_festivals`, id + `UNIQUE(user_id, 대상_id)` 가 전제다. upsert 는 find → 있으면 `visitedAt` 갱신
+  (변경 감지) / 없으면 save.
+- 정할 것으로 남은 것: 목록 모양(두 배열 vs 한 배열 시간순) · 응답에 상세 포함 여부 · 경로
+  (전부 로그인 필요라 favorite 모양이 자연스럽다) · 한 건 삭제 여부 · 문서·UI 에서의 이름.
+
+**따라오는 것**
+- 마이페이지의 히스토리 탭과 설정의 "히스토리 초기화" 가 부를 API 가 없다. 날씨·환율 위젯
+  ([D-032](#d-032--외부-api-프록시날씨환율를-1차에서-뺀다)) 과 같이 Task 7 에서 숨기거나 비활성화한다.
+- 상세 페이지의 `touchHistory` 호출은 실패해도 프론트가 무시하므로(`.catch(() => {})`) 화면이 깨지지 않는다.
+- D-036 의 "테이블 6개" 중 2개는 이 결정이 풀릴 때 만든다.

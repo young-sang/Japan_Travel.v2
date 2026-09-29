@@ -203,7 +203,7 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 
 | Task | 도메인 | 대략의 범위 |
 |---|---|---|
-| 3 | `history` | 방문기록 (favorite · review 는 완료) |
+| 보류 | `history` | 최근 본 장소. Task 4 ~ 6 이후로 미룸 (D-038) |
 | 4 | `course` | 코스 목록 · 상세 · 사용자 코스 CRUD, 소유권 판정 |
 | 5 | `post` | 게시판 글 + 댓글 |
 | 6 | `search` | 통합 검색 |
