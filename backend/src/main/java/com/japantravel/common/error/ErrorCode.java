@@ -31,6 +31,11 @@ public enum ErrorCode {
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "리뷰를 찾을 수 없습니다"),
     INVALID_RATING(HttpStatus.BAD_REQUEST, "별점은 1~5 여야 합니다"),
 
+//  course — 남의 비공개 코스도 COURSE_NOT_FOUND (존재를 숨긴다, D-047)
+    COURSE_NOT_FOUND(HttpStatus.NOT_FOUND, "코스를 찾을 수 없습니다"),
+//  본문 규칙 위반은 어느 필드든 이 코드 하나 (D-047)
+    INVALID_COURSE(HttpStatus.BAD_REQUEST, "코스 요청 값이 올바르지 않습니다"),
+
 //  Spring 이 던지는 요청 오류 (ApiExceptionHandler 가 변환)
     TYPE_MISMATCH(HttpStatus.BAD_REQUEST, "요청 값의 형식이 올바르지 않습니다"),
     MALFORMED_REQUEST(HttpStatus.BAD_REQUEST, "요청 본문을 읽을 수 없습니다"),

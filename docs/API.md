@@ -196,6 +196,66 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 
 ---
 
+## 코스 — `CourseController` (`/api/courses` · `/api/me/courses`)
+
+설계: [2026-09-29-course-api-design.md](superpowers/specs/2026-09-29-course-api-design.md) · 코스의 정체 D-041 ·
+정류장 D-042 · D-043 · 테이블 D-044 · `/api/me` D-045 · 요청·응답 D-046 · 판정·에러 D-047
+
+| 메서드 | 경로 | 권한 | 성공 | 설명 |
+|---|---|---|---|---|
+| GET | `/api/courses?prefecture=` | 🌐 | 200 | 기본 제공 + 공개 사용자 코스, 요약. 최신순. 로그인 여부와 무관하게 같은 결과 |
+| GET | `/api/courses/{id}` | 🌐 | 200 | 상세. 비공개 코스는 작성자만 (토큰이 있으면 읽는다) |
+| POST | `/api/courses` | 🔑 | 201 | 코스 작성 |
+| PUT | `/api/courses/{id}` | 🔑 작성자 | 200 | 전체 덮어쓰기. 정류장은 전부 지우고 요청대로 다시 만든다 |
+| DELETE | `/api/courses/{id}` | 🔑 작성자 | 200 | 삭제. 멱등 아님 — 두 번째는 404 |
+| GET | `/api/me/courses` | 🔑 | 200 | 내 코스 (공개 · 비공개 모두), 요약. 최신순 |
+
+- 기본 제공 코스는 `ownerId: null` 이고 아무도 고칠 수 없다 (403). 시드는 아직 없다 (D-048).
+- **남의 비공개 코스는 상세 · 수정 · 삭제 모두 404** — 없는 코스와 구분하지 않는다.
+
+**요청** — `CourseRequest` (POST · PUT). `description` · `imagePath` · 정류장의 `memo` 는 선택.
+
+```json
+{ "title": "교토 1박 2일", "description": "절과 축제를 함께 보는 코스", "prefecture": "교토부",
+  "imagePath": null, "isPublic": true,
+  "stops": [
+    { "dayNo": 1, "type": "DESTINATION", "targetId": 7,  "memo": "아침 일찍" },
+    { "dayNo": 1, "type": "FESTIVAL",    "targetId": 3,  "memo": null },
+    { "dayNo": 2, "type": "DESTINATION", "targetId": 12, "memo": null } ] }
+```
+
+- `type` 은 `DESTINATION | FESTIVAL`. `seq` 는 보내지 않는다 — 같은 `dayNo` 안에서 배열 순서대로 서버가 1 부터 매긴다.
+- 허용: 빈 `stops`, 일차 건너뜀(1 → 3), 같은 장소 두 번, 배열 안에서 `dayNo` 섞임.
+- 작성자는 본문에서 받지 않는다 — 토큰에서 온다.
+
+**응답 `data`** — 목록은 `CourseSummaryResponse` 배열, 상세 · POST · PUT 은 `CourseResponse`, DELETE 는 `null`
+
+```json
+// CourseSummaryResponse
+{ "id": 5, "title": "교토 1박 2일", "prefecture": "교토부", "imagePath": null,
+  "isPublic": true, "ownerId": 11, "ownerNickname": "다나카", "createdAt": "2026-09-29T15:00:00" }
+
+// CourseResponse = 요약 + description · updatedAt · stops
+{ "id": 5, ..., "description": "...", "updatedAt": null,
+  "stops": [
+    { "dayNo": 1, "seq": 1, "type": "DESTINATION", "targetId": 7, "name": "기요미즈데라", "prefecture": "교토부",
+      "lat": 34.9949, "lng": 135.7850, "imagePath": "...", "memo": "아침 일찍" } ] }
+```
+
+- `stops` 는 `(dayNo, seq)` 오름차순. 이름 · 좌표 · 사진은 원본 여행지·축제에서 온다 (복사해 두지 않는다).
+- 정류장의 `prefecture` 는 원본 장소의 현이다 — 코스의 대표 현과 다를 수 있다.
+- `ownerId` — 프론트가 `/api/auth/me` 의 `id` 와 비교해 내 코스에만 수정 · 삭제 버튼을 보인다.
+
+**에러**
+- `INVALID_COURSE`(400, 본문 규칙 위반 — `title` 없음·빈 문자열 · `prefecture` · `isPublic` · `stops` 없음 ·
+  정류장의 `dayNo` · `type` · `targetId` 없음 · `dayNo < 1`) · `MALFORMED_REQUEST`(400, `type` 이 두 값 밖)
+- `COURSE_NOT_FOUND`(404, 없는 코스 또는 남의 비공개 코스) · `FORBIDDEN`(403, 남의 공개 코스 · 기본 제공 코스)
+- `PREFECTURE_NOT_FOUND`(404, 목록 필터 · 본문의 현 이름) · `DESTINATION_NOT_FOUND` · `FESTIVAL_NOT_FOUND`(404, 정류장 대상)
+- `UNAUTHORIZED`(401)
+- 판정 순서 (PUT · DELETE): 본문 값 → 코스 존재 → 작성자 → 현 · 정류장 대상
+
+---
+
 ## 예정 (아직 없음)
 
 [재작성 설계 문서](superpowers/specs/2026-09-17-greenfield-rebuild-design.md) 의 Task 순서를 따른다.
@@ -204,7 +264,6 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 | Task | 도메인 | 대략의 범위 |
 |---|---|---|
 | 보류 | `history` | 최근 본 장소. Task 4 ~ 6 이후로 미룸 (D-038) |
-| 4 | `course` | 코스 목록 · 상세 · 사용자 코스 CRUD, 소유권 판정 |
 | 보류 | `post` | 게시판 글 + 댓글. Task 7 전에 다시 봄 (D-040) |
 | 6 | `search` | 통합 검색 |
 | — | destination 제안·승인 | 인증 이후로 미룸 (D-030) |

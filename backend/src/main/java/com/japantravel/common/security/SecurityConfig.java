@@ -33,6 +33,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/auth/signup", "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/destinations/**", "/api/festivals/**").permitAll()
+//                      코스 목록 · 상세는 공개. 비공개 코스는 CourseService 가 404 로 숨긴다 (D-047)
+                        .requestMatchers(HttpMethod.GET, "/api/courses/**").permitAll()
 //                      처리되지 않은 예외는 /error 로 포워드된다. 이걸 열지 않으면 500 이 401 로 바뀌어 나간다.
                         .requestMatchers("/error").permitAll()
 //                      기본을 닫는다. 새 도메인은 공개할 것만 위에 추가한다.

@@ -2,13 +2,37 @@ package com.japantravel.course.dto;
 
 import com.japantravel.course.entity.Course;
 
-// API 계약이다. 엔티티를 컨트롤러 밖으로 내보내지 않기 위해 존재한다.
-// 상세 · 작성 · 수정 응답. 목록은 요약(CourseSummaryResponse)을 따로 둔다 (D-046).
+import java.time.LocalDateTime;
+import java.util.List;
+
+//  상세 · 작성 · 수정 응답 = 요약 + description · updatedAt · stops (D-046).
+//  stops 는 (dayNo, seq) 오름차순 — Course.stops 의 @OrderBy 가 정한다.
 public record CourseResponse(
-        Long id
-        // schema.sql 과 승인된 설계를 보고 채운다
+        Long id,
+        String title,
+        String description,
+        String prefecture,
+        String imagePath,
+        boolean isPublic,
+        Long ownerId,
+        String ownerNickname,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt,
+        List<CourseStopResponse> stops
 ) {
-    public static CourseResponse from(Course entity) {
-        return new CourseResponse(entity.getId());
+    public static CourseResponse from(Course c) {
+        return new CourseResponse(
+                c.getId(),
+                c.getTitle(),
+                c.getDescription(),
+                c.getPrefecture().getName(),
+                c.getImagePath(),
+                c.isPublic(),
+                c.getOwner() == null ? null : c.getOwner().getId(),
+                c.getOwner() == null ? null : c.getOwner().getNickname(),
+                c.getCreatedAt(),
+                c.getUpdatedAt(),
+                c.getStops().stream().map(CourseStopResponse::from).toList()
+        );
     }
 }

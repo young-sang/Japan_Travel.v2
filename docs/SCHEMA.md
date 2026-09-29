@@ -9,7 +9,7 @@ Japan Travel v2 — **MySQL 8** (`localhost:3306/japan_travel`), `greenfield` �
   엔티티는 거기에 맞춘다.
 - 마이그레이션 도구가 없다. 이미 있는 테이블의 구조를 바꾸면 `IF NOT EXISTS` 때문에 반영되지 않으므로
   **DB 를 지우고 다시 띄운다. 지우기 전에 반드시 백업한다** (프로젝트 `CLAUDE.md`).
-- 테이블은 그 테이블이 필요한 도메인을 시작할 때 추가한다 (D-020). 그래서 지금은 4개뿐이다.
+- 테이블은 그 테이블이 필요한 도메인을 시작할 때 추가한다 (D-020).
 
 ---
 
@@ -25,12 +25,17 @@ Japan Travel v2 — **MySQL 8** (`localhost:3306/japan_travel`), `greenfield` �
 | `favorite_festivals` | favorite | 축제 즐겨찾기 | Task 3 |
 | `review_destinations` | review | 여행지 리뷰 | Task 3 |
 | `review_festivals` | review | 축제 리뷰 | Task 3 |
+| `courses` | course | 코스 (기본 제공 · 사용자) | Task 4 |
+| `course_stops` | course | 코스의 정류장 — 여행지 또는 축제 하나 | Task 4 |
 
 ```
 prefectures  1 ──< destinations 1 ──< favorite_destinations >── 1 users
                                 1 ──< review_destinations   >── 1 users
              1 ──< festivals    1 ──< favorite_festivals    >── 1 users
                                 1 ──< review_festivals      >── 1 users
+
+prefectures  1 ──< courses      1 ──< course_stops >──0..1 destinations
+users        1 ──< courses (owner, NULL = 기본 제공)   >──0..1 festivals   (둘 중 정확히 하나)
 ```
 
 ---
@@ -116,6 +121,41 @@ prefectures  1 ──< destinations 1 ──< favorite_destinations >── 1 us
 - **UNIQUE 없음** — 같은 사용자가 같은 대상에 여러 개 쓸 수 있다 (D-013). 즐겨찾기와 다른 점.
 - 목록 조회(`WHERE destination_id = ?`)는 FK 에 InnoDB 가 자동으로 만든 인덱스를 쓴다.
 
+## `courses`
+
+| 컬럼 | 타입 | 제약 | 설명 |
+|---|---|---|---|
+| `id` | BIGINT | PK, AUTO_INCREMENT | 목록 정렬 기준 (`id DESC` = 최신순) |
+| `title` | VARCHAR(200) | NOT NULL | |
+| `description` | TEXT | | 선택 |
+| `prefecture_id` | BIGINT | NOT NULL, FK → `prefectures.id` | 대표 현 하나. 목록 필터 기준. 정류장이 다른 현이어도 막지 않는다 |
+| `image_path` | VARCHAR(500) | | 목록 카드 사진 |
+| `owner_user_id` | BIGINT | FK → `users.id` `ON DELETE CASCADE` | 작성자. **NULL = 기본 제공 코스** (D-041), 아무도 고칠 수 없다 |
+| `is_public` | BOOLEAN | NOT NULL | 비공개는 작성자만 본다. DB 기본값 없음 — 서비스가 항상 채운다 |
+| `created_at` | DATETIME | NOT NULL | |
+| `updated_at` | DATETIME | | 수정할 때만 채운다 |
+
+- 옛 스키마에서 뺀 것 — `tags`(D-024) · `timeline_json`(→ `course_stops`) · `duration` · `center_lat` / `center_lng`
+  (정류장에서 도출) · `status`(D-041) · `is_user_created`(`owner_user_id IS NULL` 과 중복). 이유는 D-044.
+
+## `course_stops`
+
+| 컬럼 | 타입 | 제약 | 설명 |
+|---|---|---|---|
+| `id` | BIGINT | PK, AUTO_INCREMENT | |
+| `course_id` | BIGINT | NOT NULL, FK → `courses.id` `ON DELETE CASCADE` | |
+| `day_no` | INT | NOT NULL, `CHECK (>= 1)` | 일차. `DAY` 는 MySQL 키워드라 피했다 |
+| `seq` | INT | NOT NULL, `CHECK (>= 1)` | 그날 안의 순서. 서버가 매긴다 (D-046) |
+| `destination_id` | BIGINT | FK → `destinations.id` `ON DELETE CASCADE` | 둘 중 **정확히 하나** |
+| `festival_id` | BIGINT | FK → `festivals.id` `ON DELETE CASCADE` | 〃 |
+| `memo` | VARCHAR(500) | | 사용자 메모. 원본 설명을 복사하지 않는다 (D-042) |
+
+- `UNIQUE (course_id, day_no, seq)` — 같은 코스에서 순서 중복 금지. 여행지 · 축제가 **섞인 순서**를 DB 가 지킨다.
+- **"정확히 하나" 는 CHECK 가 아니라 서비스가 지킨다** (D-044). MySQL 은 참조 동작(`ON DELETE CASCADE`)이 걸린
+  컬럼을 CHECK 에 쓸 수 없다 (에러 3823). API 가 `type` + `targetId` 로 받으므로(D-046) 요청 모양이 이미 보장한다.
+- 원본 여행지·축제가 지워지면 그 정류장만 빠지고 코스는 남는다 (D-042). 남은 `seq` 에 빈 번호가 생기지만 정렬에는 문제없다.
+- 정류장 시간은 없다 (D-043).
+
 ---
 
 ## MySQL 에서 주의할 것 (D-026)
@@ -128,6 +168,7 @@ SQLite 감각으로 쓰면 조용히 틀리는 것들.
 - `INSERT OR IGNORE` → `INSERT IGNORE`.
 - 한글 시드가 깨지지 않으려면 JDBC URL 의 `characterEncoding=UTF-8` 과
   `spring.sql.init.encoding: UTF-8` 이 둘 다 필요하다.
+- `ON DELETE CASCADE` · `SET NULL` 이 걸린 컬럼은 `CHECK` 에 쓸 수 없다 (에러 3823). `course_stops` 참조.
 
 ---
 
@@ -140,8 +181,7 @@ D-010 시점에 쓰였으므로, `places` 를 가리키는 부분은 아래처�
 | Task | 테이블 | 비고 |
 |---|---|---|
 | 보류 | `history_destinations` · `history_festivals` | D-038 로 미룸. 만들 때는 favorite 와 같은 모양 (id + UNIQUE, D-036) + `visited_at` |
-| 4 | `courses` · `course_stops` | `course_stops` 가 destination · festival 중 무엇을 가리킬지는 Task 4 에서 정한다. `course_tags` 는 태그를 뺐으므로 없다 (D-024) |
-| 5 | `posts` · `post_comments` | |
+| 보류 | `posts` · `post_comments` | D-040 으로 미룸 |
 
 1차에서 만들지 않는 것 — `tags` 계열(D-024), `collections` · `collection_items` · `achievements`,
 `bulk_runs` · `collector_runs` · `audit_log` (D-009).

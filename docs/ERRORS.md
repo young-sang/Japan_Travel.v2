@@ -51,6 +51,8 @@
 | `FORBIDDEN` | 403 | 서비스 | 남의 리소스를 고치거나 지우려 함 |
 | `REVIEW_NOT_FOUND` | 404 | 서비스 | 없는 리뷰 id, 또는 경로의 대상에 딸리지 않은 리뷰 |
 | `INVALID_RATING` | 400 | 서비스 | 별점이 없거나 1~5 밖 |
+| `COURSE_NOT_FOUND` | 404 | 서비스 | 없는 코스 id, 또는 남의 비공개 코스 |
+| `INVALID_COURSE` | 400 | 서비스 | 코스 요청 본문의 필수 값이 없거나 `dayNo < 1` |
 | `TYPE_MISMATCH` | 400 | Spring | 경로·쿼리 값의 타입 변환 실패 |
 | `MALFORMED_REQUEST` | 400 | Spring | 요청 본문 JSON 을 읽지 못함 |
 | `UNSUPPORTED_MEDIA_TYPE` | 415 | Spring | 본문의 Content-Type 이 JSON 이 아님 |
@@ -66,20 +68,24 @@
 
 ### `PREFECTURE_NOT_FOUND` — 404
 
-- **어디서** `DestinationService.findAll`, `FestivalService.findAll`
-- **무엇 때문에** `?prefecture=` 에 `prefectures` 테이블에 없는 이름이 왔다.
-- **아닌 경우** 실재하는 현인데 해당 여행지·축제가 0건이면 에러가 아니라 빈 목록 `[]` 이다.
+- **어디서** `DestinationService.findAll`, `FestivalService.findAll`, `CourseService.findPublic` ·
+  `findPrefecture` (코스 목록 필터, 코스 `POST` · `PUT` 본문의 `prefecture`)
+- **무엇 때문에** `?prefecture=` 또는 본문의 `prefecture` 에 `prefectures` 테이블에 없는 이름이 왔다.
+- **아닌 경우** 실재하는 현인데 해당 여행지·축제·코스가 0건이면 에러가 아니라 빈 목록 `[]` 이다.
+  본문의 `prefecture` 가 아예 없거나 빈 문자열이면 `INVALID_COURSE` 다.
 - **예** `GET /api/destinations?prefecture=없는현`
 
 ### `DESTINATION_NOT_FOUND` — 404
 
-- **어디서** `DestinationService.findById` (`GET /api/destinations/{id}`)
+- **어디서** `DestinationService.findById` (`GET /api/destinations/{id}`), 즐겨찾기 · 리뷰의 대상 확인,
+  `CourseService.resolveStops` (코스 정류장 `{type: DESTINATION, targetId}`)
 - **무엇 때문에** 그 id 의 여행지가 없다.
 - **예** `GET /api/destinations/999999`
 
 ### `FESTIVAL_NOT_FOUND` — 404
 
-- **어디서** `FestivalService.findById` (`GET /api/festivals/{id}`)
+- **어디서** `FestivalService.findById` (`GET /api/festivals/{id}`), 즐겨찾기 · 리뷰의 대상 확인,
+  `CourseService.resolveStops` (코스 정류장 `{type: FESTIVAL, targetId}`)
 - **무엇 때문에** 그 id 의 축제가 없다.
 - **예** `GET /api/festivals/999999`
 
@@ -113,21 +119,23 @@
    토큰이 없음 · 위조 · 만료 · `Bearer ` 접두사 누락 모두 여기다. `JwtAuthenticationFilter` 는
    잘못된 토큰을 거절하지 않고 익명으로 통과시키고, 막을지는 `SecurityConfig` 의 URL 규칙이 정한다.
    이 단계는 `@RestControllerAdvice` 보다 앞이라 핸들러를 거치지 않고 EntryPoint 가 직접 쓴다.
-2. **`AuthService.me` · `FavoriteService.findUser` · `ReviewService.findUser`** (즐겨찾기 추가 · 리뷰 작성)
+2. **`AuthService.me` · `FavoriteService.findUser` · `ReviewService.findUser` · `CourseService.findUser`**
+   (즐겨찾기 추가 · 리뷰 작성 · 코스 작성)
    — 토큰은 유효한데 그 사용자가 삭제됐다. 프론트에게는 "로그인이 풀린 것" 이므로 404 가 아니라 401 이다.
    쓰기에서 이 확인을 빼면 FK 위반으로 `INTERNAL_ERROR`(500) 가 된다.
 
 > **Security 가 경로 판정보다 먼저다.** 로그인 전에는 없는 경로(`GET /api/nope`)도,
 > 틀린 메서드(`DELETE /api/destinations/1`)도 `API_NOT_FOUND` · `METHOD_NOT_ALLOWED` 가 아니라
 > `UNAUTHORIZED` 가 나간다. 공개 경로(`GET /api/destinations/**`, `GET /api/festivals/**`,
-> `POST /api/auth/signup`, `POST /api/auth/login`) 에서만 로그인 없이 404 · 405 를 볼 수 있다.
+> `GET /api/courses/**`, `POST /api/auth/signup`, `POST /api/auth/login`) 에서만 로그인 없이 404 · 405 를 볼 수 있다.
 
 ### `FORBIDDEN` — 403
 
-- **어디서** `ReviewService.checkOwner` (리뷰 `PUT` · `DELETE`)
-- **무엇 때문에** 로그인은 했지만 그 리뷰의 작성자가 아니다.
+- **어디서** `ReviewService.checkOwner` (리뷰 `PUT` · `DELETE`), `CourseService.checkOwner` (코스 `PUT` · `DELETE`)
+- **무엇 때문에** 로그인은 했지만 그 리뷰 · 코스의 작성자가 아니다. 기본 제공 코스(작성자 없음)도 여기다.
 - **아닌 경우** 리뷰가 없으면 403 이 아니라 `REVIEW_NOT_FOUND` 다. 존재 확인이 작성자 확인보다 먼저다.
-- 도메인 이름을 붙이지 않은 범용 코드다. course · post 의 소유권 판정도 이것을 쓴다.
+  **남의 비공개 코스는 403 이 아니라 `COURSE_NOT_FOUND`** 다 — 존재 자체를 숨긴다 (D-047).
+- 도메인 이름을 붙이지 않은 범용 코드다. post 의 소유권 판정도 이것을 쓴다.
 
 ### `REVIEW_NOT_FOUND` — 404
 
@@ -136,6 +144,25 @@
   (`/api/destinations/1/reviews/7` 인데 리뷰 7 은 여행지 2 의 것). 경로의 대상 자체가 없어도 이것이다.
 - **아닌 경우** 리뷰 목록·작성에서 대상이 없으면 `DESTINATION_NOT_FOUND` · `FESTIVAL_NOT_FOUND`.
 - 리뷰 삭제는 멱등이 아니라 두 번째 삭제도 이것이다 (D-037).
+
+### `COURSE_NOT_FOUND` — 404
+
+- **어디서** `CourseService.findVisible` (코스 상세 · `PUT` · `DELETE`)
+- **무엇 때문에** 그 id 의 코스가 없거나, **남의 비공개 코스**다 (토큰 없음 포함). 두 경우를 구분하지 않아
+  비공개 코스가 있다는 사실도 드러나지 않는다 (D-047).
+- **아닌 경우** 남의 **공개** 코스 · 기본 제공 코스를 고치거나 지우면 `FORBIDDEN` 이다.
+- 코스 삭제는 멱등이 아니라 두 번째 삭제도 이것이다.
+- **예** `GET /api/courses/999999`, B 가 `GET /api/courses/{A 의 비공개 코스}`
+
+### `INVALID_COURSE` — 400
+
+- **어디서** `CourseService.validate` (코스 `POST` · `PUT`)
+- **무엇 때문에** 본문 규칙 위반 — `title` 없음 · 빈 문자열, `prefecture` · `isPublic` · `stops` 없음,
+  정류장의 `dayNo` · `type` · `targetId` 없음, `dayNo < 1`. 판정하지 않으면 DB `NOT NULL` · `CHECK` 위반이 500 이 된다.
+- **어느 필드인지 나누지 않는다** (D-047) — 문구에 문제 된 값을 싣지 않는 D-034 와 같은 태도.
+- **아닌 경우** `type: "HOTEL"` 처럼 enum 밖의 값은 본문을 읽지 못해 `MALFORMED_REQUEST` 다.
+  빈 `stops` · 일차 건너뜀 · 같은 장소 두 번은 에러가 아니다.
+- `PUT` 에서는 코스 존재 · 작성자 판정보다 먼저다 — 남의 코스에 잘못된 본문을 보내도 400 이 먼저 나간다.
 
 ### `INVALID_RATING` — 400
 
