@@ -23,7 +23,7 @@
 > | 0 | 기반 정리 | 완료 |
 > | 1 | `destination` · `festival` (조회 2개씩) | 완료 — 제안·승인은 인증 이후로 미룸 (D-030) |
 > | 2 | `user` | 완료 |
-> | 3 | `favorite` `review` `history` | **다음** |
+> | 3 | `favorite` `review` `history` | **진행 중** — favorite 완료 (추가 경로는 시드 후 재확인), review 다음 |
 > | 4 | `course` | |
 > | 5 | `post` | |
 > | 6 | `search` | |

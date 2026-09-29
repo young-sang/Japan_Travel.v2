@@ -60,6 +60,7 @@
 | [D-033](#d-033--인증은-jwt--spring-security-로-한다) | 인증은 JWT + Spring Security 로 한다 | 2026-09-28 | 확정 |
 | [D-034](#d-034--에러-응답을-errorcode-enum-하나로-통일한다) | 에러 응답을 ErrorCode enum 하나로 통일한다 | 2026-09-28 | 확정 (응답 최상위 모양은 D-035) |
 | [D-035](#d-035--모든-응답을-apiresponse-봉투로-감싼다) | 모든 응답을 ApiResponse 봉투로 감싼다 | 2026-09-28 | 확정 |
+| [D-036](#d-036--활동-테이블은-6개-키는-id--unique) | 활동 테이블은 6개, 키는 id + UNIQUE | 2026-09-29 | 확정 |
 
 > 번호 주의 — `D-026` 이 두 건에 중복으로 붙어 있다 (MySQL 이전 / pom.xml 삭제).
 > 양쪽 다 커밋 메시지에 이미 쓰여서 소급 수정하면 이력과 어긋나므로 그대로 둔다.
@@ -1010,3 +1011,33 @@ Spring MVC 예외 5종(400·404·405·415)을 받고, 나머지는 catch-all 에
   가입의 201 은 `@ResponseStatus` 로 충분하다.
 - **`ErrorResponse` 이름 유지** — 이름이 "응답 전체" 를 뜻하는데 이제 일부다. Spring 의
   `org.springframework.web.ErrorResponse`(응답 전체를 뜻함)와 이름은 같고 뜻은 달라진다.
+
+---
+
+### D-036 · 활동 테이블은 6개, 키는 id + UNIQUE
+
+**2026-09-29 · 확정** · [D-022](#d-022--places-를-destinations-와-festivals-로-다시-나눈다) 의 "대가" 를
+그대로 받아들이고, 설계 문서 스키마의 복합 PK 를 바꾼다
+
+Task 3 을 시작하며 두 가지를 정했다.
+
+**1. 테이블은 D-022 대로 3종 × 대상 2개 = 6개.**
+`favorite_destinations` · `favorite_festivals` · `review_destinations` · `review_festivals` ·
+`history_destinations` · `history_festivals`. 도메인 패키지는 셋(`favorite` · `review` · `history`)이고
+패키지마다 엔티티가 2개다 (예: `favorite/entity/FavoriteDestination`, `FavoriteFestival`).
+진행은 `favorite` → `review` → `history` 순서로 하나씩 한다 (Task 1 의 destination → festival 과 같은 방식).
+
+- **이유** — 각 테이블이 평범한 FK 하나뿐이라 새 개념이 없다. D-022 는 "반복이 번거로우면 그때
+  합친다" 고 열어뒀지만, 아직 하나도 만들어보지 않은 시점이라 번거로움을 판단할 근거가 없다.
+- **기각** — nullable FK 2개 + CHECK 로 테이블 3개 ([D-011](#d-011--활동-대상을-places-로-한정해-다형성을-없앤다)
+  의 안 B, 항상 한 컬럼이 NULL) · 대상을 destination 하나로 한정 (축제 활동이 빠지는 범위 축소).
+
+**2. 즐겨찾기 · 방문기록의 키는 `id BIGINT` PK + `UNIQUE (user_id, 대상_id)`.**
+설계 문서는 `PRIMARY KEY (user_id, place_id)` 복합 키였다.
+
+- **이유** — 지금까지의 엔티티(`Destination` · `Festival` · `User`)와 스킬 템플릿이 모두
+  `@Id Long id` 한 모양이다. 복합 키는 JPA 에서 `@IdClass` / `@EmbeddedId` 와 키 클래스의
+  `equals` · `hashCode` 가 필요해 배울 것이 하나 늘고, 그 비용에 비해 얻는 것(행마다 컬럼 하나
+  절약)이 작다. "한 사용자가 같은 대상을 두 번 넣지 못한다" 는 규칙은 UNIQUE 가 똑같이 지킨다.
+- **기각** — 복합 PK (테이블 모양은 더 정확하지만 코드가 복잡해진다).
+- **리뷰는 해당 없음** — 원래도 `id` PK 이고 중복을 허용한다 ([D-013](#d-013--리뷰-중복을-허용한다)).

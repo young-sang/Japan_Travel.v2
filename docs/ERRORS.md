@@ -104,14 +104,15 @@
 
 ### `UNAUTHORIZED` — 401
 
-두 곳에서 난다.
+두 종류의 자리에서 난다.
 
 1. **`SecurityConfig` 의 `AuthenticationEntryPoint`** — 로그인이 필요한 경로에 유효한 토큰이 없다.
    토큰이 없음 · 위조 · 만료 · `Bearer ` 접두사 누락 모두 여기다. `JwtAuthenticationFilter` 는
    잘못된 토큰을 거절하지 않고 익명으로 통과시키고, 막을지는 `SecurityConfig` 의 URL 규칙이 정한다.
    이 단계는 `@RestControllerAdvice` 보다 앞이라 핸들러를 거치지 않고 EntryPoint 가 직접 쓴다.
-2. **`AuthService.me`** — 토큰은 유효한데 그 사용자가 삭제됐다. 프론트에게는 "로그인이 풀린 것" 이므로
-   404 가 아니라 401 이다.
+2. **`AuthService.me` · `FavoriteService.findUser`** (즐겨찾기 추가) — 토큰은 유효한데 그 사용자가 삭제됐다.
+   프론트에게는 "로그인이 풀린 것" 이므로 404 가 아니라 401 이다. 즐겨찾기 추가에서 이 확인을 빼면
+   FK 위반으로 `INTERNAL_ERROR`(500) 가 된다.
 
 > **Security 가 경로 판정보다 먼저다.** 로그인 전에는 없는 경로(`GET /api/nope`)도,
 > 틀린 메서드(`DELETE /api/destinations/1`)도 `API_NOT_FOUND` · `METHOD_NOT_ALLOWED` 가 아니라

@@ -21,11 +21,12 @@ Japan Travel v2 — **MySQL 8** (`localhost:3306/japan_travel`), `greenfield` �
 | `destinations` | destination | 여행지 | Task 1 |
 | `festivals` | festival | 축제 | Task 1 |
 | `users` | user | 회원 계정 | Task 2 |
+| `favorite_destinations` | favorite | 여행지 즐겨찾기 | Task 3 |
+| `favorite_festivals` | favorite | 축제 즐겨찾기 | Task 3 |
 
 ```
-prefectures 1 ──< destinations
-            1 ──< festivals
-users          (아직 아무도 참조하지 않음 — Task 3 부터)
+prefectures  1 ──< destinations 1 ──< favorite_destinations >── 1 users
+             1 ──< festivals    1 ──< favorite_festivals    >── 1 users
 ```
 
 ---
@@ -79,6 +80,21 @@ users          (아직 아무도 참조하지 않음 — Task 3 부터)
 | `role` | VARCHAR(20) | NOT NULL, DEFAULT `'USER'`, `CHECK IN ('USER','ADMIN')` | 1차에서는 권한 분기에 쓰지 않는다 (D-009) |
 | `created_at` | DATETIME | NOT NULL | |
 
+## `favorite_destinations` · `favorite_festivals`
+
+두 테이블은 대상 컬럼만 다르다 (`destination_id` → `destinations` / `festival_id` → `festivals`).
+
+| 컬럼 | 타입 | 제약 | 설명 |
+|---|---|---|---|
+| `id` | BIGINT | PK, AUTO_INCREMENT | 목록 정렬 기준 (`id DESC` = 최근 추가 순) |
+| `user_id` | BIGINT | NOT NULL, FK → `users.id` `ON DELETE CASCADE` | |
+| `destination_id` / `festival_id` | BIGINT | NOT NULL, FK → 대상 `ON DELETE CASCADE` | |
+| `created_at` | DATETIME | NOT NULL | 지금은 응답에 싣지 않는다 |
+
+- `UNIQUE (user_id, 대상_id)` — 같은 대상을 두 번 넣지 못한다. 복합 PK 대신 `id` + UNIQUE 로 둔
+  이유는 D-036. `user_id` 로 시작하므로 "내 목록" 조회의 인덱스도 겸한다.
+- `ON DELETE CASCADE` — 사용자나 대상이 지워지면 DB 가 즐겨찾기를 함께 지운다 (D-011 의 문제의식).
+
 ---
 
 ## MySQL 에서 주의할 것 (D-026)
@@ -102,7 +118,7 @@ D-010 시점에 쓰였으므로, `places` 를 가리키는 부분은 아래처�
 
 | Task | 테이블 | 비고 |
 |---|---|---|
-| 3 | `favorite_destinations` · `favorite_festivals` · `review_destinations` · `review_festivals` · `history_destinations` · `history_festivals` | 3종 × 대상 2개 = 6개, 각각 평범한 FK 하나 (D-022 의 "대가"). 반복이 번거로우면 그때 합치는 것을 다시 검토 |
+| 3 | `review_destinations` · `review_festivals` · `history_destinations` · `history_festivals` | favorite 2개는 위에 있다. 모양은 favorite 와 같고, 리뷰만 `id` PK 에 UNIQUE 없음 (D-013). D-036 |
 | 4 | `courses` · `course_stops` | `course_stops` 가 destination · festival 중 무엇을 가리킬지는 Task 4 에서 정한다. `course_tags` 는 태그를 뺐으므로 없다 (D-024) |
 | 5 | `posts` · `post_comments` | |
 

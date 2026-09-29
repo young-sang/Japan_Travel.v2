@@ -1,4 +1,4 @@
--- destination · festival · user 도메인 (MySQL)
+-- destination · festival · user · favorite 도메인 (MySQL)
 
 CREATE TABLE IF NOT EXISTS users (
   id            BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -43,6 +43,28 @@ CREATE TABLE IF NOT EXISTS festivals (
   FOREIGN KEY (prefecture_id) REFERENCES prefectures(id),
   -- MySQL 은 8.0.16 부터 CHECK 를 실제로 강제한다 (그 이전은 파싱만 하고 무시)
   CHECK (month BETWEEN 1 AND 12)
+);
+
+-- favorite (Task 3) — 대상별로 테이블을 나눈다 (D-022). 키는 id + UNIQUE (D-036)
+-- UNIQUE 가 user_id 로 시작하므로 "내 목록" 조회의 인덱스도 겸한다
+CREATE TABLE IF NOT EXISTS favorite_destinations (
+  id             BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id        BIGINT   NOT NULL,
+  destination_id BIGINT   NOT NULL,
+  created_at     DATETIME NOT NULL,
+  UNIQUE (user_id, destination_id),
+  FOREIGN KEY (user_id)        REFERENCES users(id)        ON DELETE CASCADE,
+  FOREIGN KEY (destination_id) REFERENCES destinations(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS favorite_festivals (
+  id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id     BIGINT   NOT NULL,
+  festival_id BIGINT   NOT NULL,
+  created_at  DATETIME NOT NULL,
+  UNIQUE (user_id, festival_id),
+  FOREIGN KEY (user_id)     REFERENCES users(id)     ON DELETE CASCADE,
+  FOREIGN KEY (festival_id) REFERENCES festivals(id) ON DELETE CASCADE
 );
 
 INSERT IGNORE INTO prefectures(name) VALUES

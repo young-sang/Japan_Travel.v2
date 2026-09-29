@@ -12,6 +12,11 @@ public record ApiResponse<T>(boolean success, T data, ApiError error) {
         return new ApiResponse<>(true, data, null);
     }
 
+//  돌려줄 데이터가 없는 성공(DELETE 등). 204 가 아니라 200 + data: null (D-035).
+    public static ApiResponse<Void> ok() {
+        return new ApiResponse<>(true, null, null);
+    }
+
     public static ApiResponse<Void> fail(ErrorCode code) {
         return new ApiResponse<>(false, null, ApiError.of(code));
     }
