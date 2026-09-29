@@ -121,17 +121,17 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 
 ---
 
-## 즐겨찾기 — `FavoriteController` (`/api/favorites`)
+## 즐겨찾기 — `FavoriteController` (`/api/me/favorites`)
 
 설계: [2026-09-29-favorite-api-design.md](superpowers/specs/2026-09-29-favorite-api-design.md) · 테이블 분리 D-022 · D-036
 
 | 메서드 | 경로 | 권한 | 설명 |
 |---|---|---|---|
-| GET | `/api/favorites` | 🔑 | 내 즐겨찾기. 각 배열은 최근에 추가한 순서 |
-| POST | `/api/favorites/destinations/{id}` | 🔑 | 여행지 즐겨찾기 추가 |
-| DELETE | `/api/favorites/destinations/{id}` | 🔑 | 여행지 즐겨찾기 삭제 |
-| POST | `/api/favorites/festivals/{id}` | 🔑 | 축제 즐겨찾기 추가 |
-| DELETE | `/api/favorites/festivals/{id}` | 🔑 | 축제 즐겨찾기 삭제 |
+| GET | `/api/me/favorites` | 🔑 | 내 즐겨찾기. 각 배열은 최근에 추가한 순서 |
+| POST | `/api/me/favorites/destinations/{id}` | 🔑 | 여행지 즐겨찾기 추가 |
+| DELETE | `/api/me/favorites/destinations/{id}` | 🔑 | 여행지 즐겨찾기 삭제 |
+| POST | `/api/me/favorites/festivals/{id}` | 🔑 | 축제 즐겨찾기 추가 |
+| DELETE | `/api/me/favorites/festivals/{id}` | 🔑 | 축제 즐겨찾기 삭제 |
 
 - **추가·삭제는 멱등이다.** 이미 있는 것을 다시 추가해도, 없는 것을 삭제해도 `200` + `data: null`.
   그래서 추가도 201 이 아니라 200 이다.
@@ -163,7 +163,7 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 
 `/api/festivals/{id}/reviews...` 도 같은 4개.
 
-- 즐겨찾기(`/api/favorites/...`)와 경로 모양이 다른 이유는 D-037 — 리뷰 목록은 공개라 대상 아래에 두면
+- 즐겨찾기(`/api/me/favorites/...`)와 경로 모양이 다른 이유는 D-037 — 리뷰 목록은 공개라 대상 아래에 두면
   기존 공개 규칙(`GET /api/destinations/**`)에 그대로 들어간다.
 - 리뷰 id 는 대상 종류별로 따로 매겨진다. 경로의 대상에 딸리지 않은 리뷰 id 는 404 다.
 - 한 사용자가 같은 대상에 여러 개 쓸 수 있다.

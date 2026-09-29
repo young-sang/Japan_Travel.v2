@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 //  전부 로그인 필요 — SecurityConfig 의 anyRequest().authenticated() 가 막는다.
 //  추가·삭제는 멱등이라 새로 만들었는지와 무관하게 200 + data: null 이다.
 @RestController
-@RequestMapping("/api/favorites")
+@RequestMapping("/api/me/favorites")
 @RequiredArgsConstructor
 public class FavoriteController {
 

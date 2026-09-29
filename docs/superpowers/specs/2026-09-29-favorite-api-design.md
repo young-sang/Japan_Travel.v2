@@ -3,6 +3,9 @@
 2026-09-29 · 확정 (같은 날 사후 검수로 0 · 1단계를 되짚음) · greenfield 브랜치 · Task 3 의 첫 번째
 (favorite → review, history 는 D-038 로 보류)
 
+> **경로 변경 (2026-09-29)** — [D-045](../../DECISIONS.md#d-045--로그인-사용자의-내-것-은-apime-아래에-둔다--favorite-경로도-옮긴다) 로
+> 5개 전부 `/api/favorites/...` → `/api/me/favorites/...`. 이 문서의 경로는 바뀐 경로로 고쳐 두었다.
+
 로그인한 사용자가 여행지·축제를 즐겨찾기에 넣고 빼고, 자기 목록을 본다.
 
 관련 결정: [D-022](../../DECISIONS.md#d-022--places-를-destinations-와-festivals-로-다시-나눈다)
@@ -16,7 +19,7 @@
 
 | 항목 | 결정 | 기각한 대안 |
 |---|---|---|
-| 경로 | **`/api/favorites/{destinations\|festivals}/{id}`** — 컨트롤러 하나에 모은다 | `/api/destinations/{id}/favorite` — `GET /api/destinations/**` 공개 규칙과 경로가 겹친다 · 옛 방식(본문에 `type`) — 문자열 분기와 잘못된 type 에러가 생긴다 |
+| 경로 | **`/api/me/favorites/{destinations\|festivals}/{id}`** — 컨트롤러 하나에 모은다 | `/api/destinations/{id}/favorite` — `GET /api/destinations/**` 공개 규칙과 경로가 겹친다 · 옛 방식(본문에 `type`) — 문자열 분기와 잘못된 type 에러가 생긴다 |
 | 목록 모양 | **`{ destinations: [...], festivals: [...] }`** — 기존 DTO 재사용 | 한 배열 + `type` — 두 테이블을 합쳐 정렬하는 코드가 필요 · 대상별 경로 2개 |
 | 중복 추가 · 없는 삭제 | **멱등. 둘 다 200** | 409 / 404 로 알림 — 프론트가 두 에러를 처리해야 한다 |
 
@@ -61,11 +64,11 @@
 
 | 메서드 | 경로 | 권한 | 성공 |
 |---|---|---|---|
-| GET | `/api/favorites` | 로그인 | 200 |
-| POST | `/api/favorites/destinations/{id}` | 로그인 | 200 |
-| DELETE | `/api/favorites/destinations/{id}` | 로그인 | 200 |
-| POST | `/api/favorites/festivals/{id}` | 로그인 | 200 |
-| DELETE | `/api/favorites/festivals/{id}` | 로그인 | 200 |
+| GET | `/api/me/favorites` | 로그인 | 200 |
+| POST | `/api/me/favorites/destinations/{id}` | 로그인 | 200 |
+| DELETE | `/api/me/favorites/destinations/{id}` | 로그인 | 200 |
+| POST | `/api/me/favorites/festivals/{id}` | 로그인 | 200 |
+| DELETE | `/api/me/favorites/festivals/{id}` | 로그인 | 200 |
 
 `SecurityConfig` 는 고치지 않는다. `anyRequest().authenticated()` 가 이미 막는다.
 
@@ -102,7 +105,7 @@ CREATE TABLE IF NOT EXISTS favorite_destinations (
 
 ## 4. 엔드포인트 계약
 
-### GET /api/favorites
+### GET /api/me/favorites
 
 내 즐겨찾기. 각 배열은 **최근에 추가한 순서**(`favorite.id DESC`).
 
@@ -116,7 +119,7 @@ CREATE TABLE IF NOT EXISTS favorite_destinations (
 - 요소는 기존 `DestinationResponse` · `FestivalResponse` 를 그대로 쓴다. 즐겨찾기한 시각은 싣지 않는다.
 - 비어 있으면 `{ "destinations": [], "festivals": [] }` — 에러가 아니다.
 
-### POST /api/favorites/destinations/{id}
+### POST /api/me/favorites/destinations/{id}
 
 | 상태 | 조건 | 본문 |
 |---|---|---|
@@ -131,7 +134,7 @@ CREATE TABLE IF NOT EXISTS favorite_destinations (
 - 동시에 같은 대상을 두 번 추가하면 둘 다 존재 확인을 통과하고 한쪽이 UNIQUE 에 걸려 500 이 된다.
   가입의 동시 요청과 같이 따로 처리하지 않는다 (ERRORS.md `USERNAME_TAKEN` 참조).
 
-### DELETE /api/favorites/destinations/{id}
+### DELETE /api/me/favorites/destinations/{id}
 
 | 상태 | 조건 | 본문 |
 |---|---|---|
@@ -144,7 +147,7 @@ CREATE TABLE IF NOT EXISTS favorite_destinations (
 
 ### festivals
 
-`/api/favorites/festivals/{id}` 는 위와 같다. 404 만 `FESTIVAL_NOT_FOUND`.
+`/api/me/favorites/festivals/{id}` 는 위와 같다. 404 만 `FESTIVAL_NOT_FOUND`.
 
 **새 `ErrorCode` 는 없다.**
 
@@ -179,12 +182,12 @@ favorite/
 ## 6. 검증 (스모크)
 
 1. 가입 → 토큰
-2. `GET /api/favorites` → 두 배열 모두 `[]`
-3. `POST /api/favorites/destinations/1` 두 번 → 둘 다 200, 목록에 1건
-4. `POST /api/favorites/festivals/1` → 목록 `festivals` 에 1건
-5. `POST /api/favorites/destinations/999999` → 404 `DESTINATION_NOT_FOUND`
-6. `DELETE /api/favorites/destinations/1` 두 번 → 둘 다 200, 목록에서 사라짐
-7. 토큰 없이 `GET /api/favorites` → 401
+2. `GET /api/me/favorites` → 두 배열 모두 `[]`
+3. `POST /api/me/favorites/destinations/1` 두 번 → 둘 다 200, 목록에 1건
+4. `POST /api/me/favorites/festivals/1` → 목록 `festivals` 에 1건
+5. `POST /api/me/favorites/destinations/999999` → 404 `DESTINATION_NOT_FOUND`
+6. `DELETE /api/me/favorites/destinations/1` 두 번 → 둘 다 200, 목록에서 사라짐
+7. 토큰 없이 `GET /api/me/favorites` → 401
 
 **결과 (2026-09-29)** — 1 · 2 · 5 · 6 · 7 통과. `id=abc` → 400 `TYPE_MISMATCH` 도 확인.
 **3 · 4 는 확인하지 못했다.** `destinations` · `festivals` 가 비어 있어(시드 전, D-021) 추가할 대상이
