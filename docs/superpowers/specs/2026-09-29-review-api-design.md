@@ -180,3 +180,6 @@ review/
 **결과 (2026-09-29)** — 1 ~ 6 모두 통과. 추가로 `{rating: 0}` → 400 `INVALID_RATING`,
 `{rating: "abc"}` → 400 `MALFORMED_REQUEST`, 토큰 없이 `DELETE` → 401, favorite 회귀(`GET /api/favorites`) 200 확인.
 **위 "시드 후 확인할 것" 은 아직 확인하지 못했다** (favorite 의 3 · 4 와 같은 사정).
+
+**재확인 (2026-09-30, 시드 후 · D-050)** — 여행지 · 축제 양쪽 모두 통과: 작성 201 (`updatedAt` null) · 목록 반영 ·
+수정 200 (`updatedAt` 채워짐) · B 의 수정 · 삭제 403 · 다른 대상 경로로 수정 404 · 삭제 200 후 재삭제 404.

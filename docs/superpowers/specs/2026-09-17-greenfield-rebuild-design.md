@@ -23,8 +23,8 @@
 > | 0 | 기반 정리 | 완료 |
 > | 1 | `destination` · `festival` (조회 2개씩) | 완료 — 제안·승인은 인증 이후로 미룸 (D-030) |
 > | 2 | `user` | 완료 |
-> | 3 | `favorite` `review` `history` | 완료 — favorite · review (성공 경로는 시드 후 재확인). **history 는 보류** (D-038) |
-> | 4 | `course` | **다음** |
+> | 3 | `favorite` `review` `history` | 완료 — favorite · review (성공 경로 시드 후 확인, D-050). **history 는 보류** (D-038) |
+> | 4 | `course` | 완료 — 여행지·축제 시드 후 성공 경로 확인 (D-050). 기본 제공 코스 시드는 보류 (D-048) |
 > | 5 | `post` | |
 > | 6 | `search` | |
 > | 7 | 프론트 맞추기 | |

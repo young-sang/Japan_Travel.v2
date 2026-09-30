@@ -29,6 +29,8 @@ spring:
     init:
       mode: always
       schema-locations: classpath:schema.sql
+      # 여행지·축제 시드. INSERT IGNORE 라 매 기동마다 돌아도 중복되지 않는다 (D-050)
+      data-locations: classpath:data.sql
       # 없으면 schema.sql 을 플랫폼 기본 인코딩(한국어 Windows = MS949)으로 읽어
       # 도도부현 한글 시드가 깨진 채로 INSERT 된다
       encoding: UTF-8
