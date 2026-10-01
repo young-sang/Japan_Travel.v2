@@ -7,59 +7,46 @@ import Button from '../../components/ui/Button.jsx';
 import EmptyState from '../../components/ui/EmptyState.jsx';
 import { SkeletonGrid } from '../../components/ui/Skeleton.jsx';
 
+// "전체" 탭은 없다 — 여행지 / 축제를 따로 보인다 (D-039). 응답이 장소 DTO 그대로라 상세를 다시 부르지 않는다.
 const TYPES = [
-  { key: '', label: '전체' },
   { key: 'destination', label: '여행지' },
   { key: 'festival', label: '축제' },
-  { key: 'course', label: '여행코스' },
 ];
 
 export default function FavoritesTab() {
-  const [enriched, setEnriched] = useState(null);
-  const [filter, setFilter] = useState('');
+  const [fav, setFav] = useState(null);
+  const [type, setType] = useState('destination');
 
-  async function reload() {
-    try {
-      const list = await api.listFavorites();
-      const items = await Promise.all(list.map(async (f) => {
-        try {
-          const fn = f.targetType === 'destination' ? api.getDestination
-                   : f.targetType === 'festival' ? api.getFestival
-                   : api.getCourse;
-          const detail = await fn(f.targetId);
-          return { ...f, detail };
-        } catch { return { ...f, detail: null }; }
-      }));
-      setEnriched(items.filter((x) => x.detail));
-    } catch {
-      setEnriched([]);
-    }
-  }
+  useEffect(() => {
+    api.listFavorites()
+      .then(setFav)
+      .catch(() => setFav({ destinations: [], festivals: [] }));
+  }, []);
 
-  useEffect(() => { reload(); }, []);
+  if (fav === null) return <SkeletonGrid count={6} />;
 
-  if (enriched === null) return <SkeletonGrid count={6} />;
-
-  const shown = filter ? enriched.filter((x) => x.targetType === filter) : enriched;
+  const shown = fav[`${type}s`] || [];
 
   return (
     <div>
       <div style={{ display: 'flex', gap: 8, marginBottom: 'var(--space-5)', flexWrap: 'wrap' }}>
         {TYPES.map((t) => (
-          <Tag key={t.key} size="md" selected={filter === t.key} onClick={() => setFilter(t.key)}>{t.label}</Tag>
+          <Tag key={t.key} size="md" selected={type === t.key} onClick={() => setType(t.key)}>
+            {t.label} {(fav[`${t.key}s`] || []).length}
+          </Tag>
         ))}
       </div>
       {shown.length === 0 ? (
         <EmptyState
           icon="♡"
           title="아직 즐겨찾기가 없어요"
-          description="마음에 드는 장소나 코스를 즐겨찾기 해보세요."
-          primaryAction={<Link to="/destination"><Button variant="primary">여행지 둘러보기</Button></Link>}
+          description="마음에 드는 장소를 즐겨찾기 해보세요."
+          primaryAction={<Link to={`/${type}`}><Button variant="primary">{type === 'festival' ? '축제' : '여행지'} 둘러보기</Button></Link>}
         />
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 'var(--space-4)' }}>
-          {shown.map((f) => (
-            <PlaceCard key={`${f.targetType}-${f.targetId}`} item={f.detail} type={f.targetType} />
+          {shown.map((it) => (
+            <PlaceCard key={`${type}-${it.id}`} item={it} type={type} />
           ))}
         </div>
       )}

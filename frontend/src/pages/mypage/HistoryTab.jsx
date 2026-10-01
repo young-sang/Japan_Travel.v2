@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api } from '../../api/client.js';
+import { api, typeSlug } from '../../api/client.js';
 import Button from '../../components/ui/Button.jsx';
 import EmptyState from '../../components/ui/EmptyState.jsx';
 import { SkeletonGrid } from '../../components/ui/Skeleton.jsx';
@@ -21,25 +21,17 @@ function groupByDate(items) {
   return groups;
 }
 
+// 응답이 이미 시간순 한 배열이고 이름 · 이미지까지 싣고 있다 (D-052). 항목마다 상세를 다시 부르지 않는다.
 export default function HistoryTab() {
-  const [enriched, setEnriched] = useState(null);
+  const [items, setItems] = useState(null);
   const toast = useToast();
 
   async function reload() {
-    setEnriched(null);
+    setItems(null);
     try {
-      const list = await api.history();
-      const e = await Promise.all(list.map(async (it) => {
-        try {
-          const fn = it.targetType === 'destination' ? api.getDestination
-                   : it.targetType === 'festival' ? api.getFestival
-                   : api.getCourse;
-          return { ...it, detail: await fn(it.targetId) };
-        } catch { return { ...it, detail: null }; }
-      }));
-      setEnriched(e.filter((x) => x.detail));
+      setItems(await api.history());
     } catch {
-      setEnriched([]);
+      setItems([]);
     }
   }
 
@@ -54,9 +46,9 @@ export default function HistoryTab() {
     } catch { toast.error('삭제 실패'); }
   }
 
-  if (enriched === null) return <SkeletonGrid count={8} columns="repeat(auto-fill, minmax(180px, 1fr))" />;
+  if (items === null) return <SkeletonGrid count={8} columns="repeat(auto-fill, minmax(180px, 1fr))" />;
 
-  if (enriched.length === 0) {
+  if (items.length === 0) {
     return (
       <EmptyState
         icon="🕒"
@@ -67,7 +59,7 @@ export default function HistoryTab() {
     );
   }
 
-  const groups = groupByDate(enriched);
+  const groups = groupByDate(items);
 
   return (
     <div>
@@ -79,21 +71,23 @@ export default function HistoryTab() {
           <h3 style={{ color: 'var(--color-ink-500)', fontSize: 'var(--fs-sm)', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: 'var(--space-3)' }}>{label}</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 'var(--space-3)' }}>
             {list.map((h) => (
-              <Link key={`${h.targetType}-${h.targetId}-${h.visitedAt}`}
-                    to={`/detail/${h.targetType}/${h.targetId}`}
+              <Link key={`${h.type}-${h.targetId}`}
+                    to={`/detail/${typeSlug(h.type)}/${h.targetId}`}
                     style={{ textDecoration: 'none', color: 'inherit' }}>
                 <div style={{
                   border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)',
                   overflow: 'hidden', background: 'var(--color-surface-0)',
                 }}>
                   <div style={{ aspectRatio: '4/3', background: 'var(--color-surface-2)' }}>
-                    <img src={h.detail.imagePath || '/placeholder.svg'} alt=""
+                    <img src={h.imagePath || '/placeholder.svg'} alt=""
                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                          onError={(e) => { if (e.currentTarget.dataset.fb === '1') return; e.currentTarget.dataset.fb = '1'; e.currentTarget.src = '/placeholder.svg'; }} />
                   </div>
                   <div style={{ padding: '10px 12px' }}>
-                    <p style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, margin: 0, color: 'var(--color-ink-900)' }}>{h.detail.name || h.detail.title}</p>
-                    <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--color-ink-500)', margin: '4px 0 0' }}>{new Date(h.visitedAt).toLocaleString()}</p>
+                    <p style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, margin: 0, color: 'var(--color-ink-900)' }}>{h.name}</p>
+                    <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--color-ink-500)', margin: '4px 0 0' }}>
+                      {h.prefecture} · {new Date(h.visitedAt).toLocaleString()}
+                    </p>
                   </div>
                 </div>
               </Link>

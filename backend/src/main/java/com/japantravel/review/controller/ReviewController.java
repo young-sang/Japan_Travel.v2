@@ -1,6 +1,7 @@
 package com.japantravel.review.controller;
 
 import com.japantravel.common.web.ApiResponse;
+import com.japantravel.review.dto.MyReviewResponse;
 import com.japantravel.review.dto.ReviewRequest;
 import com.japantravel.review.dto.ReviewResponse;
 import com.japantravel.review.service.ReviewService;
@@ -26,6 +27,13 @@ import java.util.List;
 public class ReviewController {
 
     private final ReviewService reviewService;
+
+//  ---- 내 리뷰 (D-055) — 로그인 필요. "내 것" 이라 /api/me 아래에 둔다 (D-045)
+
+    @GetMapping("/api/me/reviews")
+    public ApiResponse<List<MyReviewResponse>> mine(@AuthenticationPrincipal Long userId) {
+        return ApiResponse.ok(reviewService.findMine(userId));
+    }
 
 //  ---- destination ----
 

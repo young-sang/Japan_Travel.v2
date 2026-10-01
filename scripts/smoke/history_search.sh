@@ -83,6 +83,19 @@ check "전체 삭제" 200 '"data":null'
 req GET /api/me/history "${AUTH[@]}"
 check "삭제 후 빈 목록" 200 '"data":[]'
 
+echo "== 내 리뷰 (D-055)"
+req GET /api/me/reviews "${AUTH[@]}"
+check "리뷰 없음 → 빈 목록" 200 '{"success":true,"data":[],"error":null}'
+req POST "/api/destinations/$DID/reviews" "${AUTH[@]}" "${JSON[@]}" -d '{"rating":4,"comment":"ok"}'
+check "여행지 리뷰 작성" 201 '"rating":4'
+sleep 1
+req POST "/api/festivals/$FID/reviews" "${AUTH[@]}" "${JSON[@]}" -d '{"rating":5,"comment":"good"}'
+check "축제 리뷰 작성" 201 '"rating":5'
+req GET /api/me/reviews "${AUTH[@]}"
+check "내 리뷰에 두 대상이 모두 있음" 200 "\"data\":[{\"id\":" "\"type\":\"FESTIVAL\",\"targetId\":$FID,\"targetName\":\"" "\"type\":\"DESTINATION\",\"targetId\":$DID,"
+req GET /api/me/reviews
+check "토큰 없이 → 401" 401 '"code":"UNAUTHORIZED"'
+
 echo "== search"
 req GET "/api/search?q=%EB%8F%84%EC%BF%84%EB%8F%84"
 check "로그인 없이 '도쿄도' 검색" 200 '"destinations":[{' '"festivals":[' '"courses":[' '"prefecture":"도쿄도"'

@@ -194,6 +194,17 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 - `FORBIDDEN`(403, 남의 리뷰) · `UNAUTHORIZED`(401)
 - 판정 순서: 별점 → 리뷰 존재 → 작성자
 
+### 내 리뷰 — `GET /api/me/reviews` 🔑 (D-055)
+
+내가 쓴 여행지·축제 리뷰를 한 배열로, 최근에 쓴 순서. 수정 · 삭제는 위의 대상 아래 경로를 쓴다.
+
+```json
+[ { "id": 7, "type": "FESTIVAL", "targetId": 3, "targetName": "기온 마쓰리",
+    "rating": 5, "comment": "...", "createdAt": "2026-09-29T20:00:00", "updatedAt": null } ]
+```
+
+**에러** — `UNAUTHORIZED`(401)
+
 ---
 
 ## 코스 — `CourseController` (`/api/courses` · `/api/me/courses`)

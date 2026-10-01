@@ -1,10 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import PrefectureGrid from '../components/PrefectureGrid.jsx';
-import TagGrid from '../components/TagGrid.jsx';
 import PlaceCard from '../components/PlaceCard.jsx';
-import EmptyStateCollector from '../components/EmptyStateCollector.jsx';
-import { DEST_TAGS } from '../data/prefectures.js';
 import { api } from '../api/client.js';
 import Container from '../components/ui/Container.jsx';
 import PageHeader from '../components/ui/PageHeader.jsx';
@@ -14,19 +11,20 @@ import { SkeletonGrid } from '../components/ui/Skeleton.jsx';
 import ListPageLayout, { ResultsGrid } from '../layouts/ListPageLayout.jsx';
 import { useToast } from '../components/ui/Toast.jsx';
 
+// 테마(태그) 필터는 없다 — 태그 테이블을 1차에서 만들지 않았다 (D-024). 현 필터만 서버가 받는다.
 export default function Destination() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const toast = useToast();
-  const [prefecture, setPrefecture] = useState('');
-  const [tag, setTag] = useState(params.get('tag') || '');
+  // 상세의 "근처 추천 → 더 보기" 가 ?prefecture= 로 들어온다
+  const [prefecture, setPrefecture] = useState(params.get('prefecture') || '');
   const [items, setItems] = useState(null);
   const [sort, setSort] = useState('default');
 
   async function load() {
     setItems(null);
     try {
-      const list = await api.listDestinations({ prefecture: prefecture || undefined, tag: tag || undefined });
+      const list = await api.listDestinations({ prefecture: prefecture || undefined });
       setItems(list);
     } catch (e) {
       toast.error('여행지 목록을 불러오지 못했습니다');
@@ -34,7 +32,7 @@ export default function Destination() {
     }
   }
 
-  useEffect(() => { load(); }, [prefecture, tag]);
+  useEffect(() => { load(); }, [prefecture]);
 
   const sortedItems = sortItems(items, sort);
 
@@ -55,9 +53,8 @@ export default function Destination() {
         sidebar={
           <>
             <PrefectureGrid value={prefecture} onChange={setPrefecture} />
-            <TagGrid tags={DEST_TAGS} value={tag} onChange={setTag} title="테마" />
-            {(tag || prefecture) && (
-              <Button variant="ghost" size="sm" onClick={() => { setPrefecture(''); setTag(''); }}>
+            {prefecture && (
+              <Button variant="ghost" size="sm" onClick={() => setPrefecture('')}>
                 필터 초기화
               </Button>
             )}
@@ -66,7 +63,7 @@ export default function Destination() {
         toolbar={
           <>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-              <Tag variant="brand" size="md">{prefecture || '전체'}{tag && ` · ${tag}`}</Tag>
+              <Tag variant="brand" size="md">{prefecture || '전체'}</Tag>
               <span style={{ color: 'var(--color-ink-500)', fontSize: 'var(--fs-sm)' }}>
                 {items === null ? '불러오는 중…' : `결과 ${items.length}건`}
               </span>
@@ -92,10 +89,7 @@ export default function Destination() {
         }
       >
         {items === null && <SkeletonGrid count={8} />}
-        {items !== null && items.length === 0 && prefecture && (
-          <EmptyStateCollector type="destination" prefecture={prefecture} onComplete={load} />
-        )}
-        {items !== null && items.length === 0 && !prefecture && (
+        {items !== null && items.length === 0 && (
           <div style={{ padding: 40, textAlign: 'center', color: 'var(--color-ink-500)' }}>표시할 여행지가 없습니다</div>
         )}
         {items !== null && items.length > 0 && (

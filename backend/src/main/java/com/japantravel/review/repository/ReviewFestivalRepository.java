@@ -16,4 +16,8 @@ public interface ReviewFestivalRepository extends JpaRepository<ReviewFestival, 
 //  경로의 축제에 딸린 리뷰인지까지 한 번에 확인한다. 아니면 빈 값 → 404.
     @EntityGraph(attributePaths = "user")
     Optional<ReviewFestival> findByIdAndFestivalId(Long id, Long festivalId);
+
+//  내 리뷰 (D-055). 응답이 대상 이름을 쓰므로 축제를 함께 가져온다.
+    @EntityGraph(attributePaths = "festival")
+    List<ReviewFestival> findByUserIdOrderByIdDesc(Long userId);
 }

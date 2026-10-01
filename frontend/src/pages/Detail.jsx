@@ -15,6 +15,21 @@ import styles from './Detail.module.css';
 
 const CATEGORY_LABEL = { destination: '여행지', festival: '축제', course: '코스' };
 
+// 최근 본 장소 · 리뷰 · 즐겨찾기는 여행지 · 축제만 대상이다 (D-036 · D-052). 코스는 셋 다 없다.
+const isPlace = (type) => type === 'destination' || type === 'festival';
+
+// 코스 상세의 정류장(D-046) → 옛 타임라인 모양. 시간은 없고(D-043) 일차를 대신 보인다.
+function stopsToTimeline(stops = []) {
+  return stops.map((s) => ({
+    time: `${s.dayNo}일차`,
+    title: s.name,
+    desc: [s.prefecture, s.memo].filter(Boolean).join(' · '),
+    lat: s.lat,
+    lng: s.lng,
+    href: `/detail/${s.type.toLowerCase()}/${s.targetId}`,
+  }));
+}
+
 export default function Detail() {
   const { type, id } = useParams();
   const navigate = useNavigate();
@@ -33,7 +48,7 @@ export default function Detail() {
       .then((d) => {
         if (cancelled) return;
         setItem(d);
-        api.touchHistory(type, Number(id)).catch(() => {});
+        if (isPlace(type)) api.touchHistory(type, Number(id)).catch(() => {});   // 비로그인이면 401 — 무시한다
         if (d && d.prefecture) {
           api.listDestinations({ prefecture: d.prefecture })
             .then((list) => { if (!cancelled) setNearby(list.filter((x) => !(type === 'destination' && x.id === d.id)).slice(0, 6)); })
@@ -83,10 +98,15 @@ export default function Detail() {
   const name = item.name || item.title;
   const desc = item.description;
   const img = item.imagePath;
-  const lat = item.lat || item.centerLat;
-  const lng = item.lng || item.centerLng;
-  const timeline = item.timeline || [];
-  const metaItems = [item.prefecture, item.dateText, item.duration].filter(Boolean);
+  const timeline = type === 'course' ? stopsToTimeline(item.stops) : [];
+  // 코스는 좌표가 없으므로 좌표가 있는 첫 정류장을 지도 중심으로 쓴다
+  const firstWithCoords = timeline.find((s) => s.lat && s.lng);
+  const lat = item.lat || firstWithCoords?.lat;
+  const lng = item.lng || firstWithCoords?.lng;
+  const owner = type === 'course' ? (item.ownerNickname || '기본 제공') : null;
+  const days = timeline.length ? Math.max(...item.stops.map((s) => s.dayNo)) : 0;
+  const duration = type === 'course' && days ? `${days}일` : null;
+  const metaItems = [item.prefecture, item.dateText, duration].filter(Boolean);
 
   return (
     <article className={styles.page}>
@@ -156,7 +176,7 @@ export default function Detail() {
                       <div className={styles.timelineContent}>
                         <div className={styles.timelineHead}>
                           <span className={styles.timelineTime}>{s.time}</span>
-                          <strong>{s.title}</strong>
+                          <Link to={s.href} style={{ color: 'inherit' }}><strong>{s.title}</strong></Link>
                         </div>
                         {s.desc && <p className={styles.timelineDesc}>{s.desc}</p>}
                       </div>
@@ -166,9 +186,11 @@ export default function Detail() {
               </section>
             )}
 
-            <section className={styles.section}>
-              <ReviewSection targetType={type} targetId={Number(id)} />
-            </section>
+            {isPlace(type) && (
+              <section className={styles.section}>
+                <ReviewSection targetType={type} targetId={Number(id)} />
+              </section>
+            )}
           </div>
 
           <aside className={styles.side}>
@@ -177,8 +199,8 @@ export default function Detail() {
               <dl className={styles.dl}>
                 {item.prefecture && (<><dt>지역</dt><dd>{item.prefecture}</dd></>)}
                 {item.dateText && (<><dt>일정</dt><dd>{item.dateText}</dd></>)}
-                {item.duration && (<><dt>소요</dt><dd>{item.duration}</dd></>)}
-                {item.address && (<><dt>주소</dt><dd>{item.address}</dd></>)}
+                {duration && (<><dt>소요</dt><dd>{duration}</dd></>)}
+                {owner && (<><dt>만든 이</dt><dd>{owner}</dd></>)}
               </dl>
             </div>
             {lat && lng && (

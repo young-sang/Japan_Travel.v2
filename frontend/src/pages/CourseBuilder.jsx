@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { api } from '../api/client.js';
+import { api, typeSlug } from '../api/client.js';
 import { PREFECTURES } from '../data/prefectures.js';
 import Container from '../components/ui/Container.jsx';
 import PageHeader from '../components/ui/PageHeader.jsx';
@@ -12,6 +12,9 @@ import Spinner from '../components/ui/Spinner.jsx';
 import { useToast } from '../components/ui/Toast.jsx';
 import styles from './CourseBuilder.module.css';
 
+// 코스 = 기본 정보 + 정류장 (D-041 · D-042). 정류장은 여행지 · 축제 하나를 가리키고
+// 일차 · 메모만 갖는다 — 시간은 없다 (D-043). 임시저장은 없고 공개 / 비공개만 고른다 (D-041).
+// 요청 모양: stops[] = {dayNo, type: DESTINATION|FESTIVAL, targetId, memo} (D-046). 순서는 배열 순서다.
 export default function CourseBuilder() {
   const { id } = useParams();
   const editing = !!id;
@@ -19,11 +22,11 @@ export default function CourseBuilder() {
   const toast = useToast();
 
   const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
   const [prefecture, setPrefecture] = useState('도쿄도');
-  const [duration, setDuration] = useState('약 8시간');
-  const [tags, setTags] = useState('');
   const [imagePath, setImagePath] = useState('');
-  const [stops, setStops] = useState([]);
+  const [isPublic, setIsPublic] = useState(true);
+  const [stops, setStops] = useState([]);   // {dayNo, type: 'destination'|'festival', targetId, name, memo}
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
 
@@ -39,9 +42,12 @@ export default function CourseBuilder() {
     if (editing) {
       api.getCourse(id)
         .then((c) => {
-          setTitle(c.title || ''); setPrefecture(c.prefecture || '도쿄도'); setDuration(c.duration || '');
-          setTags((c.tags || []).join(', ')); setImagePath(c.imagePath || '');
-          setStops(c.timeline || []);
+          setTitle(c.title || ''); setDescription(c.description || '');
+          setPrefecture(c.prefecture || '도쿄도'); setImagePath(c.imagePath || '');
+          setIsPublic(c.isPublic);
+          setStops((c.stops || []).map((s) => ({
+            dayNo: s.dayNo, type: typeSlug(s.type), targetId: s.targetId, name: s.name, memo: s.memo || '',
+          })));
         })
         .catch(() => toast.error('코스를 불러오지 못했습니다'));
     }
@@ -68,36 +74,30 @@ export default function CourseBuilder() {
     return () => clearTimeout(t);
   }, [query, prefecture]);
 
+  // 즐겨찾기 응답이 장소 DTO 두 배열이라 상세를 다시 부르지 않는다 (D-039)
   useEffect(() => {
     if (tab !== 'favorites' || favs !== null) return;
     setFavsLoading(true);
-    (async () => {
-      try {
-        const list = await api.listFavorites();
-        const enriched = await Promise.all(list
-          .filter((f) => f.targetType !== 'course')
-          .map(async (f) => {
-            try {
-              const fn = f.targetType === 'destination' ? api.getDestination : api.getFestival;
-              return { ...f, detail: await fn(f.targetId) };
-            } catch { return null; }
-          }));
-        setFavs(enriched.filter(Boolean));
-      } catch { setFavs([]); }
-      finally { setFavsLoading(false); }
-    })();
+    api.listFavorites()
+      .then((fav) => setFavs([
+        ...fav.destinations.map((d) => ({ ...d, _type: 'destination' })),
+        ...fav.festivals.map((f) => ({ ...f, _type: 'festival' })),
+      ]))
+      .catch(() => setFavs([]))
+      .finally(() => setFavsLoading(false));
   }, [tab, favs]);
 
   const stopsCount = stops.length;
-  const stopSummary = useMemo(() => stops.map((s, i) => `${i + 1}. ${s.title}`).join(' → '), [stops]);
+  const days = stopsCount ? Math.max(...stops.map((s) => s.dayNo)) : 0;
+  const stopSummary = useMemo(() => stops.map((s, i) => `${i + 1}. ${s.name}`).join(' → '), [stops]);
 
-  function addStop(item, type = 'destination') {
+  function addStop(item, type) {
     setStops((s) => [...s, {
-      time: defaultTimeFor(s.length),
-      title: item.name,
-      desc: (item.description || '').slice(0, 80),
-      lat: item.lat, lng: item.lng,
-      targetType: type, targetId: item.id,
+      dayNo: s.length ? s[s.length - 1].dayNo : 1,   // 마지막 정류장과 같은 일차로 시작
+      type,
+      targetId: item.id,
+      name: item.name,
+      memo: '',
     }]);
     setQuery('');
   }
@@ -122,25 +122,30 @@ export default function CourseBuilder() {
     return Object.keys(e).length === 0;
   }
 
-  async function save(status) {
+  async function save() {
     if (!validate()) {
       toast.warn('입력 내용을 확인해주세요');
       return;
     }
     setSaving(true);
+    // 서버는 일차 안에서 배열 순서대로 순번을 매긴다. 일차가 섞여 있으면 일차 순으로 안정 정렬한다
+    const ordered = stops.map((s, i) => ({ ...s, i })).sort((a, b) => a.dayNo - b.dayNo || a.i - b.i);
     const body = {
-      title, prefecture, duration, imagePath: imagePath || null,
-      tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
-      centerLat: stops[0]?.lat, centerLng: stops[0]?.lng,
-      timeline: stops, status,
+      title,
+      description: description || null,
+      prefecture,
+      imagePath: imagePath || null,
+      isPublic,
+      stops: ordered.map((s) => ({
+        dayNo: Number(s.dayNo), type: s.type.toUpperCase(), targetId: s.targetId, memo: s.memo || null,
+      })),
     };
     try {
-      if (editing) await api.updateCourse(id, body);
-      else await api.createCourse(body);
-      toast.success(status === 'draft' ? '임시 저장했어요' : '발행했어요');
-      navigate('/mypage/courses');
+      const saved = editing ? await api.updateCourse(id, body) : await api.createCourse(body);
+      toast.success('저장했어요');
+      navigate(`/detail/course/${saved.id}`);
     } catch (err) {
-      toast.error('저장에 실패했습니다');
+      toast.error(err.message || '저장에 실패했습니다');
     } finally {
       setSaving(false);
     }
@@ -154,8 +159,11 @@ export default function CourseBuilder() {
         subtitle={stopsCount > 0 ? stopSummary : '왼쪽에서 장소를 검색해 일정을 추가해보세요'}
         actions={
           <>
-            <Button variant="secondary" onClick={() => save('draft')} loading={saving}>임시 저장</Button>
-            <Button variant="primary" onClick={() => save('published')} loading={saving}>발행</Button>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 'var(--fs-sm)' }}>
+              <input type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />
+              공개
+            </label>
+            <Button variant="primary" onClick={save} loading={saving}>저장</Button>
           </>
         }
       />
@@ -168,16 +176,13 @@ export default function CourseBuilder() {
               <Field label="제목" required error={errors.title}>
                 <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="예: 도쿄 1일 산책" />
               </Field>
-              <Field label="지역" required>
+              <Field label="지역" required helper="코스의 대표 지역. 다른 지역의 장소도 넣을 수 있어요">
                 <select value={prefecture} onChange={(e) => setPrefecture(e.target.value)}>
                   {PREFECTURES.map((p) => <option key={p}>{p}</option>)}
                 </select>
               </Field>
-              <Field label="소요 시간">
-                <input value={duration} onChange={(e) => setDuration(e.target.value)} placeholder="약 8시간" />
-              </Field>
-              <Field label="태그" helper="쉼표(,)로 구분">
-                <input value={tags} onChange={(e) => setTags(e.target.value)} placeholder="역사, 당일여행" />
+              <Field label="소개" helper="선택">
+                <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="어떤 코스인지 짧게 소개해주세요" />
               </Field>
               <Field label="대표 이미지 URL" helper="선택">
                 <input value={imagePath} onChange={(e) => setImagePath(e.target.value)} placeholder="https://…" />
@@ -219,20 +224,7 @@ export default function CourseBuilder() {
                     <p className={styles.resultsEmpty}>일치하는 장소가 없어요</p>
                   )}
                   {results.map((d) => (
-                    <button
-                      key={`${d._type}-${d.id}`}
-                      type="button"
-                      className={styles.resultItem}
-                      onClick={() => addStop(d, d._type)}
-                    >
-                      <span className={styles.resultName}>
-                        <span className={d._type === 'festival' ? styles.badgeFest : styles.badgeDest}>
-                          {d._type === 'festival' ? '축제' : '여행지'}
-                        </span>
-                        {d.name}
-                      </span>
-                      <span className={styles.resultAdd}>+ 추가</span>
-                    </button>
+                    <PlaceResult key={`${d._type}-${d.id}`} item={d} onAdd={() => addStop(d, d._type)} label="+ 추가" />
                   ))}
                 </div>
               </>
@@ -247,20 +239,7 @@ export default function CourseBuilder() {
                   </p>
                 )}
                 {!favsLoading && favs && favs.map((f) => (
-                  <button
-                    key={`${f.targetType}-${f.targetId}`}
-                    type="button"
-                    className={styles.resultItem}
-                    onClick={() => addStop(f.detail, f.targetType)}
-                  >
-                    <span className={styles.resultName}>
-                      <span className={f.targetType === 'festival' ? styles.badgeFest : styles.badgeDest}>
-                        {f.targetType === 'festival' ? '축제' : '여행지'}
-                      </span>
-                      {f.detail.name}
-                    </span>
-                    <span className={styles.resultAdd}>+ 구간 추가</span>
-                  </button>
+                  <PlaceResult key={`${f._type}-${f.id}`} item={f} onAdd={() => addStop(f, f._type)} label="+ 구간 추가" />
                 ))}
               </div>
             )}
@@ -270,7 +249,10 @@ export default function CourseBuilder() {
         <section className={styles.right}>
           <div className={styles.card}>
             <header className={styles.timelineHead}>
-              <h2 className={styles.cardTitle}>일정 <span className={styles.count}>{stopsCount}</span></h2>
+              <h2 className={styles.cardTitle}>
+                일정 <span className={styles.count}>{stopsCount}</span>
+                {days > 0 && <span style={{ marginLeft: 8, fontSize: 'var(--fs-sm)', color: 'var(--color-ink-500)' }}>{days}일</span>}
+              </h2>
               {errors.stops && <span className={styles.errorMsg}>{errors.stops}</span>}
             </header>
 
@@ -287,19 +269,22 @@ export default function CourseBuilder() {
                   <li key={i} className={styles.stop}>
                     <div className={styles.stopHead}>
                       <span className={styles.stopIndex}>{i + 1}</span>
-                      <input
+                      <select
                         className={styles.timeInput}
-                        value={s.time}
-                        onChange={(e) => update(i, 'time', e.target.value)}
-                        aria-label={`${i + 1}번 일정 시간`}
-                        placeholder="HH:MM"
-                      />
-                      <input
-                        className={styles.titleInput}
-                        value={s.title}
-                        onChange={(e) => update(i, 'title', e.target.value)}
-                        aria-label={`${i + 1}번 일정 제목`}
-                      />
+                        value={s.dayNo}
+                        onChange={(e) => update(i, 'dayNo', Number(e.target.value))}
+                        aria-label={`${i + 1}번 일정 일차`}
+                      >
+                        {Array.from({ length: Math.max(days, s.dayNo) + 1 }, (_, k) => k + 1).map((d) => (
+                          <option key={d} value={d}>{d}일차</option>
+                        ))}
+                      </select>
+                      <span className={styles.titleInput} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span className={s.type === 'festival' ? styles.badgeFest : styles.badgeDest}>
+                          {s.type === 'festival' ? '축제' : '여행지'}
+                        </span>
+                        {s.name}
+                      </span>
                       <div className={styles.stopActions}>
                         <IconButton label="위로" size="sm" onClick={() => move(i, -1)} disabled={i === 0}>↑</IconButton>
                         <IconButton label="아래로" size="sm" onClick={() => move(i, 1)} disabled={i === stops.length - 1}>↓</IconButton>
@@ -308,10 +293,11 @@ export default function CourseBuilder() {
                     </div>
                     <textarea
                       className={styles.descInput}
-                      value={s.desc}
-                      onChange={(e) => update(i, 'desc', e.target.value)}
-                      aria-label={`${i + 1}번 일정 설명`}
-                      placeholder="이 장소에 대한 메모…"
+                      value={s.memo}
+                      maxLength={500}
+                      onChange={(e) => update(i, 'memo', e.target.value)}
+                      aria-label={`${i + 1}번 일정 메모`}
+                      placeholder="이 장소에 대한 메모 (예: 오전 9시 도착, 점심은 근처 시장)"
                     />
                   </li>
                 ))}
@@ -324,8 +310,16 @@ export default function CourseBuilder() {
   );
 }
 
-function defaultTimeFor(idx) {
-  const h = 9 + idx * 2;
-  if (h >= 24) return '23:00';
-  return `${String(h).padStart(2, '0')}:00`;
+function PlaceResult({ item, onAdd, label }) {
+  return (
+    <button type="button" className={styles.resultItem} onClick={onAdd}>
+      <span className={styles.resultName}>
+        <span className={item._type === 'festival' ? styles.badgeFest : styles.badgeDest}>
+          {item._type === 'festival' ? '축제' : '여행지'}
+        </span>
+        {item.name}
+      </span>
+      <span className={styles.resultAdd}>{label}</span>
+    </button>
+  );
 }

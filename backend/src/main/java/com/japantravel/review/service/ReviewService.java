@@ -6,6 +6,7 @@ import com.japantravel.destination.entity.Destination;
 import com.japantravel.destination.repository.DestinationRepository;
 import com.japantravel.festival.entity.Festival;
 import com.japantravel.festival.repository.FestivalRepository;
+import com.japantravel.review.dto.MyReviewResponse;
 import com.japantravel.review.dto.ReviewRequest;
 import com.japantravel.review.dto.ReviewResponse;
 import com.japantravel.review.entity.ReviewDestination;
@@ -18,7 +19,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 //  수정 · 삭제의 판정 순서: 별점 → 리뷰 존재(경로의 대상에 딸렸는지 포함) → 작성자.
 //  없는 리뷰에 403 을 주지 않는다.
@@ -111,6 +114,19 @@ public class ReviewService {
                 .orElseThrow(() -> new ApiException(ErrorCode.REVIEW_NOT_FOUND));
         checkOwner(review.getUser(), userId);
         reviewFestivalRepository.delete(review);
+    }
+
+//  ---- 내 리뷰 ----
+
+//  두 테이블을 합쳐 작성 순서(최근 먼저)로 한 배열에 담는다 — history 와 같은 방식 (D-055).
+    public List<MyReviewResponse> findMine(Long userId) {
+        return Stream.concat(
+                        reviewDestinationRepository.findByUserIdOrderByIdDesc(userId).stream()
+                                .map(MyReviewResponse::from),
+                        reviewFestivalRepository.findByUserIdOrderByIdDesc(userId).stream()
+                                .map(MyReviewResponse::from))
+                .sorted(Comparator.comparing(MyReviewResponse::createdAt).reversed())
+                .toList();
     }
 
 //  ---- 공통 ----

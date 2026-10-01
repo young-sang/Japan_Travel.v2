@@ -16,21 +16,16 @@ export default function ActivityTab() {
   const [counts, setCounts] = useState({ favorites: 0, courses: 0, reviews: 0, prefectures: 0 });
 
   useEffect(() => {
-    Promise.all([api.listFavorites(), api.listCourses({ ownerUserId: 1 }), api.myReviews(), api.history()])
+    Promise.all([api.listFavorites(), api.myCourses(), api.myReviews(), api.history()])
       .then(([fav, courses, revs, hist]) => {
-        // 도도부현 카운트: history + favorites의 detail을 다 불러와야 정확하지만 비용 큼.
-        // 단순화: history에서 추출 — detail 조회로 prefecture 받기
-        Promise.all(hist.map(async (h) => {
-          try {
-            const fn = h.targetType === 'destination' ? api.getDestination : h.targetType === 'festival' ? api.getFestival : api.getCourse;
-            const d = await fn(h.targetId);
-            return d.prefecture;
-          } catch { return null; }
-        })).then((prefs) => {
-          const unique = new Set(prefs.filter(Boolean));
-          setCounts({ favorites: fav.length, courses: courses.length, reviews: revs.length, prefectures: unique.size });
+        // "방문한 도도부현" = 최근 본 장소의 현. history 응답이 현을 싣고 있어 상세를 다시 부르지 않는다 (D-052)
+        const prefectures = new Set(hist.map((h) => h.prefecture).filter(Boolean));
+        setCounts({
+          favorites: fav.destinations.length + fav.festivals.length,
+          courses: courses.length, reviews: revs.length, prefectures: prefectures.size,
         });
-      });
+      })
+      .catch(() => {});
   }, []);
 
   return (

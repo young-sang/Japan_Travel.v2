@@ -16,4 +16,8 @@ public interface ReviewDestinationRepository extends JpaRepository<ReviewDestina
 //  경로의 여행지에 딸린 리뷰인지까지 한 번에 확인한다. 아니면 빈 값 → 404.
     @EntityGraph(attributePaths = "user")
     Optional<ReviewDestination> findByIdAndDestinationId(Long id, Long destinationId);
+
+//  내 리뷰 (D-055). 응답이 대상 이름을 쓰므로 여행지를 함께 가져온다.
+    @EntityGraph(attributePaths = "destination")
+    List<ReviewDestination> findByUserIdOrderByIdDesc(Long userId);
 }

@@ -25,7 +25,7 @@ export default function Signup() {
       toast.success('가입 완료! 환영합니다.');
       navigate('/mypage', { replace: true });
     } catch (err) {
-      toast.error(err.body?.error || '가입 실패');
+      toast.error(err.message || '가입 실패');
     } finally {
       setBusy(false);
     }

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import PrefectureGrid from '../components/PrefectureGrid.jsx';
 import PlaceCard from '../components/PlaceCard.jsx';
-import EmptyStateCollector from '../components/EmptyStateCollector.jsx';
 import { api } from '../api/client.js';
 import Container from '../components/ui/Container.jsx';
 import PageHeader from '../components/ui/PageHeader.jsx';
@@ -74,10 +73,7 @@ export default function Festival() {
         }
       >
         {items === null && <SkeletonGrid count={8} />}
-        {items !== null && items.length === 0 && prefecture && (
-          <EmptyStateCollector type="festival" prefecture={prefecture} onComplete={load} />
-        )}
-        {items !== null && items.length === 0 && !prefecture && (
+        {items !== null && items.length === 0 && (
           <div style={{ padding: 40, textAlign: 'center', color: 'var(--color-ink-500)' }}>표시할 축제가 없습니다</div>
         )}
         {items !== null && items.length > 0 && view === 'list' && (

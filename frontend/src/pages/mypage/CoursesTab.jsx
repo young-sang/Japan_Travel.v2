@@ -7,28 +7,28 @@ import EmptyState from '../../components/ui/EmptyState.jsx';
 import { SkeletonGrid } from '../../components/ui/Skeleton.jsx';
 import { useToast } from '../../components/ui/Toast.jsx';
 
+// 임시저장은 없다 — 공개 / 비공개만 있다 (D-041). 필터는 받아 온 목록에서 거른다.
 const FILTERS = [
   { key: '', label: '전체' },
-  { key: 'draft', label: '임시저장' },
-  { key: 'published', label: '발행됨' },
+  { key: 'public', label: '공개' },
+  { key: 'private', label: '비공개' },
 ];
 
 export default function CoursesTab() {
   const [courses, setCourses] = useState(null);
-  const [status, setStatus] = useState('');
+  const [filter, setFilter] = useState('');
   const toast = useToast();
 
   async function reload() {
     setCourses(null);
     try {
-      const list = await api.listCourses({ mine: true, status: status || undefined });
-      setCourses(list);
+      setCourses(await api.myCourses());
     } catch {
       toast.error('코스를 불러오지 못했습니다');
       setCourses([]);
     }
   }
-  useEffect(() => { reload(); }, [status]);
+  useEffect(() => { reload(); }, []);
 
   async function remove(id) {
     if (!confirm('이 코스를 삭제할까요?')) return;
@@ -39,28 +39,38 @@ export default function CoursesTab() {
     } catch { toast.error('삭제 실패'); }
   }
 
+  // 목록은 요약이라 정류장이 없다 — 상세를 받아 요청 모양(D-046)으로 바꿔 새로 만든다
   async function duplicate(c) {
     try {
-      const { id, createdAt, ...body } = c;
-      body.title = c.title + ' (복사본)';
-      await api.createCourse(body);
-      toast.success('복제했어요');
+      const d = await api.getCourse(c.id);
+      await api.createCourse({
+        title: d.title + ' (복사본)',
+        description: d.description,
+        prefecture: d.prefecture,
+        imagePath: d.imagePath,
+        isPublic: false,
+        stops: d.stops.map((s) => ({ dayNo: s.dayNo, type: s.type, targetId: s.targetId, memo: s.memo })),
+      });
+      toast.success('비공개 복사본을 만들었어요');
       reload();
     } catch { toast.error('복제 실패'); }
   }
+
+  const shown = (courses || []).filter((c) =>
+    filter === 'public' ? c.isPublic : filter === 'private' ? !c.isPublic : true);
 
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-5)', flexWrap: 'wrap', gap: 'var(--space-3)' }}>
         <div style={{ display: 'flex', gap: 8 }}>
           {FILTERS.map((f) => (
-            <Tag key={f.key} size="md" selected={status === f.key} onClick={() => setStatus(f.key)}>{f.label}</Tag>
+            <Tag key={f.key} size="md" selected={filter === f.key} onClick={() => setFilter(f.key)}>{f.label}</Tag>
           ))}
         </div>
         <Link to="/mypage/courses/new"><Button variant="primary">+ 새 코스 만들기</Button></Link>
       </div>
       {courses === null && <SkeletonGrid count={4} />}
-      {courses !== null && courses.length === 0 && (
+      {courses !== null && shown.length === 0 && (
         <EmptyState
           icon="🗒️"
           title="아직 만든 코스가 없어요"
@@ -68,21 +78,21 @@ export default function CoursesTab() {
           primaryAction={<Link to="/mypage/courses/new"><Button variant="primary">+ 새 코스 만들기</Button></Link>}
         />
       )}
-      {courses !== null && courses.length > 0 && (
+      {courses !== null && shown.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 'var(--space-4)' }}>
-          {courses.map((c) => (
+          {shown.map((c) => (
             <article key={c.id} style={{
               border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)',
               padding: 'var(--space-4)', background: 'var(--color-surface-0)'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: 8 }}>
                 <h3 style={{ margin: 0, fontSize: 'var(--fs-lg)', fontWeight: 700 }}>{c.title}</h3>
-                <Tag size="sm" variant={c.status === 'draft' ? 'neutral' : 'success'}>
-                  {c.status === 'draft' ? '임시저장' : '발행됨'}
+                <Tag size="sm" variant={c.isPublic ? 'success' : 'neutral'}>
+                  {c.isPublic ? '공개' : '비공개'}
                 </Tag>
               </div>
               <p style={{ color: 'var(--color-ink-500)', fontSize: 'var(--fs-sm)', margin: '8px 0 0' }}>
-                {c.prefecture} · {c.duration} · {(c.timeline || []).length}개 일정
+                {c.prefecture} · {String(c.createdAt || '').slice(0, 10)} 만듦
               </p>
               <div style={{ marginTop: 'var(--space-4)', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 <Link to={`/detail/course/${c.id}`}><Button size="sm" variant="secondary">보기</Button></Link>

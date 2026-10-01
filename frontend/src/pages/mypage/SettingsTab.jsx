@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../api/client.js';
 import Button from '../../components/ui/Button.jsx';
+import { invalidateFavorites } from '../../components/FavButton.jsx';
 import { useToast } from '../../components/ui/Toast.jsx';
 
 export default function SettingsTab() {
@@ -15,8 +16,12 @@ export default function SettingsTab() {
   async function clearFavorites() {
     if (!confirm('모든 즐겨찾기를 삭제할까요?')) return;
     try {
-      const list = await api.listFavorites();
-      await Promise.all(list.map((f) => api.removeFavorite(f.targetType, f.targetId)));
+      const fav = await api.listFavorites();
+      await Promise.all([
+        ...fav.destinations.map((d) => api.removeFavorite('destination', d.id)),
+        ...fav.festivals.map((f) => api.removeFavorite('festival', f.id)),
+      ]);
+      invalidateFavorites();
       toast.success('즐겨찾기를 초기화했어요');
     } catch { toast.error('실패'); }
   }
@@ -32,7 +37,7 @@ export default function SettingsTab() {
   async function exportData() {
     try {
       const [fav, hist, revs, courses] = await Promise.all([
-        api.listFavorites(), api.history(), api.myReviews(), api.listCourses({ mine: true }),
+        api.listFavorites(), api.history(), api.myReviews(), api.myCourses(),
       ]);
       const blob = new Blob([JSON.stringify({ favorites: fav, history: hist, reviews: revs, courses }, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);

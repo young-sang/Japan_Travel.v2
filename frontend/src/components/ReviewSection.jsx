@@ -9,8 +9,10 @@ import EmptyState from './ui/EmptyState.jsx';
 import { useToast } from './ui/Toast.jsx';
 import styles from './ReviewSection.module.css';
 
+// 리뷰는 대상 아래 중첩 경로다 (D-037). 서버는 최신순 배열만 주므로 평균 · 개수는 여기서 계산한다.
+// 수정 · 삭제 버튼은 내 리뷰(userId === 내 id)에만 보인다.
 export default function ReviewSection({ targetType, targetId }) {
-  const [data, setData] = useState({ items: [], average: 0, count: 0 });
+  const [items, setItems] = useState([]);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [editingId, setEditingId] = useState(null);
@@ -20,13 +22,15 @@ export default function ReviewSection({ targetType, targetId }) {
 
   async function reload() {
     try {
-      const r = await api.reviewsFor(targetType, targetId);
-      setData(r || { items: [], average: 0, count: 0 });
+      setItems((await api.reviewsFor(targetType, targetId)) || []);
     } catch (e) {
       toast.error('리뷰를 불러오지 못했습니다');
     }
   }
   useEffect(() => { reload(); }, [targetType, targetId]);
+
+  const count = items.length;
+  const average = count ? items.reduce((a, r) => a + r.rating, 0) / count : 0;
 
   async function submit(e) {
     e.preventDefault();
@@ -34,17 +38,17 @@ export default function ReviewSection({ targetType, targetId }) {
     setSubmitting(true);
     try {
       if (editingId) {
-        await api.updateReview(editingId, { targetType, targetId, rating, comment });
+        await api.updateReview(targetType, targetId, editingId, { rating, comment });
         toast.success('리뷰를 수정했습니다');
         setEditingId(null);
       } else {
-        await api.addReview({ targetType, targetId, rating, comment });
+        await api.addReview(targetType, targetId, { rating, comment });
         toast.success('리뷰를 등록했습니다');
       }
       setComment(''); setRating(5);
       reload();
     } catch (e) {
-      toast.error('리뷰 저장에 실패했습니다');
+      toast.error(e.message || '리뷰 저장에 실패했습니다');
     } finally {
       setSubmitting(false);
     }
@@ -58,24 +62,24 @@ export default function ReviewSection({ targetType, targetId }) {
   async function remove(id) {
     if (!confirm('리뷰를 삭제할까요?')) return;
     try {
-      await api.deleteReview(id);
+      await api.deleteReview(targetType, targetId, id);
       toast.info('리뷰를 삭제했습니다');
       reload();
-    } catch {
-      toast.error('삭제에 실패했습니다');
+    } catch (e) {
+      toast.error(e.message || '삭제에 실패했습니다');
     }
   }
 
   return (
     <div>
       <div className={styles.head}>
-        <h2 className={styles.title}>리뷰 <span className={styles.count}>{data.count || 0}</span></h2>
-        {data.average > 0 && (
-          <Rating value={data.average} showValue />
+        <h2 className={styles.title}>리뷰 <span className={styles.count}>{count}</span></h2>
+        {average > 0 && (
+          <Rating value={average} showValue />
         )}
       </div>
 
-      {user && user.role === 'ADMIN' ? null : user ? (
+      {user ? (
         <form onSubmit={submit} className={styles.form}>
           <Field label="평점" required>
             <div>
@@ -109,7 +113,7 @@ export default function ReviewSection({ targetType, targetId }) {
       )}
 
       <ul className={styles.list}>
-        {(data.items || []).length === 0 && (
+        {items.length === 0 && (
           <EmptyState
             icon="💬"
             title="아직 리뷰가 없어요"
@@ -117,12 +121,13 @@ export default function ReviewSection({ targetType, targetId }) {
             size="sm"
           />
         )}
-        {(data.items || []).map((r) => (
+        {items.map((r) => (
           <li key={r.id} className={styles.item}>
             <div className={styles.itemHead}>
               <Rating value={r.rating} size={14} />
-              <span className={styles.date}>{r.createdAt}</span>
-              {user && (user.id === r.userId || user.role === 'ADMIN') && (
+              <strong style={{ fontSize: 'var(--fs-sm)' }}>{r.nickname}</strong>
+              <span className={styles.date}>{formatDate(r.updatedAt || r.createdAt)}{r.updatedAt ? ' (수정됨)' : ''}</span>
+              {user && user.id === r.userId && (
                 <span className={styles.itemActions}>
                   <button type="button" onClick={() => startEdit(r)} className={styles.linkBtn}>수정</button>
                   <button type="button" onClick={() => remove(r.id)} className={styles.linkBtn}>삭제</button>
@@ -135,4 +140,9 @@ export default function ReviewSection({ targetType, targetId }) {
       </ul>
     </div>
   );
+}
+
+// "2026-09-29T20:00:00" → "2026-09-29 20:00"
+function formatDate(s) {
+  return s ? String(s).replace('T', ' ').slice(0, 16) : '';
 }

@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
-import { api } from '../../api/client.js';
+import { Link } from 'react-router-dom';
+import { api, typeSlug } from '../../api/client.js';
 
+const TYPE_LABEL = { destination: '여행지', festival: '축제' };
+
+// 내 리뷰 (D-055) — 여행지 · 축제 리뷰가 한 배열로 최근순. 삭제는 대상 아래 경로를 쓴다 (D-037).
 export default function ReviewsTab() {
   const [reviews, setReviews] = useState([]);
 
   async function reload() {
-    const list = await api.myReviews();
-    setReviews(list);
+    try { setReviews(await api.myReviews()); } catch { setReviews([]); }
   }
   useEffect(() => { reload(); }, []);
 
@@ -14,9 +17,9 @@ export default function ReviewsTab() {
   const dist = [1, 2, 3, 4, 5].map((n) => reviews.filter((r) => r.rating === n).length);
   const max = Math.max(1, ...dist);
 
-  async function remove(id) {
+  async function remove(r) {
     if (!confirm('리뷰를 삭제할까요?')) return;
-    await api.deleteReview(id);
+    await api.deleteReview(typeSlug(r.type), r.targetId, r.id);
     reload();
   }
 
@@ -43,12 +46,14 @@ export default function ReviewsTab() {
       </div>
 
       {reviews.map((r) => (
-        <div key={r.id} style={{ padding: 16, borderBottom: '1px solid #eee' }}>
+        <div key={`${r.type}-${r.id}`} style={{ padding: 16, borderBottom: '1px solid #eee' }}>
           <div>
-            <a href={`/detail/${r.targetType}/${r.targetId}`} style={{ color: '#888', fontSize: 13 }}>{r.targetType} #{r.targetId}</a>
+            <Link to={`/detail/${typeSlug(r.type)}/${r.targetId}`} style={{ color: '#888', fontSize: 13 }}>
+              {TYPE_LABEL[typeSlug(r.type)]} · {r.targetName}
+            </Link>
             <span style={{ marginLeft: 12, color: '#f59e0b' }}>{'★'.repeat(r.rating)}</span>
             <span style={{ float: 'right' }}>
-              <button onClick={() => remove(r.id)} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer' }}>삭제</button>
+              <button onClick={() => remove(r)} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer' }}>삭제</button>
             </span>
           </div>
           <p style={{ marginTop: 8 }}>{r.comment}</p>

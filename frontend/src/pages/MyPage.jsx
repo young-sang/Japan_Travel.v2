@@ -29,12 +29,13 @@ export default function MyPage() {
 
   useEffect(() => {
     Promise.all([
-      api.listFavorites().catch(() => []),
-      api.listCourses({ mine: true }).catch(() => []),
+      api.listFavorites().catch(() => ({ destinations: [], festivals: [] })),
+      api.myCourses().catch(() => []),
       api.history().catch(() => []),
       api.myReviews().catch(() => []),
     ]).then(([fav, courses, hist, revs]) => setStats({
-      favorites: fav.length, courses: courses.length, history: hist.length, reviews: revs.length,
+      favorites: fav.destinations.length + fav.festivals.length,
+      courses: courses.length, history: hist.length, reviews: revs.length,
     }));
   }, [tab]);
 
@@ -43,10 +44,10 @@ export default function MyPage() {
       <section className={styles.hero}>
         <Container>
           <div className={styles.profile}>
-            <div className={styles.avatar} aria-hidden="true">{user?.role === 'ADMIN' ? '🛠' : '🙂'}</div>
+            <div className={styles.avatar} aria-hidden="true">🙂</div>
             <div className={styles.profileInfo}>
               <h1 className={styles.name}>{user?.nickname || '게스트'}</h1>
-              <p className={styles.subtitle}>@{user?.username} {user?.role === 'ADMIN' ? '· 관리자' : ''}</p>
+              <p className={styles.subtitle}>@{user?.username}</p>
               <div className={styles.statRow}>
                 <Stat label="즐겨찾기" value={stats.favorites} to="/mypage/favorites" />
                 <Stat label="내 코스" value={stats.courses} to="/mypage/courses" />

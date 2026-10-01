@@ -26,7 +26,7 @@ export default function Login() {
       toast.success('로그인되었습니다');
       navigate(from, { replace: true });
     } catch (err) {
-      toast.error(err.body?.error || '로그인 실패');
+      toast.error(err.message || '로그인 실패');
     } finally {
       setBusy(false);
     }

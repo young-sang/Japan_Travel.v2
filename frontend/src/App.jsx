@@ -2,9 +2,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header.jsx';
 import Footer from './components/Footer.jsx';
 import Home from './pages/Home.jsx';
-import Board from './pages/Board.jsx';
-import PostDetail from './pages/PostDetail.jsx';
-import PostEditor from './pages/PostEditor.jsx';
 import Destination from './pages/Destination.jsx';
 import Festival from './pages/Festival.jsx';
 import Course from './pages/Course.jsx';
@@ -16,7 +13,6 @@ import TipDetail from './pages/TipDetail.jsx';
 import Top100 from './pages/Top100.jsx';
 import MyPage from './pages/MyPage.jsx';
 import CourseBuilder from './pages/CourseBuilder.jsx';
-import Admin from './pages/Admin.jsx';
 import Login from './pages/Login.jsx';
 import Signup from './pages/Signup.jsx';
 import ProtectedRoute from './auth/ProtectedRoute.jsx';
@@ -33,10 +29,7 @@ export default function App() {
         <ErrorBoundary>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/board" element={<Board />} />
-            <Route path="/board/new" element={<ProtectedRoute><PostEditor /></ProtectedRoute>} />
-            <Route path="/board/:id" element={<PostDetail />} />
-            <Route path="/board/:id/edit" element={<ProtectedRoute><PostEditor /></ProtectedRoute>} />
+            {/* 게시판(D-040) · 관리자(D-009) 는 부를 API 가 없어 라우트에서 뺐다 (D-054). 파일은 남아 있다 */}
             <Route path="/destination" element={<Destination />} />
             <Route path="/festival" element={<Festival />} />
             <Route path="/course" element={<Course />} />
@@ -49,10 +42,9 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/mypage" element={<Navigate to="/mypage/favorites" replace />} />
-            <Route path="/mypage/:tab" element={<ProtectedRoute denyAdmin><MyPage /></ProtectedRoute>} />
-            <Route path="/mypage/courses/new" element={<ProtectedRoute denyAdmin><CourseBuilder /></ProtectedRoute>} />
-            <Route path="/mypage/courses/:id/edit" element={<ProtectedRoute denyAdmin><CourseBuilder /></ProtectedRoute>} />
-            <Route path="/admin/*" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
+            <Route path="/mypage/:tab" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
+            <Route path="/mypage/courses/new" element={<ProtectedRoute><CourseBuilder /></ProtectedRoute>} />
+            <Route path="/mypage/courses/:id/edit" element={<ProtectedRoute><CourseBuilder /></ProtectedRoute>} />
           </Routes>
         </ErrorBoundary>
       </main>
