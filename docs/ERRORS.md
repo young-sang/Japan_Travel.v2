@@ -127,7 +127,7 @@
 > **Security 가 경로 판정보다 먼저다.** 로그인 전에는 없는 경로(`GET /api/nope`)도,
 > 틀린 메서드(`DELETE /api/destinations/1`)도 `API_NOT_FOUND` · `METHOD_NOT_ALLOWED` 가 아니라
 > `UNAUTHORIZED` 가 나간다. 공개 경로(`GET /api/destinations/**`, `GET /api/festivals/**`,
-> `GET /api/courses/**`, `POST /api/auth/signup`, `POST /api/auth/login`) 에서만 로그인 없이 404 · 405 를 볼 수 있다.
+> `GET /api/courses/**`, `GET /api/search`, `POST /api/auth/signup`, `POST /api/auth/login`) 에서만 로그인 없이 404 · 405 를 볼 수 있다.
 
 ### `FORBIDDEN` — 403
 

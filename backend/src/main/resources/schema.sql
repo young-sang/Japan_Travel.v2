@@ -128,6 +128,28 @@ CREATE TABLE IF NOT EXISTS course_stops (
   CHECK (seq >= 1)
 );
 
+-- history (최근 본 장소) — favorite 와 같은 모양 (D-036) + visited_at (D-052)
+-- 대상당 1행. 다시 보면 visited_at 만 갱신한다
+CREATE TABLE IF NOT EXISTS history_destinations (
+  id             BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id        BIGINT   NOT NULL,
+  destination_id BIGINT   NOT NULL,
+  visited_at     DATETIME NOT NULL,
+  UNIQUE (user_id, destination_id),
+  FOREIGN KEY (user_id)        REFERENCES users(id)        ON DELETE CASCADE,
+  FOREIGN KEY (destination_id) REFERENCES destinations(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS history_festivals (
+  id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id     BIGINT   NOT NULL,
+  festival_id BIGINT   NOT NULL,
+  visited_at  DATETIME NOT NULL,
+  UNIQUE (user_id, festival_id),
+  FOREIGN KEY (user_id)     REFERENCES users(id)     ON DELETE CASCADE,
+  FOREIGN KEY (festival_id) REFERENCES festivals(id) ON DELETE CASCADE
+);
+
 INSERT IGNORE INTO prefectures(name) VALUES
   ('홋카이도'), ('아오모리현'), ('이와테현'), ('미야기현'),
   ('아키타현'), ('야마가타현'), ('후쿠시마현'), ('이바라키현'),

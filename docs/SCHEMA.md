@@ -27,12 +27,16 @@ Japan Travel v2 — **MySQL 8** (`localhost:3306/japan_travel`), `greenfield` �
 | `review_festivals` | review | 축제 리뷰 | Task 3 |
 | `courses` | course | 코스 (기본 제공 · 사용자) | Task 4 |
 | `course_stops` | course | 코스의 정류장 — 여행지 또는 축제 하나 | Task 4 |
+| `history_destinations` | history | 최근 본 여행지 | Task 3 (D-052) |
+| `history_festivals` | history | 최근 본 축제 | Task 3 (D-052) |
 
 ```
 prefectures  1 ──< destinations 1 ──< favorite_destinations >── 1 users
                                 1 ──< review_destinations   >── 1 users
+                                1 ──< history_destinations  >── 1 users
              1 ──< festivals    1 ──< favorite_festivals    >── 1 users
                                 1 ──< review_festivals      >── 1 users
+                                1 ──< history_festivals     >── 1 users
 
 prefectures  1 ──< courses      1 ──< course_stops >──0..1 destinations
 users        1 ──< courses (owner, NULL = 기본 제공)   >──0..1 festivals   (둘 중 정확히 하나)
@@ -156,6 +160,21 @@ users        1 ──< courses (owner, NULL = 기본 제공)   >──0..1 festi
 - 원본 여행지·축제가 지워지면 그 정류장만 빠지고 코스는 남는다 (D-042). 남은 `seq` 에 빈 번호가 생기지만 정렬에는 문제없다.
 - 정류장 시간은 없다 (D-043).
 
+## `history_destinations` · `history_festivals`
+
+최근 본 장소 (D-052). favorite 와 같은 모양이고 `created_at` 대신 `visited_at` 이 있다.
+두 테이블은 대상 컬럼만 다르다 (`destination_id` → `destinations` / `festival_id` → `festivals`).
+
+| 컬럼 | 타입 | 제약 | 설명 |
+|---|---|---|---|
+| `id` | BIGINT | PK, AUTO_INCREMENT | |
+| `user_id` | BIGINT | NOT NULL, FK → `users.id` `ON DELETE CASCADE` | |
+| `destination_id` / `festival_id` | BIGINT | NOT NULL, FK → 대상 `ON DELETE CASCADE` | |
+| `visited_at` | DATETIME | NOT NULL | 마지막으로 본 시각. 다시 보면 갱신된다. 목록 정렬 기준 |
+
+- `UNIQUE (user_id, 대상_id)` — 대상당 1행. 기록은 find → 있으면 `visited_at` 갱신 / 없으면 INSERT.
+- 목록은 두 테이블을 각각 읽어 서비스에서 `visited_at DESC` 로 합친다.
+
 ---
 
 ## MySQL 에서 주의할 것 (D-026)
@@ -180,7 +199,6 @@ D-010 시점에 쓰였으므로, `places` 를 가리키는 부분은 아래처�
 
 | Task | 테이블 | 비고 |
 |---|---|---|
-| 보류 | `history_destinations` · `history_festivals` | D-038 로 미룸. 만들 때는 favorite 와 같은 모양 (id + UNIQUE, D-036) + `visited_at` |
 | 보류 | `posts` · `post_comments` | D-040 으로 미룸 |
 
 1차에서 만들지 않는 것 — `tags` 계열(D-024), `collections` · `collection_items` · `achievements`,

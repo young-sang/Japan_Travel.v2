@@ -256,6 +256,56 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 
 ---
 
+## 최근 본 장소 — `HistoryController` (`/api/me/history`)
+
+설계: [2026-10-01-history-search-api-design.md](superpowers/specs/2026-10-01-history-search-api-design.md) · D-038 · D-052
+
+| 메서드 | 경로 | 권한 | 설명 |
+|---|---|---|---|
+| GET | `/api/me/history` | 🔑 | 내가 본 여행지·축제를 한 배열로, 최근에 본 순서 |
+| POST | `/api/me/history/destinations/{id}` | 🔑 | 여행지를 봤다고 기록 |
+| POST | `/api/me/history/festivals/{id}` | 🔑 | 축제를 봤다고 기록 |
+| DELETE | `/api/me/history` | 🔑 | 내 기록 전체 삭제 |
+
+- **기록은 upsert 다.** 대상당 1행이고, 다시 보면 `visitedAt` 만 갱신된다. 항상 `200` + `data: null`.
+- 상세 페이지를 열 때 프론트가 자동으로 부른다. 요청 본문은 없다.
+- 한 건 삭제는 없다.
+
+**응답 `data`** (`GET`)
+
+```json
+[ { "type": "FESTIVAL",    "targetId": 3,  "name": "...", "prefecture": "교토부", "imagePath": "...", "visitedAt": "2026-10-01T19:20:00" },
+  { "type": "DESTINATION", "targetId": 12, "name": "...", "prefecture": "도쿄도", "imagePath": null,  "visitedAt": "2026-09-30T10:02:11" } ]
+```
+
+**에러** — `DESTINATION_NOT_FOUND` · `FESTIVAL_NOT_FOUND`(404, 처음 기록할 대상이 없음) ·
+`UNAUTHORIZED`(401) · `TYPE_MISMATCH`(400)
+
+---
+
+## 통합 검색 — `SearchController` (`/api/search`)
+
+설계: [2026-10-01-history-search-api-design.md](superpowers/specs/2026-10-01-history-search-api-design.md) · D-053
+
+| 메서드 | 경로 | 권한 | 설명 |
+|---|---|---|---|
+| GET | `/api/search?q=` | 공개 | 여행지 · 축제 · 공개 코스를 한 번에 검색 |
+
+- 여행지·축제는 **이름 · 설명 · 현**, 코스는 **제목 · 현**에 `q` 가 포함되면 맞는다 (부분 일치, 대소문자 무시).
+- 대상별 최대 20건. 정렬은 각 목록 API 와 같다 (여행지·코스 `id DESC`, 축제 `month ASC, id DESC`).
+- 코스는 공개 코스만 나온다.
+- `q` 가 없거나 공백이면 에러가 아니라 세 배열 모두 빈 배열이다.
+
+**응답 `data`** — 요소는 `DestinationResponse` · `FestivalResponse` · `CourseSummaryResponse` 그대로다.
+
+```json
+{ "destinations": [ ... ], "festivals": [ ... ], "courses": [ ... ] }
+```
+
+**에러** — 이 엔드포인트가 직접 던지는 것은 없다.
+
+---
+
 ## 예정 (아직 없음)
 
 [재작성 설계 문서](superpowers/specs/2026-09-17-greenfield-rebuild-design.md) 의 Task 순서를 따른다.
@@ -263,9 +313,7 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 
 | Task | 도메인 | 대략의 범위 |
 |---|---|---|
-| 보류 | `history` | 최근 본 장소. Task 4 ~ 6 이후로 미룸 (D-038) |
 | 보류 | `post` | 게시판 글 + 댓글. Task 7 전에 다시 봄 (D-040) |
-| 6 | `search` | 통합 검색 |
 | — | destination 제안·승인 | 인증 이후로 미룸 (D-030) |
 
 1차에서 뺀 것 — 날씨·환율 프록시(D-032), 관리자 API 전부(D-009).
