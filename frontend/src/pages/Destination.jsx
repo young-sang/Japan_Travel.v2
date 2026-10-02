@@ -82,6 +82,8 @@ export default function Destination() {
               >
                 <option value="default">추천순</option>
                 <option value="name">이름순</option>
+                <option value="rating">평점순</option>
+                <option value="reviews">리뷰 많은순</option>
               </select>
               <Button variant="secondary" size="sm" onClick={gotoRandom} disabled={!items?.length}>🎲 랜덤</Button>
             </div>
@@ -106,6 +108,13 @@ function sortItems(items, sort) {
   if (!items) return items;
   if (sort === 'name') {
     return [...items].sort((a, b) => (a.name || a.title || '').localeCompare(b.name || b.title || ''));
+  }
+  // 서버 집계 (D-057). 리뷰 없는 곳(avgRating null)은 -1 로 두어 뒤로 보낸다
+  if (sort === 'rating') {
+    return [...items].sort((a, b) => ((b.avgRating ?? -1) - (a.avgRating ?? -1)) || (b.reviewCount - a.reviewCount));
+  }
+  if (sort === 'reviews') {
+    return [...items].sort((a, b) => (b.reviewCount - a.reviewCount) || ((b.avgRating ?? -1) - (a.avgRating ?? -1)));
   }
   return items;
 }

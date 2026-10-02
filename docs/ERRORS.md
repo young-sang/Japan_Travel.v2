@@ -48,6 +48,7 @@
 | `USERNAME_TAKEN` | 409 | 서비스 | 가입 시 아이디 중복 |
 | `LOGIN_FAILED` | 401 | 서비스 | 아이디 없음 또는 비밀번호 틀림 |
 | `UNAUTHORIZED` | 401 | 필터 · 서비스 | 로그인이 필요한데 유효한 토큰이 없음 |
+| `WRONG_PASSWORD` | 400 | 서비스 | 비밀번호 변경 · 탈퇴에서 비밀번호 확인 실패 |
 | `FORBIDDEN` | 403 | 서비스 | 남의 리소스를 고치거나 지우려 함 |
 | `REVIEW_NOT_FOUND` | 404 | 서비스 | 없는 리뷰 id, 또는 경로의 대상에 딸리지 않은 리뷰 |
 | `INVALID_RATING` | 400 | 서비스 | 별점이 없거나 1~5 밖 |
@@ -119,7 +120,7 @@
    토큰이 없음 · 위조 · 만료 · `Bearer ` 접두사 누락 모두 여기다. `JwtAuthenticationFilter` 는
    잘못된 토큰을 거절하지 않고 익명으로 통과시키고, 막을지는 `SecurityConfig` 의 URL 규칙이 정한다.
    이 단계는 `@RestControllerAdvice` 보다 앞이라 핸들러를 거치지 않고 EntryPoint 가 직접 쓴다.
-2. **`AuthService.me` · `FavoriteService.findUser` · `ReviewService.findUser` · `CourseService.findUser`**
+2. **`AuthService.me` · `AccountService.find` · `FavoriteService.findUser` · `ReviewService.findUser` · `CourseService.findUser`**
    (즐겨찾기 추가 · 리뷰 작성 · 코스 작성)
    — 토큰은 유효한데 그 사용자가 삭제됐다. 프론트에게는 "로그인이 풀린 것" 이므로 404 가 아니라 401 이다.
    쓰기에서 이 확인을 빼면 FK 위반으로 `INTERNAL_ERROR`(500) 가 된다.
@@ -128,6 +129,12 @@
 > 틀린 메서드(`DELETE /api/destinations/1`)도 `API_NOT_FOUND` · `METHOD_NOT_ALLOWED` 가 아니라
 > `UNAUTHORIZED` 가 나간다. 공개 경로(`GET /api/destinations/**`, `GET /api/festivals/**`,
 > `GET /api/courses/**`, `GET /api/search`, `POST /api/auth/signup`, `POST /api/auth/login`) 에서만 로그인 없이 404 · 405 를 볼 수 있다.
+
+### `WRONG_PASSWORD` — 400
+
+- **어디서** `AccountService.changePassword` (`PUT /api/me/password`) · `AccountService.withdraw` (`DELETE /api/me`)
+- **무엇 때문에** 본문의 `currentPassword` · `password` 가 없거나 틀렸다.
+- **401 이 아닌 이유** 토큰은 유효하다. 401 이면 프론트가 "로그인이 풀린 것" 으로 읽는다 ([D-056](DECISIONS.md)).
 
 ### `FORBIDDEN` — 403
 

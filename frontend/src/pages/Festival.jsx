@@ -18,6 +18,7 @@ export default function Festival() {
   const [month, setMonth] = useState(null);
   const [items, setItems] = useState(null);
   const [view, setView] = useState('list');
+  const [sort, setSort] = useState('default');
   const toast = useToast();
 
   async function load() {
@@ -65,7 +66,26 @@ export default function Festival() {
                 {items === null ? '불러오는 중…' : `결과 ${items.length}건`}
               </span>
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {view === 'list' && (
+                <>
+                  <label htmlFor="fest-sort" style={{ fontSize: 'var(--fs-sm)', color: 'var(--color-ink-700)' }}>정렬</label>
+                  <select
+                    id="fest-sort"
+                    value={sort}
+                    onChange={(e) => setSort(e.target.value)}
+                    style={{
+                      font: 'inherit', fontSize: 'var(--fs-sm)',
+                      padding: '6px 10px', borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--color-border-strong)', background: '#fff',
+                    }}
+                  >
+                    <option value="default">월순</option>
+                    <option value="rating">평점순</option>
+                    <option value="reviews">리뷰 많은순</option>
+                  </select>
+                </>
+              )}
               <Button variant={view === 'list' ? 'primary' : 'secondary'} size="sm" onClick={() => setView('list')}>리스트</Button>
               <Button variant={view === 'calendar' ? 'primary' : 'secondary'} size="sm" onClick={() => setView('calendar')}>캘린더</Button>
             </div>
@@ -78,7 +98,7 @@ export default function Festival() {
         )}
         {items !== null && items.length > 0 && view === 'list' && (
           <ResultsGrid>
-            {items.map((it) => <PlaceCard key={it.id} item={it} type="festival" />)}
+            {sortItems(items, sort).map((it) => <PlaceCard key={it.id} item={it} type="festival" />)}
           </ResultsGrid>
         )}
         {items !== null && items.length > 0 && view === 'calendar' && (
@@ -87,6 +107,17 @@ export default function Festival() {
       </ListPageLayout>
     </Container>
   );
+}
+
+// 기본은 서버 순서(월 오름차순). 리뷰 없는 곳(avgRating null)은 -1 로 두어 뒤로 보낸다 (D-057)
+function sortItems(items, sort) {
+  if (sort === 'rating') {
+    return [...items].sort((a, b) => ((b.avgRating ?? -1) - (a.avgRating ?? -1)) || (b.reviewCount - a.reviewCount));
+  }
+  if (sort === 'reviews') {
+    return [...items].sort((a, b) => (b.reviewCount - a.reviewCount) || ((b.avgRating ?? -1) - (a.avgRating ?? -1)));
+  }
+  return items;
 }
 
 function CalendarView({ items }) {

@@ -37,8 +37,21 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  // 계정 관리 (D-056). 닉네임은 응답의 user 로 바꿔 헤더에 바로 반영한다.
+  const updateNickname = useCallback(async (nickname) => {
+    const u = await api.updateProfile(nickname);
+    setUser(u);
+    return u;
+  }, []);
+
+  const withdraw = useCallback(async (password) => {
+    await api.withdraw(password);
+    tokenStore.clear();
+    setUser(null);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, signup, logout, updateNickname, withdraw }}>
       {children}
     </AuthContext.Provider>
   );

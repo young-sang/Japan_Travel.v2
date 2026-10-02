@@ -36,6 +36,15 @@ export default function PlaceCard({ item, type, onClick }) {
             <span>{metaParts.join(' · ')}</span>
           </CardMeta>
         )}
+        {/* 서버 집계 (D-057). 리뷰가 없으면 표시하지 않는다 */}
+        {item.reviewCount > 0 && (
+          <CardMeta>
+            <span className={styles.rating} aria-label={`평균 별점 ${item.avgRating}점, 리뷰 ${item.reviewCount}개`}>
+              ★ {item.avgRating.toFixed(1)}
+            </span>
+            <span>({item.reviewCount})</span>
+          </CardMeta>
+        )}
         {desc && <CardDesc clamp={2}>{truncate(desc)}</CardDesc>}
       </CardBody>
     </Card>

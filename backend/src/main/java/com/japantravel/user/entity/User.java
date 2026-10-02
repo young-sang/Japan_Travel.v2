@@ -37,4 +37,12 @@ public class User {
         this.role = "USER";
         this.createdAt = LocalDateTime.now();
     }
+
+    public void changeNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void changePasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
 }

@@ -2,6 +2,7 @@ package com.japantravel.festival.entity;
 
 import com.japantravel.prefecture.entity.Prefecture;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Formula;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,4 +42,11 @@ public class Festival {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "prefecture_id")
     private Prefecture prefecture;
+
+//  리뷰 집계 (D-057). destination 과 같은 규칙.
+    @Formula("(select avg(r.rating) from review_festivals r where r.festival_id = id)")
+    private Double avgRating;
+
+    @Formula("(select count(*) from review_festivals r where r.festival_id = id)")
+    private long reviewCount;
 }

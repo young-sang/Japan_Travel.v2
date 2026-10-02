@@ -13,7 +13,10 @@ public record DestinationResponse(
         Double lat,
         Double lng,
         String imagePath,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+//      리뷰 집계 (D-057). 평균은 소수 첫째 자리, 리뷰가 없으면 null
+        Double avgRating,
+        long reviewCount
 ) {
     public static DestinationResponse from(Destination d) {
         return new DestinationResponse(
@@ -25,7 +28,13 @@ public record DestinationResponse(
                 d.getLat(),
                 d.getLng(),
                 d.getImagePath(),
-                d.getCreatedAt()
+                d.getCreatedAt(),
+                round1(d.getAvgRating()),
+                d.getReviewCount()
         );
+    }
+
+    private static Double round1(Double avg) {
+        return avg == null ? null : Math.round(avg * 10) / 10.0;
     }
 }

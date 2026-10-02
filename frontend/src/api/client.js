@@ -89,4 +89,9 @@ export const api = {
   me: () => req('/api/auth/me'),
   login: (username, password) => req('/api/auth/login', { method: 'POST', body: { username, password } }),
   signup: (username, password, nickname) => req('/api/auth/signup', { method: 'POST', body: { username, password, nickname } }),
+
+  // account — 계정 관리 (D-056). 비밀번호 불일치는 code WRONG_PASSWORD (400)
+  updateProfile: (nickname) => req('/api/me/profile', { method: 'PATCH', body: { nickname } }),
+  changePassword: (currentPassword, newPassword) => req('/api/me/password', { method: 'PUT', body: { currentPassword, newPassword } }),
+  withdraw: (password) => req('/api/me', { method: 'DELETE', body: { password } }),
 };

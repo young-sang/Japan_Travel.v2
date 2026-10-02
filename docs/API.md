@@ -74,6 +74,34 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 
 ---
 
+## 계정 관리 — `AccountController` (`/api/me`) (D-056)
+
+| 메서드 | 경로 | 권한 | 성공 | 설명 |
+|---|---|---|---|---|
+| PATCH | `/api/me/profile` | 🔑 | 200 | 닉네임 수정 |
+| PUT | `/api/me/password` | 🔑 | 200 | 비밀번호 변경. 현재 비밀번호 확인 |
+| DELETE | `/api/me` | 🔑 | 200 | 회원 탈퇴. 찜 · 리뷰 · 코스 · 기록도 CASCADE 로 삭제 |
+
+**요청**
+
+```json
+// PATCH /api/me/profile — ProfileUpdateRequest
+{ "nickname": "새닉네임" }
+
+// PUT /api/me/password — PasswordChangeRequest
+{ "currentPassword": "pw1234", "newPassword": "newpw5678" }
+
+// DELETE /api/me — WithdrawRequest
+{ "password": "pw1234" }
+```
+
+**응답 `data`** — profile 은 바뀐 `UserResponse`, password · 탈퇴는 `null`.
+비밀번호를 바꿔도 이미 받은 토큰은 만료까지 유효하다 (D-033).
+
+**에러** — `WRONG_PASSWORD`(400, password · 탈퇴) · `UNAUTHORIZED`(401, 토큰 없음 · 사용자 삭제됨)
+
+---
+
 ## 여행지 — `DestinationController` (`/api/destinations`)
 
 | 메서드 | 경로 | 권한 | 설명 |
@@ -87,10 +115,14 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 
 **응답 `data`** — 목록은 배열, 상세는 객체 하나. 둘 다 `DestinationResponse` 이다.
 
+- `avgRating` · `reviewCount` — 리뷰 집계 (D-057). 평균은 소수 첫째 자리, 리뷰가 없으면 `null` · `0`.
+  같은 DTO 를 쓰는 찜 · 검색 응답에도 실린다. 축제(`FestivalResponse`)도 같다.
+
 ```json
 { "id": 12, "name": "...", "prefecture": "교토부",
   "description": "...", "lat": 34.99, "lng": 135.78,
-  "imagePath": "...", "createdAt": "2026-09-22T10:00:00" }
+  "imagePath": "...", "createdAt": "2026-09-22T10:00:00",
+  "avgRating": 4.3, "reviewCount": 12 }
 ```
 
 **에러** — `PREFECTURE_NOT_FOUND`(404) · `DESTINATION_NOT_FOUND`(404) · `TYPE_MISMATCH`(400, `id` 가 숫자 아님)
@@ -114,7 +146,8 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 { "id": 3, "name": "...", "prefecture": "교토부",
   "month": 7, "dateText": "7월 중",
   "description": "...", "lat": 35.00, "lng": 135.77,
-  "imagePath": "...", "createdAt": "2026-09-22T10:00:00" }
+  "imagePath": "...", "createdAt": "2026-09-22T10:00:00",
+  "avgRating": 4.3, "reviewCount": 12 }
 ```
 
 **에러** — `PREFECTURE_NOT_FOUND`(404) · `FESTIVAL_NOT_FOUND`(404) · `INVALID_MONTH`(400) · `TYPE_MISMATCH`(400)
