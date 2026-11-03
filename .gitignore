@@ -61,3 +61,17 @@ data/legacy_*.db
 
 # fetch_commons_images.py 의 API 응답 캐시 (D-063)
 scripts/commons_images_cache.json
+
+# IntelliJ 빌드 출력
+backend/out/
+
+# 옛 SQLite 원본 — 시드 변환은 끝났고 MySQL 로 옮겼다. 파일은 로컬에 두고 추적만 끊는다 (D-066)
+data/japan_travel.db
+
+# 데스크톱 앱 미리보기 설정 — 실행 파일 경로가 이 PC 기준이다
+.claude/launch.json
+
+# 계획서 · 발표 자료 (hwp · docx · pptx) — 저장소 밖 산출물
+/*.hwp
+/*.docx
+/*.pptx
