@@ -55,9 +55,13 @@ com.japantravel
   app look healthy: `netstat -ano | grep ":8080" | grep LISTEN`.
 - Korean query params must be percent-encoded in curl on Git Bash, or Tomcat returns 400:
   `python -c "import urllib.parse;print(urllib.parse.quote('도쿄도'))"`.
-- Smoke scripts: `bash scripts/smoke/<name>.sh` (`account`, `error`, `history_search`, `rating`).
+- **Tests (D-062)**: `./gradlew test`. Uses the `japan_travel_test` DB on the same local MySQL (profile `test`).
+  - `*ApiTest` extends `support/IntegrationTest` — MockMvc, commits per request, wipes `users` before each test
+    (CASCADE clears user data), seed is read-only. Look up seed ids with `jdbc`, never hard-code them.
+  - `*ServiceTest` — Mockito unit tests; build entities with `support/Fixtures` (assign fixtures to a variable before `when(...)`).
+  - When you add or change an endpoint or a service rule, add or update the matching test.
+- Smoke scripts against a running app: `bash scripts/smoke/<name>.sh` (`account`, `error`, `history_search`, `rating`).
 - Auth smoke: sign up via `POST /api/auth/signup`, take `data.token`, send `Authorization: Bearer <token>`.
-- No JUnit suite exists; verify by curl + log inspection.
 
 # Out of scope
 

@@ -82,13 +82,19 @@ http://localhost:5173 에 접속한다. `/api` 요청은 Vite 프록시가 `:808
 
 ## 검증
 
-자동 테스트는 아직 없다. 백엔드를 띄운 상태에서 스모크 스크립트를 돌린다.
+백엔드 자동 테스트 (D-062) — 로컬 MySQL 이 켜져 있고 `DB_PASSWORD` 가 설정돼 있어야 한다.
+같은 서버의 `japan_travel_test` DB 를 쓰고(없으면 만든다), 운영 `japan_travel` 은 건드리지 않는다.
 
 ```bash
-bash scripts/smoke/account.sh
+cd backend && ./gradlew test
 ```
 
-`scripts/smoke/` 에 `account` · `error` · `history_search` · `rating` 이 있다.
+| 층 | 위치 | 내용 |
+|---|---|---|
+| API 통합 | `src/test/java/.../*ApiTest.java` | MockMvc 로 엔드포인트 전부의 성공 경로와 401 · 403 · 404 · 400 규칙 |
+| 서비스 단위 | `src/test/java/.../*ServiceTest.java` | Mockito 로 판정 순서 · 멱등 · seq 매기기 · 정렬 규칙 |
+
+앱을 띄운 상태에서 보는 curl 스모크 스크립트도 남아 있다 — `scripts/smoke/` 의 `account` · `error` · `history_search` · `rating`.
 
 ## 디자인 보존
 
