@@ -20,7 +20,8 @@ export function CardMedia({ src, alt = '', aspect = '4/3', fallback, children, c
   };
   return (
     <div className={`${styles.media} ${className}`} style={{ aspectRatio: aspect }}>
-      {src && <img src={src} alt={alt} loading="lazy" onError={onError} />}
+      {/* 사진이 없어도 빈 회색 칸 대신 대체 이미지를 보인다 (D-064) */}
+      {(src || fallback) && <img src={src || fallback} alt={alt} loading="lazy" onError={onError} />}
       {children}
     </div>
   );

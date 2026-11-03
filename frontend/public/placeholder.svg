@@ -1,15 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="이미지 없음">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" role="img" aria-label="사진 준비 중">
+  <!-- 사진이 없거나 깨졌을 때 쓰는 대체 이미지 (D-064). 해 질 녘 하늘과 후지산 실루엣 -->
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#F2F2F2"/>
-      <stop offset="100%" stop-color="#E5E5E5"/>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FDE2E4"/>
+      <stop offset="60%" stop-color="#FAD0C4"/>
+      <stop offset="100%" stop-color="#F8B8A8"/>
+    </linearGradient>
+    <linearGradient id="mt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7A8BA8"/>
+      <stop offset="100%" stop-color="#4F5D78"/>
     </linearGradient>
   </defs>
-  <rect width="400" height="300" fill="url(#g)"/>
-  <g fill="#BFBFBF" transform="translate(160 110)">
-    <rect x="0" y="0" width="80" height="60" rx="6" fill="none" stroke="#BFBFBF" stroke-width="3"/>
-    <circle cx="22" cy="22" r="8"/>
-    <path d="M6 54 L30 32 L48 46 L62 32 L74 54 Z"/>
-  </g>
-  <text x="200" y="210" text-anchor="middle" font-family="Pretendard, sans-serif" font-size="14" fill="#9E9E9E">이미지 준비 중</text>
+  <rect width="400" height="300" fill="url(#sky)"/>
+  <circle cx="290" cy="100" r="34" fill="#E8414F" opacity="0.85"/>
+  <path d="M40 300 L160 150 Q200 118 240 150 L360 300 Z" fill="url(#mt)"/>
+  <path d="M160 150 Q200 118 240 150 L222 166 L208 156 L196 168 L184 156 L172 166 Z" fill="#FFFFFF"/>
+  <path d="M0 300 L0 250 Q60 228 120 252 T240 250 T400 246 L400 300 Z" fill="#3E4A61" opacity="0.55"/>
+  <text x="200" y="285" text-anchor="middle" font-family="Pretendard, sans-serif" font-size="13" font-weight="600" fill="#FFFFFF" opacity="0.9">사진 준비 중</text>
 </svg>

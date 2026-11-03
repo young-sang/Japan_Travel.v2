@@ -66,6 +66,8 @@ users        1 ──< courses (owner, NULL = 기본 제공)   >──0..1 festi
 | `description` | TEXT | | |
 | `lat` · `lng` | DOUBLE | | 지도 표시용 |
 | `image_path` | VARCHAR(500) | | |
+| `image_credit` | VARCHAR(300) | | 사진 출처 "작가 / 라이선스 / Wikimedia Commons" (D-063) |
+| `image_source` | VARCHAR(500) | | 사진 원본 페이지 주소 |
 | `created_at` | DATETIME | NOT NULL | 자바 `LocalDateTime` (D-026 이 D-017 의 날짜 문제를 해결) |
 
 - `UNIQUE (name, prefecture_id)` — 같은 현 안에서 이름 중복 금지.

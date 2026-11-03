@@ -15,6 +15,8 @@ public record FestivalResponse(
         Double lat,
         Double lng,
         String imagePath,
+        String imageCredit,
+        String imageSource,
         LocalDateTime createdAt,
 //      리뷰 집계 (D-057). 평균은 소수 첫째 자리, 리뷰가 없으면 null
         Double avgRating,
@@ -31,6 +33,8 @@ public record FestivalResponse(
                 f.getLat(),
                 f.getLng(),
                 f.getImagePath(),
+                f.getImageCredit(),
+                f.getImageSource(),
                 f.getCreatedAt(),
                 round1(f.getAvgRating()),
                 f.getReviewCount()

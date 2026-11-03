@@ -112,15 +112,18 @@ export default function Detail() {
     <article className={styles.page}>
       {/* HERO */}
       <section className={styles.hero}>
-        {img ? (
-          <img
-            className={styles.heroImg}
-            src={img}
-            alt={name}
-            onError={(e) => { if (e.currentTarget.dataset.fb === '1') return; e.currentTarget.dataset.fb = '1'; e.currentTarget.src = '/placeholder.svg'; }}
-          />
-        ) : (
-          <div className={styles.heroFallback} aria-hidden="true">🗾</div>
+        {/* 사진이 없으면 카드와 같은 대체 이미지를 쓴다 (D-064) */}
+        <img
+          className={styles.heroImg}
+          src={img || '/placeholder.svg'}
+          alt={name}
+          onError={(e) => { if (e.currentTarget.dataset.fb === '1') return; e.currentTarget.dataset.fb = '1'; e.currentTarget.src = '/placeholder.svg'; }}
+        />
+        {/* CC BY · BY-SA 사진은 출처를 밝혀야 한다 (D-063) */}
+        {img && item.imageCredit && (
+          <a className={styles.heroCredit} href={item.imageSource} target="_blank" rel="noreferrer">
+            사진: {item.imageCredit}
+          </a>
         )}
         <div className={styles.heroOverlay}>
           <div className={styles.heroLeft}>

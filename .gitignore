@@ -58,3 +58,6 @@ data/*.bak_*
 
 # 시드 원천 (옛 db 사본, git 에는 pre-greenfield 태그로 보존돼 있음)
 data/legacy_*.db
+
+# fetch_commons_images.py 의 API 응답 캐시 (D-063)
+scripts/commons_images_cache.json

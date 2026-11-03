@@ -17,7 +17,28 @@
   align-items: center;
   padding: 0 8%;
   box-sizing: border-box;
+  position: relative;
+  background-color: #2b3445;   /* 사진을 불러오기 전 */
+  background-size: cover;
+  background-position: center;
 }
+/* Detail.module.css 의 .heroCredit 과 같은 모양 (D-063). 아래쪽은 슬라이드 점과 겹쳐 위에 둔다 */
+.slideCredit {
+  position: absolute;
+  right: var(--space-2);
+  top: var(--space-2);
+  max-width: calc(100% - 2 * var(--space-2));
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.5);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.slideCredit:hover { text-decoration: underline; }
 .slideContent {
   color: #fff;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);

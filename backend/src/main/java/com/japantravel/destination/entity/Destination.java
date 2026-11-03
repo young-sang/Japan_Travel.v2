@@ -29,6 +29,13 @@ public class Destination {
     @Column(name = "image_path")
     private String imagePath;
 
+//  사진 출처 (D-063). 시드 사진은 images.sql 이 채운다
+    @Column(name = "image_credit")
+    private String imageCredit;
+
+    @Column(name = "image_source")
+    private String imageSource;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

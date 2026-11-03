@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 //  owner 가 null 이면 기본 제공 코스 (D-041). 기본 제공 코스는 API 로 아무도 고칠 수 없다.
@@ -80,6 +81,19 @@ public class Course {
 
     public void clearStops() {
         stops.clear();
+    }
+
+//  코스 사진이 비었을 때 대신 보여 줄 정류장 — (dayNo, seq) 순으로 원본 장소에 사진이 있는 첫 정류장.
+//  코스가 자기 사진을 가지거나 사진 있는 정류장이 없으면 null. 정류장을 LAZY 로 읽으므로 트랜잭션 안에서 부른다.
+    public CourseStop coverStop() {
+        if (imagePath != null) {
+            return null;
+        }
+        return stops.stream()
+                .sorted(Comparator.comparing(CourseStop::getDayNo).thenComparing(CourseStop::getSeq))
+                .filter(s -> s.placeImagePath() != null)
+                .findFirst()
+                .orElse(null);
     }
 
     public boolean isOwnedBy(Long userId) {

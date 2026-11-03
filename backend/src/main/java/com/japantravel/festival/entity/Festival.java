@@ -36,6 +36,13 @@ public class Festival {
     @Column(name = "image_path")
     private String imagePath;
 
+//  사진 출처 (D-063). destination 과 같다
+    @Column(name = "image_credit")
+    private String imageCredit;
+
+    @Column(name = "image_source")
+    private String imageSource;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

@@ -121,7 +121,8 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 ```json
 { "id": 12, "name": "...", "prefecture": "교토부",
   "description": "...", "lat": 34.99, "lng": 135.78,
-  "imagePath": "...", "createdAt": "2026-09-22T10:00:00",
+  "imagePath": "...", "imageCredit": "작가 / CC BY-SA 4.0 / Wikimedia Commons",
+  "imageSource": "https://commons.wikimedia.org/wiki/File:...", "createdAt": "2026-09-22T10:00:00",
   "avgRating": 4.3, "reviewCount": 12 }
 ```
 
@@ -146,7 +147,8 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 { "id": 3, "name": "...", "prefecture": "교토부",
   "month": 7, "dateText": "7월 중",
   "description": "...", "lat": 35.00, "lng": 135.77,
-  "imagePath": "...", "createdAt": "2026-09-22T10:00:00",
+  "imagePath": "...", "imageCredit": "작가 / CC BY-SA 4.0 / Wikimedia Commons",
+  "imageSource": "https://commons.wikimedia.org/wiki/File:...", "createdAt": "2026-09-22T10:00:00",
   "avgRating": 4.3, "reviewCount": 12 }
 ```
 
@@ -279,14 +281,19 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 { "id": 5, "title": "교토 1박 2일", "prefecture": "교토부", "imagePath": null,
   "isPublic": true, "ownerId": 11, "ownerNickname": "다나카", "createdAt": "2026-09-29T15:00:00" }
 
-// CourseResponse = 요약 + description · updatedAt · stops
-{ "id": 5, ..., "description": "...", "updatedAt": null,
+// CourseResponse = 요약 + description · imageCredit · imageSource · updatedAt · stops
+{ "id": 5, ..., "imagePath": "...", "imageCredit": "작가 / CC BY-SA 4.0 / Wikimedia Commons",
+  "imageSource": "https://commons.wikimedia.org/wiki/File:...", "description": "...", "updatedAt": null,
   "stops": [
     { "dayNo": 1, "seq": 1, "type": "DESTINATION", "targetId": 7, "name": "기요미즈데라", "prefecture": "교토부",
       "lat": 34.9949, "lng": 135.7850, "imagePath": "...", "memo": "아침 일찍" } ] }
 ```
 
 - `stops` 는 `(dayNo, seq)` 오름차순. 이름 · 좌표 · 사진은 원본 여행지·축제에서 온다 (복사해 두지 않는다).
+- **대표 사진 대체** — 코스의 `image_path` 가 비었으면 `(dayNo, seq)` 순으로 원본 여행지·축제에 사진이 있는
+  첫 정류장의 사진을 `imagePath` 로 싣는다 (목록 · 상세 · 검색 결과 모두). 그런 정류장도 없으면 `null`.
+- `imageCredit` · `imageSource` (상세 · POST · PUT 만) — 정류장 사진을 대신 쓸 때 그 장소의 출처
+  ("작가 / 라이선스 / Wikimedia Commons") 와 원본 페이지. 코스가 자기 사진을 가지면 둘 다 `null`.
 - 정류장의 `prefecture` 는 원본 장소의 현이다 — 코스의 대표 현과 다를 수 있다.
 - `ownerId` — 프론트가 `/api/auth/me` 의 `id` 와 비교해 내 코스에만 수정 · 삭제 버튼을 보인다.
 

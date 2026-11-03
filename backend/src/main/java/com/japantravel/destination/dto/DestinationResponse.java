@@ -13,6 +13,9 @@ public record DestinationResponse(
         Double lat,
         Double lng,
         String imagePath,
+//      사진 출처 "작가 / 라이선스 / Wikimedia Commons" 와 원본 페이지 (D-063). 사진이 없거나 직접 넣은 사진이면 null
+        String imageCredit,
+        String imageSource,
         LocalDateTime createdAt,
 //      리뷰 집계 (D-057). 평균은 소수 첫째 자리, 리뷰가 없으면 null
         Double avgRating,
@@ -28,6 +31,8 @@ public record DestinationResponse(
                 d.getLat(),
                 d.getLng(),
                 d.getImagePath(),
+                d.getImageCredit(),
+                d.getImageSource(),
                 d.getCreatedAt(),
                 round1(d.getAvgRating()),
                 d.getReviewCount()

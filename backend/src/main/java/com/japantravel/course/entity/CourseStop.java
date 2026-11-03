@@ -55,4 +55,17 @@ public class CourseStop {
     public static CourseStop of(Course course, Integer dayNo, Integer seq, Festival festival, String memo) {
         return new CourseStop(course, dayNo, seq, null, festival, memo);
     }
+
+//  원본 장소(여행지 또는 축제)의 사진 · 출처
+    public String placeImagePath() {
+        return destination != null ? destination.getImagePath() : festival.getImagePath();
+    }
+
+    public String placeImageCredit() {
+        return destination != null ? destination.getImageCredit() : festival.getImageCredit();
+    }
+
+    public String placeImageSource() {
+        return destination != null ? destination.getImageSource() : festival.getImageSource();
+    }
 }

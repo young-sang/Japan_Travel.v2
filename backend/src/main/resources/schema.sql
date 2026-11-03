@@ -23,6 +23,8 @@ CREATE TABLE IF NOT EXISTS destinations (
   lat           DOUBLE,
   lng           DOUBLE,
   image_path    VARCHAR(500),
+  image_credit  VARCHAR(300),                    -- 사진 출처 "작가 / 라이선스 / Wikimedia Commons" (D-063)
+  image_source  VARCHAR(500),                    -- 사진 원본 페이지 주소
   created_at    DATETIME NOT NULL,
   UNIQUE (name, prefecture_id),
   FOREIGN KEY (prefecture_id) REFERENCES prefectures(id)
@@ -38,12 +40,32 @@ CREATE TABLE IF NOT EXISTS festivals (
   lat           DOUBLE,
   lng           DOUBLE,
   image_path    VARCHAR(500),
+  image_credit  VARCHAR(300),
+  image_source  VARCHAR(500),
   created_at    DATETIME NOT NULL,
   UNIQUE (name, prefecture_id),
   FOREIGN KEY (prefecture_id) REFERENCES prefectures(id),
   -- MySQL 은 8.0.16 부터 CHECK 를 실제로 강제한다 (그 이전은 파싱만 하고 무시)
   CHECK (month BETWEEN 1 AND 12)
 );
+
+-- 사진 출처 컬럼은 나중에 생겼다 (D-063). 위 CREATE 는 이미 있는 테이블을 건드리지 않으므로, 기존 DB 에는
+-- 컬럼이 없을 때만 ALTER 한다. MySQL 8 에는 ADD COLUMN IF NOT EXISTS 가 없어 information_schema 로 확인한다.
+SET @ddl = (SELECT IF(COUNT(*) = 0,
+  'ALTER TABLE destinations ADD COLUMN image_credit VARCHAR(300) AFTER image_path, ADD COLUMN image_source VARCHAR(500) AFTER image_credit',
+  'DO 0') FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'destinations' AND column_name = 'image_credit');
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @ddl = (SELECT IF(COUNT(*) = 0,
+  'ALTER TABLE festivals ADD COLUMN image_credit VARCHAR(300) AFTER image_path, ADD COLUMN image_source VARCHAR(500) AFTER image_credit',
+  'DO 0') FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'festivals' AND column_name = 'image_credit');
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- favorite (Task 3) — 대상별로 테이블을 나눈다 (D-022). 키는 id + UNIQUE (D-036)
 -- UNIQUE 가 user_id 로 시작하므로 "내 목록" 조회의 인덱스도 겸한다
