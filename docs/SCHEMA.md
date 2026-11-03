@@ -199,7 +199,7 @@ D-010 시점에 쓰였으므로, `places` 를 가리키는 부분은 아래처�
 
 | Task | 테이블 | 비고 |
 |---|---|---|
-| 보류 | `posts` · `post_comments` | D-040 으로 미룸 |
+| — | (없음) | 남은 Task 없음. `posts` · `post_comments` 는 만들지 않는다 (D-061) |
 
 1차에서 만들지 않는 것 — `tags` 계열(D-024), `collections` · `collection_items` · `achievements`,
 `bulk_runs` · `collector_runs` · `audit_log` (D-009).

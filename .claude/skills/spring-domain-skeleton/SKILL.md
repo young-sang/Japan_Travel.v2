@@ -1,6 +1,6 @@
 ---
 name: spring-domain-skeleton
-description: Japan Travel 백엔드에서 도메인 하나를 만드는 전체 흐름(설계 재정리 → 계약 결정 → 스펙 검수 → 스키마·스켈레톤 → 계층별 채우기 → 스모크)을 게이트마다 멈추며 진행하고, 그 안에서 5계층 스켈레톤(controller/service/repository/entity/dto)을 생성한다. "destination 도메인 만들어줘", "festival 도메인 세팅해줘", "도메인 뼈대 만들어", "Task N 시작하자", "course 시작", "create post domain", "spring domain skeleton", "add domain package", 이미 만든 도메인의 "사후 검수" 같은 요청에 사용할 것. 이 프로젝트에서 새 도메인 패키지를 추가하거나 도메인 구현을 시작·검수하려는 맥락이면 항상 이 스킬을 쓴다.
+description: Japan Travel 백엔드에서 도메인 하나를 만드는 전체 흐름(설계 재정리 → 계약 결정 → 스펙 검수 → 스키마·스켈레톤 → 계층별 채우기 → 스모크)을 게이트마다 멈추며 진행하고, 그 안에서 5계층 스켈레톤(controller/service/repository/entity/dto)을 생성한다. "destination 도메인 만들어줘", "festival 도메인 세팅해줘", "도메인 뼈대 만들어", "Task N 시작하자", "course 시작", "spring domain skeleton", "add domain package", 이미 만든 도메인의 "사후 검수" 같은 요청에 사용할 것. 이 프로젝트에서 새 도메인 패키지를 추가하거나 도메인 구현을 시작·검수하려는 맥락이면 항상 이 스킬을 쓴다.
 ---
 
 # 도메인 만들기 (Japan Travel)
@@ -170,8 +170,8 @@ grep -rl "@SpringBootApplication" --include=*.java backend/src/main/java
 
 | 용도 | 형태 | 예 |
 |---|---|---|
-| 패키지명 | 소문자 단수 | `destination`, `post` |
-| 클래스명 | PascalCase | `Destination`, `Post` |
+| 패키지명 | 소문자 단수 | `destination`, `course` |
+| 클래스명 | PascalCase | `Destination`, `Course` |
 | URL 경로 | 복수형 | `/api/destinations` |
 
 **테이블 이름은 복수형 규칙으로 만들지 말고 `schema.sql` 에서 확인한다.**
@@ -191,7 +191,6 @@ grep -n "CREATE TABLE" backend/src/main/resources/schema.sql
 | `destination` · `festival` · `user` | `destinations` · `festivals` · `users` | 도메인 하나에 테이블 하나 |
 | `favorite` · `review` · `history` | `<도메인>_destinations` · `<도메인>_festivals` | **대상별로 2개** (D-022 · D-036). 5단계의 변형 규칙을 따른다 |
 | `course` | `courses` + `course_stops` | 테이블 2개. `course_tags` 는 없다 (D-024) |
-| `post` | `posts` + `post_comments` | 테이블 2개 |
 | `search` | 없음 | **엔티티·리포지토리를 만들지 않는다** |
 
 **대응하는 테이블이 없으면** `entity` 와 `repository` 를 만들지 않고

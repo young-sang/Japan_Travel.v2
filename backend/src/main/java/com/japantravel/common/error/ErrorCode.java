@@ -26,7 +26,7 @@ public enum ErrorCode {
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다"),
 //  비밀번호 변경 · 탈퇴의 본인 확인 실패. 401 이 아니다 — 로그인은 유효하다 (D-056)
     WRONG_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 올바르지 않습니다"),
-//  남의 것을 건드림. 도메인 이름을 붙이지 않는다 — review · course · post 가 같이 쓴다
+//  남의 것을 건드림. 도메인 이름을 붙이지 않는다 — review · course 가 같이 쓴다
     FORBIDDEN(HttpStatus.FORBIDDEN, "권한이 없습니다"),
 
 //  review

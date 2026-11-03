@@ -29,7 +29,7 @@ export default function App() {
         <ErrorBoundary>
           <Routes>
             <Route path="/" element={<Home />} />
-            {/* 게시판(D-040) · 관리자(D-009) 는 부를 API 가 없어 라우트에서 뺐다 (D-054). 파일은 남아 있다 */}
+            {/* 관리자(D-009) 는 부를 API 가 없어 라우트에서 뺐다 (D-054). 파일은 남아 있다. 게시판은 D-061 로 삭제 */}
             <Route path="/destination" element={<Destination />} />
             <Route path="/festival" element={<Festival />} />
             <Route path="/course" element={<Course />} />
@@ -45,7 +45,7 @@ export default function App() {
             <Route path="/mypage/:tab" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
             <Route path="/mypage/courses/new" element={<ProtectedRoute><CourseBuilder /></ProtectedRoute>} />
             <Route path="/mypage/courses/:id/edit" element={<ProtectedRoute><CourseBuilder /></ProtectedRoute>} />
-            {/* 숨긴 화면(/board · /admin)의 옛 링크나 북마크로 들어와도 빈 화면 대신 홈으로 */}
+            {/* 숨긴 화면(/admin) 이나 삭제한 게시판(/board)의 옛 링크나 북마크로 들어와도 빈 화면 대신 홈으로 */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </ErrorBoundary>

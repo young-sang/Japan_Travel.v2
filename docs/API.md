@@ -357,7 +357,7 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 
 | Task | 도메인 | 대략의 범위 |
 |---|---|---|
-| 보류 | `post` | 게시판 글 + 댓글. Task 7 전에 다시 봄 (D-040) |
 | — | destination 제안·승인 | 인증 이후로 미룸 (D-030) |
 
 1차에서 뺀 것 — 날씨·환율 프록시(D-032), 관리자 API 전부(D-009).
+하지 않기로 한 것 — `post` 게시판 글 + 댓글 (D-061).
