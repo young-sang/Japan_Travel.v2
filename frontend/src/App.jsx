@@ -45,6 +45,8 @@ export default function App() {
             <Route path="/mypage/:tab" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
             <Route path="/mypage/courses/new" element={<ProtectedRoute><CourseBuilder /></ProtectedRoute>} />
             <Route path="/mypage/courses/:id/edit" element={<ProtectedRoute><CourseBuilder /></ProtectedRoute>} />
+            {/* 숨긴 화면(/board · /admin)의 옛 링크나 북마크로 들어와도 빈 화면 대신 홈으로 */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </ErrorBoundary>
       </main>

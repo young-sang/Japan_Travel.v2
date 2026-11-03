@@ -39,7 +39,7 @@ export default function Login() {
         borderRadius: 'var(--radius-lg)' }}>
         <h1 style={{ marginTop: 0, fontSize: 'var(--fs-xl)', fontWeight: 700 }}>로그인</h1>
         <p style={{ color: 'var(--color-ink-500)', fontSize: 'var(--fs-sm)', marginBottom: 'var(--space-5)' }}>
-          데모 계정: <code>admin</code> / <code>admin1234</code>
+          즐겨찾기 · 리뷰 · 내 코스는 로그인 후 쓸 수 있어요.
         </p>
         <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
           <Field label="아이디" required>

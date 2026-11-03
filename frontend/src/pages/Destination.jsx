@@ -47,7 +47,7 @@ export default function Destination() {
       <PageHeader
         eyebrow="둘러보기"
         title="일본 여행지"
-        subtitle="현(都道府県)과 테마로 골라보는 일본 곳곳의 명소"
+        subtitle="현(都道府県)별로 골라보는 일본 곳곳의 명소"
       />
       <ListPageLayout
         sidebar={
