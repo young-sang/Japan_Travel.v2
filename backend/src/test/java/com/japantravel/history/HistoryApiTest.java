@@ -40,9 +40,7 @@ class HistoryApiTest extends IntegrationTest {
         long festivalId = festivalId();
         mockMvc.perform(auth(post("/api/me/history/destinations/{id}", destinationId), token));
         mockMvc.perform(auth(post("/api/me/history/festivals/{id}", festivalId), token));
-//      visited_at 은 초 단위 DATETIME 이라 같은 초 안의 두 기록은 순서가 정해지지 않는다. 시각을 벌려 둔다
-        jdbc.update("UPDATE history_destinations SET visited_at = NOW() - INTERVAL 2 HOUR");
-        jdbc.update("UPDATE history_festivals SET visited_at = NOW() - INTERVAL 1 HOUR");
+//      같은 초 안의 두 기록도 visited_at(마이크로초, D-065) 으로 순서가 갈린다
 
         mockMvc.perform(auth(get("/api/me/history"), token))
                 .andExpect(jsonPath("$.data.length()").value(2))

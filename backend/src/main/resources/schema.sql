@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS review_destinations (
   destination_id BIGINT   NOT NULL,
   rating         INT      NOT NULL,
   comment        TEXT,
-  created_at     DATETIME NOT NULL,
+  created_at     DATETIME(6) NOT NULL,
   updated_at     DATETIME,
   FOREIGN KEY (user_id)        REFERENCES users(id)        ON DELETE CASCADE,
   FOREIGN KEY (destination_id) REFERENCES destinations(id) ON DELETE CASCADE,
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS review_festivals (
   festival_id BIGINT   NOT NULL,
   rating      INT      NOT NULL,
   comment     TEXT,
-  created_at  DATETIME NOT NULL,
+  created_at  DATETIME(6) NOT NULL,
   updated_at  DATETIME,
   FOREIGN KEY (user_id)     REFERENCES users(id)     ON DELETE CASCADE,
   FOREIGN KEY (festival_id) REFERENCES festivals(id) ON DELETE CASCADE,
@@ -156,7 +156,7 @@ CREATE TABLE IF NOT EXISTS history_destinations (
   id             BIGINT AUTO_INCREMENT PRIMARY KEY,
   user_id        BIGINT   NOT NULL,
   destination_id BIGINT   NOT NULL,
-  visited_at     DATETIME NOT NULL,
+  visited_at     DATETIME(6) NOT NULL,
   UNIQUE (user_id, destination_id),
   FOREIGN KEY (user_id)        REFERENCES users(id)        ON DELETE CASCADE,
   FOREIGN KEY (destination_id) REFERENCES destinations(id) ON DELETE CASCADE
@@ -166,11 +166,41 @@ CREATE TABLE IF NOT EXISTS history_festivals (
   id          BIGINT AUTO_INCREMENT PRIMARY KEY,
   user_id     BIGINT   NOT NULL,
   festival_id BIGINT   NOT NULL,
-  visited_at  DATETIME NOT NULL,
+  visited_at  DATETIME(6) NOT NULL,
   UNIQUE (user_id, festival_id),
   FOREIGN KEY (user_id)     REFERENCES users(id)     ON DELETE CASCADE,
   FOREIGN KEY (festival_id) REFERENCES festivals(id) ON DELETE CASCADE
 );
+
+-- 내 리뷰 · 최근 본 장소는 두 테이블을 합쳐 시각으로 정렬한다 (D-065). 초 단위면 같은 초의 기록끼리 순서가
+-- 흔들리므로 마이크로초로 둔다. 위 CREATE 는 기존 테이블을 건드리지 않으니 정밀도가 0 일 때만 ALTER 한다.
+SET @ddl = (SELECT IF(COUNT(*) = 1,
+  'ALTER TABLE review_destinations MODIFY created_at DATETIME(6) NOT NULL', 'DO 0') FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'review_destinations' AND column_name = 'created_at' AND datetime_precision = 0);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @ddl = (SELECT IF(COUNT(*) = 1,
+  'ALTER TABLE review_festivals MODIFY created_at DATETIME(6) NOT NULL', 'DO 0') FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'review_festivals' AND column_name = 'created_at' AND datetime_precision = 0);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @ddl = (SELECT IF(COUNT(*) = 1,
+  'ALTER TABLE history_destinations MODIFY visited_at DATETIME(6) NOT NULL', 'DO 0') FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'history_destinations' AND column_name = 'visited_at' AND datetime_precision = 0);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @ddl = (SELECT IF(COUNT(*) = 1,
+  'ALTER TABLE history_festivals MODIFY visited_at DATETIME(6) NOT NULL', 'DO 0') FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'history_festivals' AND column_name = 'visited_at' AND datetime_precision = 0);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 INSERT IGNORE INTO prefectures(name) VALUES
   ('홋카이도'), ('아오모리현'), ('이와테현'), ('미야기현'),

@@ -148,16 +148,12 @@ class ReviewApiTest extends IntegrationTest {
 
     @Test
     void 내_리뷰는_두_대상을_합쳐_최신순으로_본다() throws Exception {
-        long oldest = write(destinationId, 4);
+        write(destinationId, 4);
         long festivalId = festivalId();
-        long middle = body(mockMvc.perform(auth(withJson(post("/api/festivals/{id}/reviews", festivalId),
-                        Map.of("rating", 2)), token))
-                .andExpect(status().isCreated())).at("/data/id").asLong();
-        long newest = write(destinationId, 1);
-//      created_at 은 초 단위 DATETIME 이라 같은 초 안의 리뷰는 순서가 정해지지 않는다. 시각을 벌려 둔다
-        jdbc.update("UPDATE review_destinations SET created_at = NOW() - INTERVAL 3 HOUR WHERE id = ?", oldest);
-        jdbc.update("UPDATE review_festivals SET created_at = NOW() - INTERVAL 2 HOUR WHERE id = ?", middle);
-        jdbc.update("UPDATE review_destinations SET created_at = NOW() - INTERVAL 1 HOUR WHERE id = ?", newest);
+        mockMvc.perform(auth(withJson(post("/api/festivals/{id}/reviews", festivalId), Map.of("rating", 2)), token))
+                .andExpect(status().isCreated());
+        write(destinationId, 1);
+//      같은 초 안의 리뷰도 created_at(마이크로초, D-065) 으로 순서가 갈린다
         signup("suzuki");
 
         mockMvc.perform(auth(get("/api/me/reviews"), token))

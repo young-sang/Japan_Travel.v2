@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { MapContainer, TileLayer, CircleMarker, Polyline, Popup } from 'react-leaflet';
 import FavButton from '../components/FavButton.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
-import { api } from '../api/client.js';
+import { api, tokenStore } from '../api/client.js';
 import Container from '../components/ui/Container.jsx';
 import IconButton from '../components/ui/IconButton.jsx';
 import Tag from '../components/ui/Tag.jsx';
@@ -48,7 +48,8 @@ export default function Detail() {
       .then((d) => {
         if (cancelled) return;
         setItem(d);
-        if (isPlace(type)) api.touchHistory(type, Number(id)).catch(() => {});   // 비로그인이면 401 — 무시한다
+        // 비로그인이면 부르지 않는다(401 이 콘솔에 남는다). user 는 새로고침 직후 아직 비어 있을 수 있어 토큰으로 본다
+        if (isPlace(type) && tokenStore.get()) api.touchHistory(type, Number(id)).catch(() => {});
         if (d && d.prefecture) {
           api.listDestinations({ prefecture: d.prefecture })
             .then((list) => { if (!cancelled) setNearby(list.filter((x) => !(type === 'destination' && x.id === d.id)).slice(0, 6)); })

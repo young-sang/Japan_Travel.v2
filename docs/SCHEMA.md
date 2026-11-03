@@ -121,7 +121,7 @@ users        1 ──< courses (owner, NULL = 기본 제공)   >──0..1 festi
 | `destination_id` / `festival_id` | BIGINT | NOT NULL, FK → 대상 `ON DELETE CASCADE` | |
 | `rating` | INT | NOT NULL, `CHECK (1~5)` | 서비스가 먼저 검사한다 (DB 위반은 500 이 되므로) |
 | `comment` | TEXT | | 선택 |
-| `created_at` | DATETIME | NOT NULL | |
+| `created_at` | DATETIME(6) | NOT NULL | 마이크로초 — 내 리뷰는 두 테이블을 합쳐 이 값으로 정렬한다 (D-065) |
 | `updated_at` | DATETIME | | 수정할 때만 채운다. 작성 직후에는 NULL |
 
 - **UNIQUE 없음** — 같은 사용자가 같은 대상에 여러 개 쓸 수 있다 (D-013). 즐겨찾기와 다른 점.
@@ -172,7 +172,7 @@ users        1 ──< courses (owner, NULL = 기본 제공)   >──0..1 festi
 | `id` | BIGINT | PK, AUTO_INCREMENT | |
 | `user_id` | BIGINT | NOT NULL, FK → `users.id` `ON DELETE CASCADE` | |
 | `destination_id` / `festival_id` | BIGINT | NOT NULL, FK → 대상 `ON DELETE CASCADE` | |
-| `visited_at` | DATETIME | NOT NULL | 마지막으로 본 시각. 다시 보면 갱신된다. 목록 정렬 기준 |
+| `visited_at` | DATETIME(6) | NOT NULL | 마지막으로 본 시각. 다시 보면 갱신된다. 목록 정렬 기준. 마이크로초 (D-065) |
 
 - `UNIQUE (user_id, 대상_id)` — 대상당 1행. 기록은 find → 있으면 `visited_at` 갱신 / 없으면 INSERT.
 - 목록은 두 테이블을 각각 읽어 서비스에서 `visited_at DESC` 로 합친다.
