@@ -38,6 +38,9 @@ public enum ErrorCode {
 //  본문 규칙 위반은 어느 필드든 이 코드 하나 (D-047)
     INVALID_COURSE(HttpStatus.BAD_REQUEST, "코스 요청 값이 올바르지 않습니다"),
 
+//  news (D-079)
+    NEWS_NOT_FOUND(HttpStatus.NOT_FOUND, "뉴스를 찾을 수 없습니다"),
+
 //  Spring 이 던지는 요청 오류 (ApiExceptionHandler 가 변환)
     TYPE_MISMATCH(HttpStatus.BAD_REQUEST, "요청 값의 형식이 올바르지 않습니다"),
     MALFORMED_REQUEST(HttpStatus.BAD_REQUEST, "요청 본문을 읽을 수 없습니다"),

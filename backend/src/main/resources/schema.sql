@@ -172,6 +172,19 @@ CREATE TABLE IF NOT EXISTS history_festivals (
   FOREIGN KEY (festival_id) REFERENCES festivals(id) ON DELETE CASCADE
 );
 
+-- news — 관리자가 직접 쓰는 뉴스 (D-075 · D-079). 작성자 계정을 지워도 글은 남긴다
+CREATE TABLE IF NOT EXISTS news (
+  id             BIGINT AUTO_INCREMENT PRIMARY KEY,
+  title          VARCHAR(200) NOT NULL,
+  body           TEXT         NOT NULL,
+  image_path     VARCHAR(500),
+  image_credit   VARCHAR(300),                   -- 사진 출처 "작가 / 라이선스 / Wikimedia Commons" (D-063 과 같은 형식)
+  author_user_id BIGINT,
+  created_at     DATETIME(6)  NOT NULL,          -- 목록 정렬 기준. 같은 초에 여러 건이어도 순서가 갈린다 (D-065)
+  updated_at     DATETIME,                       -- 수정할 때만 채운다
+  FOREIGN KEY (author_user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
 -- 내 리뷰 · 최근 본 장소는 두 테이블을 합쳐 시각으로 정렬한다 (D-065). 초 단위면 같은 초의 기록끼리 순서가
 -- 흔들리므로 마이크로초로 둔다. 위 CREATE 는 기존 테이블을 건드리지 않으니 정밀도가 0 일 때만 ALTER 한다.
 SET @ddl = (SELECT IF(COUNT(*) = 1,

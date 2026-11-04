@@ -37,6 +37,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/courses/**").permitAll()
 //                      통합 검색은 공개 데이터만 돌려준다 (D-053)
                         .requestMatchers(HttpMethod.GET, "/api/search").permitAll()
+//                      뉴스 조회는 공개 (D-079)
+                        .requestMatchers(HttpMethod.GET, "/api/news/**").permitAll()
 //                      처리되지 않은 예외는 /error 로 포워드된다. 이걸 열지 않으면 500 이 401 로 바뀌어 나간다.
                         .requestMatchers("/error").permitAll()
 //                      기본을 닫는다. 새 도메인은 공개할 것만 위에 추가한다.
