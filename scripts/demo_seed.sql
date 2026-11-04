@@ -2,14 +2,17 @@
 --
 --   mysql -uroot -p --default-character-set=utf8mb4 japan_travel < scripts/demo_seed.sql
 --
--- 계정 5개, 비밀번호는 모두 demo1234. 메인 시연 계정은 demo — 교토 · 오사카 여행을 준비하는 사람이다.
+-- 계정 6개, 비밀번호는 모두 demo1234. 메인 시연 계정은 demo — 교토 · 오사카 여행을 준비하는 사람이다.
+-- admin 은 뉴스를 쓰는 관리자다 (D-079).
 -- 목록은 id 내림차순으로 보이므로(리뷰 · 코스 등) INSERT 마다 ORDER BY 로 오래된 것부터 id 를 받게 한다.
 -- 장소는 이름으로 찾는다. 시각은 NOW() 기준으로 두어 언제 돌려도 "최근" 으로 보인다.
 
 SET NAMES utf8mb4;
 
--- 다시 돌릴 때: 시연 계정을 지우면 코스 · 리뷰 · 즐겨찾기 · 최근 본 장소가 FK CASCADE 로 함께 지워진다
-DELETE FROM users WHERE username IN ('demo', 'kyoto_lover', 'foodie_park', 'photo_bear', 'weekend_trip');
+-- 다시 돌릴 때: 시연 계정을 지우면 코스 · 리뷰 · 즐겨찾기 · 최근 본 장소가 FK CASCADE 로 함께 지워진다.
+-- 뉴스는 작성자를 지워도 남으므로(ON DELETE SET NULL) admin 이 쓴 글을 먼저 지운다
+DELETE n FROM news n JOIN users u ON u.id = n.author_user_id WHERE u.username = 'admin';
+DELETE FROM users WHERE username IN ('demo', 'kyoto_lover', 'foodie_park', 'photo_bear', 'weekend_trip', 'admin');
 
 -- BCrypt("demo1234") — 회원가입 API 가 만든 해시를 그대로 옮겼다
 SET @pw = '$2a$10$nEA1HxHVCVOpeGkN2/LK2uwGplF7Ty.73iAXXzBigYKL0WCz/JLVG';
@@ -19,7 +22,29 @@ INSERT INTO users (username, password_hash, nickname, role, created_at) VALUES
   ('kyoto_lover',  @pw, '교토덕후',   'USER', NOW() - INTERVAL 60 DAY),
   ('foodie_park',  @pw, '먹방여행러', 'USER', NOW() - INTERVAL 45 DAY),
   ('photo_bear',   @pw, '사진찍는곰', 'USER', NOW() - INTERVAL 40 DAY),
-  ('weekend_trip', @pw, '주말여행자', 'USER', NOW() - INTERVAL 20 DAY);
+  ('weekend_trip', @pw, '주말여행자', 'USER', NOW() - INTERVAL 20 DAY),
+  ('admin',        @pw, '편집부',     'ADMIN', NOW() - INTERVAL 90 DAY);
+
+-- 뉴스 4건 — 직접 쓴 글. 사진은 여행지의 Commons 사진과 출처를 그대로 쓴다 (D-063 · D-079)
+INSERT INTO news (title, body, image_path, image_credit, author_user_id, created_at)
+SELECT v.title, v.body, d.image_path, d.image_credit, u.id, NOW(6) - INTERVAL v.days DAY
+FROM (VALUES
+  ROW('여행지 TOP 25 를 새로 열었습니다',
+      '여행자들이 많이 둘러보고, 찜하고, 리뷰를 남긴 여행지를 점수로 모아 TOP 25 페이지를 만들었습니다.\n본 사람은 1점, 찜은 2점, 리뷰는 3점입니다. 순위는 기록이 쌓이는 대로 바로 바뀝니다.\n홈 화면의 빠른 메뉴에서 들어갈 수 있습니다.',
+      '후시미 이나리 타이샤', 1),
+  ROW('교토 단풍 시즌, 붐비지 않게 다니는 법',
+      '11월 중순부터 12월 초까지 교토는 단풍을 보러 온 사람으로 가득합니다.\n기요미즈데라와 후시미 이나리는 아침 8시 전에 가면 한결 여유롭습니다. 아라시야마는 오후보다 오전이 낫고, 저녁에는 사찰마다 여는 야간 라이트업을 노려 보세요.\n이동은 버스보다 전철이 덜 막힙니다.',
+      '기요미즈데라', 4),
+  ROW('삿포로 눈축제 준비 체크리스트',
+      '2월 초 삿포로 눈축제는 오도리 공원 일대에 커다란 눈 조각이 늘어서는 홋카이도의 대표 겨울 행사입니다.\n밤 기온은 영하 10도 가까이 내려가니 방한화와 장갑, 핫팩을 꼭 챙기세요. 축제 기간에는 숙소가 빨리 차므로 일찍 예약하는 편이 좋습니다.\n오타루 눈빛 거리와 묶으면 이틀 일정으로 알맞습니다.',
+      '삿포로 오도리 공원', 9),
+  ROW('겨울에 떠나는 따뜻한 오키나와',
+      '12월에서 2월 사이에도 오키나와 본섬의 낮 기온은 20도 안팎입니다.\n바다 수영은 어렵지만 추라우미 수족관, 슈리성, 국제거리처럼 실내외를 오가는 일정에는 오히려 걷기 좋은 계절입니다.\n렌터카를 빌리면 북부 해안 드라이브까지 하루에 둘러볼 수 있습니다.',
+      '추라우미 수족관', 15)
+) AS v(title, body, place, days)
+JOIN users u ON u.username = 'admin'
+JOIN destinations d ON d.name = v.place
+ORDER BY v.days DESC;
 
 -- 여행지 리뷰. 주요 장소마다 2~4건이 보이도록 나눠 쓴다
 INSERT INTO review_destinations (user_id, destination_id, rating, comment, created_at)
@@ -188,9 +213,10 @@ LEFT JOIN destinations d ON d.name = v.dest
 LEFT JOIN festivals f ON f.name = v.fest
 ORDER BY c.id, v.day_no, v.seq;
 
--- 확인용 — 기대값: 사용자 5, 여행지 리뷰 29, 축제 리뷰 6, 즐겨찾기 18, 최근 본 53, 코스 3, 정류장 18, 점수 있는 여행지 32
+-- 확인용 — 기대값: 사용자 6, 뉴스 4, 여행지 리뷰 29, 축제 리뷰 6, 즐겨찾기 18, 최근 본 53, 코스 3, 정류장 18, 점수 있는 여행지 32
 SELECT
-  (SELECT COUNT(*) FROM users WHERE username IN ('demo', 'kyoto_lover', 'foodie_park', 'photo_bear', 'weekend_trip')) AS users,
+  (SELECT COUNT(*) FROM users WHERE username IN ('demo', 'kyoto_lover', 'foodie_park', 'photo_bear', 'weekend_trip', 'admin')) AS users,
+  (SELECT COUNT(*) FROM news) AS news,
   (SELECT COUNT(*) FROM review_destinations) AS review_dest,
   (SELECT COUNT(*) FROM review_festivals) AS review_fest,
   (SELECT COUNT(*) FROM favorite_destinations) + (SELECT COUNT(*) FROM favorite_festivals) AS favorites,
