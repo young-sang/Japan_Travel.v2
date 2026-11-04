@@ -39,4 +39,22 @@ public class News {
 //  수정하기 전에는 null
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    public News(User author, String title, String body, String imagePath, String imageCredit) {
+        this.author = author;
+        this.title = title;
+        this.body = body;
+        this.imagePath = imagePath;
+        this.imageCredit = imageCredit;
+        this.createdAt = LocalDateTime.now();
+    }
+
+//  save 를 다시 부르지 않는다 — 트랜잭션 안의 변경 감지가 UPDATE 를 낸다.
+    public void update(String title, String body, String imagePath, String imageCredit) {
+        this.title = title;
+        this.body = body;
+        this.imagePath = imagePath;
+        this.imageCredit = imageCredit;
+        this.updatedAt = LocalDateTime.now();
+    }
 }

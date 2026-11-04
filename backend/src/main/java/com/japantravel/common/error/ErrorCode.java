@@ -40,6 +40,8 @@ public enum ErrorCode {
 
 //  news (D-079)
     NEWS_NOT_FOUND(HttpStatus.NOT_FOUND, "뉴스를 찾을 수 없습니다"),
+//  제목 · 본문이 비었거나 제목이 200자를 넘음
+    INVALID_NEWS(HttpStatus.BAD_REQUEST, "뉴스 요청 값이 올바르지 않습니다"),
 
 //  Spring 이 던지는 요청 오류 (ApiExceptionHandler 가 변환)
     TYPE_MISMATCH(HttpStatus.BAD_REQUEST, "요청 값의 형식이 올바르지 않습니다"),

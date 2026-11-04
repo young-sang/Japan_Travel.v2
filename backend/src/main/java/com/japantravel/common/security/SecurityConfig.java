@@ -12,10 +12,11 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.AuthenticationEntryPoint;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @Configuration
@@ -39,11 +40,15 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/search").permitAll()
 //                      뉴스 조회는 공개 (D-079)
                         .requestMatchers(HttpMethod.GET, "/api/news/**").permitAll()
+//                      뉴스 쓰기 · 수정 · 삭제는 관리자만 (D-079). 거부는 accessDeniedHandler 가 403 으로 쓴다
+                        .requestMatchers("/api/news/**").hasRole("ADMIN")
 //                      처리되지 않은 예외는 /error 로 포워드된다. 이걸 열지 않으면 500 이 401 로 바뀌어 나간다.
                         .requestMatchers("/error").permitAll()
 //                      기본을 닫는다. 새 도메인은 공개할 것만 위에 추가한다.
                         .anyRequest().authenticated())
-                .exceptionHandling(e -> e.authenticationEntryPoint(unauthorizedEntryPoint(objectMapper)))
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint((req, res, ex) -> writeError(res, objectMapper, ErrorCode.UNAUTHORIZED))
+                        .accessDeniedHandler((req, res, ex) -> writeError(res, objectMapper, ErrorCode.FORBIDDEN)))
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -54,13 +59,12 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-//  필터 단계의 401 은 @RestControllerAdvice 까지 오지 않으므로 여기서 같은 모양의 JSON 을 쓴다.
-    private AuthenticationEntryPoint unauthorizedEntryPoint(ObjectMapper objectMapper) {
-        return (request, response, ex) -> {
-            response.setStatus(ErrorCode.UNAUTHORIZED.getStatus().value());
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-            objectMapper.writeValue(response.getWriter(), ApiResponse.fail(ErrorCode.UNAUTHORIZED));
-        };
+//  필터 단계의 401 · 403 은 @RestControllerAdvice 까지 오지 않으므로 여기서 같은 모양의 JSON 을 쓴다.
+    private static void writeError(HttpServletResponse response, ObjectMapper objectMapper, ErrorCode code)
+            throws IOException {
+        response.setStatus(code.getStatus().value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        objectMapper.writeValue(response.getWriter(), ApiResponse.fail(code));
     }
 }
