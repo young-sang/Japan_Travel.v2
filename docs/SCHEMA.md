@@ -29,6 +29,7 @@ Japan Travel v2 — **MySQL 8** (`localhost:3306/japan_travel`), `greenfield` �
 | `course_stops` | course | 코스의 정류장 — 여행지 또는 축제 하나 | Task 4 |
 | `history_destinations` | history | 최근 본 여행지 | Task 3 (D-052) |
 | `history_festivals` | history | 최근 본 축제 | Task 3 (D-052) |
+| `news` | news | 관리자가 쓰는 뉴스 | S3c (D-079) |
 
 ```
 prefectures  1 ──< destinations 1 ──< favorite_destinations >── 1 users
@@ -40,6 +41,7 @@ prefectures  1 ──< destinations 1 ──< favorite_destinations >── 1 us
 
 prefectures  1 ──< courses      1 ──< course_stops >──0..1 destinations
 users        1 ──< courses (owner, NULL = 기본 제공)   >──0..1 festivals   (둘 중 정확히 하나)
+users        1 ──< news    (author, 계정을 지우면 NULL)
 ```
 
 ---
@@ -176,6 +178,23 @@ users        1 ──< courses (owner, NULL = 기본 제공)   >──0..1 festi
 
 - `UNIQUE (user_id, 대상_id)` — 대상당 1행. 기록은 find → 있으면 `visited_at` 갱신 / 없으면 INSERT.
 - 목록은 두 테이블을 각각 읽어 서비스에서 `visited_at DESC` 로 합친다.
+
+---
+
+## `news`
+
+관리자가 직접 쓰는 뉴스 (D-075 · D-079). 작성자 계정을 지워도 글은 남는다.
+
+| 컬럼 | 타입 | 제약 | 설명 |
+|---|---|---|---|
+| `id` | BIGINT | PK, AUTO_INCREMENT | |
+| `title` | VARCHAR(200) | NOT NULL | |
+| `body` | TEXT | NOT NULL | 줄바꿈만 살리는 텍스트 |
+| `image_path` | VARCHAR(500) | | 대표 사진 URL (업로드 없음) |
+| `image_credit` | VARCHAR(300) | | 사진 출처. D-063 과 같은 형식 |
+| `author_user_id` | BIGINT | FK → `users.id` `ON DELETE SET NULL` | 작성한 관리자 |
+| `created_at` | DATETIME(6) | NOT NULL | 목록 정렬 기준. 마이크로초 (D-065) |
+| `updated_at` | DATETIME | | 수정할 때만 채운다 |
 
 ---
 

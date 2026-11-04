@@ -49,11 +49,13 @@
 | `LOGIN_FAILED` | 401 | 서비스 | 아이디 없음 또는 비밀번호 틀림 |
 | `UNAUTHORIZED` | 401 | 필터 · 서비스 | 로그인이 필요한데 유효한 토큰이 없음 |
 | `WRONG_PASSWORD` | 400 | 서비스 | 비밀번호 변경 · 탈퇴에서 비밀번호 확인 실패 |
-| `FORBIDDEN` | 403 | 서비스 | 남의 리소스를 고치거나 지우려 함 |
+| `FORBIDDEN` | 403 | 서비스 · 필터 | 남의 리소스를 고치거나 지우려 함, 또는 ADMIN 전용 경로에 일반 사용자 |
 | `REVIEW_NOT_FOUND` | 404 | 서비스 | 없는 리뷰 id, 또는 경로의 대상에 딸리지 않은 리뷰 |
 | `INVALID_RATING` | 400 | 서비스 | 별점이 없거나 1~5 밖 |
 | `COURSE_NOT_FOUND` | 404 | 서비스 | 없는 코스 id, 또는 남의 비공개 코스 |
 | `INVALID_COURSE` | 400 | 서비스 | 코스 요청 본문의 필수 값이 없거나 `dayNo < 1` |
+| `NEWS_NOT_FOUND` | 404 | 서비스 | 없는 뉴스 id |
+| `INVALID_NEWS` | 400 | 서비스 | 뉴스 제목 · 본문이 비었거나 제목이 200자 초과 |
 | `TYPE_MISMATCH` | 400 | Spring | 경로·쿼리 값의 타입 변환 실패 |
 | `MALFORMED_REQUEST` | 400 | Spring | 요청 본문 JSON 을 읽지 못함 |
 | `UNSUPPORTED_MEDIA_TYPE` | 415 | Spring | 본문의 Content-Type 이 JSON 이 아님 |
@@ -142,7 +144,9 @@
 - **무엇 때문에** 로그인은 했지만 그 리뷰 · 코스의 작성자가 아니다. 기본 제공 코스(작성자 없음)도 여기다.
 - **아닌 경우** 리뷰가 없으면 403 이 아니라 `REVIEW_NOT_FOUND` 다. 존재 확인이 작성자 확인보다 먼저다.
   **남의 비공개 코스는 403 이 아니라 `COURSE_NOT_FOUND`** 다 — 존재 자체를 숨긴다 (D-047).
-- 도메인 이름을 붙이지 않은 범용 코드다. review · course 가 같이 쓴다.
+- **필터에서도 난다** — 뉴스 쓰기 · 수정 · 삭제(`/api/news/**`, GET 제외)는 `SecurityConfig` 가 `hasRole("ADMIN")` 으로 막는다.
+  토큰은 유효한데 ADMIN 이 아니면 `accessDeniedHandler` 가 이 코드를 공용 봉투로 쓴다 (D-079). 토큰이 없으면 `UNAUTHORIZED` 다.
+- 도메인 이름을 붙이지 않은 범용 코드다. review · course · news 가 같이 쓴다.
 
 ### `REVIEW_NOT_FOUND` — 404
 
@@ -170,6 +174,18 @@
 - **아닌 경우** `type: "HOTEL"` 처럼 enum 밖의 값은 본문을 읽지 못해 `MALFORMED_REQUEST` 다.
   빈 `stops` · 일차 건너뜀 · 같은 장소 두 번은 에러가 아니다.
 - `PUT` 에서는 코스 존재 · 작성자 판정보다 먼저다 — 남의 코스에 잘못된 본문을 보내도 400 이 먼저 나간다.
+
+### `NEWS_NOT_FOUND` — 404
+
+- **어디서** `NewsService.get` (뉴스 상세 · `PUT` · `DELETE`)
+- **무엇 때문에** 그 id 의 뉴스가 없다. 삭제는 멱등이 아니라 두 번째 삭제도 이것이다.
+- **아닌 경우** 일반 사용자의 `PUT` · `DELETE` 는 존재와 상관없이 필터에서 `FORBIDDEN` 이 먼저 나간다.
+
+### `INVALID_NEWS` — 400
+
+- **어디서** `NewsService.validate` (뉴스 `POST` · `PUT`)
+- **무엇 때문에** `title` · `body` 가 없거나 공백뿐, 또는 `title` 이 200자를 넘는다. 판정하지 않으면 DB `NOT NULL` 위반이 500 이 된다.
+- **아닌 경우** `PUT` 에서는 뉴스 존재 판정(`NEWS_NOT_FOUND`)이 먼저다.
 
 ### `INVALID_RATING` — 400
 

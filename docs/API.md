@@ -365,6 +365,28 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 
 ---
 
+## 뉴스 — `NewsController` (`/api/news`)
+
+설계: [2026-11-04-news-api-design.md](superpowers/specs/2026-11-04-news-api-design.md) · D-075 · D-079
+
+| 메서드 | 경로 | 권한 | 상태 | 설명 |
+|---|---|---|---|---|
+| GET | `/api/news` | 🌐 | 200 | 목록. `created_at` 내림차순. 본문 대신 앞 100자 미리보기 |
+| GET | `/api/news/{id}` | 🌐 | 200 | 상세 |
+| POST | `/api/news` | 🔑 ADMIN | 201 | 작성 |
+| PUT | `/api/news/{id}` | 🔑 ADMIN | 200 | 수정 (네 필드 모두 덮어씀) |
+| DELETE | `/api/news/{id}` | 🔑 ADMIN | 200 | 삭제. `data` 는 `null` |
+
+- 권한은 `SecurityConfig` 가 경로로 막는다. 토큰 없음 → 401 `UNAUTHORIZED`, ADMIN 아님 → 403 `FORBIDDEN`.
+- 요청 `{ "title", "body", "imagePath"?, "imageCredit"? }` — 빈 문자열인 사진 필드는 `null` 로 저장한다.
+- 목록 한 칸 `{ id, title, excerpt, imagePath, createdAt }` — `excerpt` 는 줄바꿈을 공백으로 편 앞 100자, 넘으면 `…`.
+- 상세 · 작성 · 수정 응답 `{ id, title, body, imagePath, imageCredit, authorNickname, createdAt, updatedAt }` —
+  작성자 계정이 지워졌으면 `authorNickname` 은 `null`.
+
+**에러** — `NEWS_NOT_FOUND`(404) · `INVALID_NEWS`(400, 제목 · 본문이 비었거나 제목 200자 초과) · `UNAUTHORIZED`(401) · `FORBIDDEN`(403)
+
+---
+
 ## 예정 (아직 없음)
 
 [재작성 설계 문서](superpowers/specs/2026-09-17-greenfield-rebuild-design.md) 의 Task 순서를 따른다.
@@ -374,5 +396,5 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 |---|---|---|
 | — | destination 제안·승인 | 인증 이후로 미룸 (D-030) |
 
-1차에서 뺀 것 — 날씨·환율 프록시(D-032), 관리자 API 전부(D-009).
+1차에서 뺀 것 — 날씨·환율 프록시(D-032), 관리자 API(D-009). 관리자 기능은 뉴스 쓰기 하나만 되살렸다(D-075).
 하지 않기로 한 것 — `post` 게시판 글 + 댓글 (D-061).
