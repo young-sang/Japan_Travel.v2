@@ -117,7 +117,7 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
   동점이면 평균 평점 높은 순(리뷰 없는 곳은 뒤), 그다음 `id` 오름차순.
 
 ```json
-{ "rank": 1, "score": 17, "viewerCount": 3, "favoriteCount": 2,
+{ "rank": 1, "score": 17, "viewerCount": 4, "favoriteCount": 2,
   "destination": { "id": 198, "name": "후시미 이나리 타이샤", "prefecture": "교토부", "avgRating": 4.7, "reviewCount": 3, ... } }
 ```
 
