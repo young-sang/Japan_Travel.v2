@@ -59,6 +59,13 @@ export const api = {
   listFestivals: ({ prefecture, month } = {}) => req(`/api/festivals${query({ prefecture, month })}`),
   getFestival: (id) => req(`/api/festivals/${id}`),
 
+  // news — 조회는 공개, 쓰기 · 수정 · 삭제는 관리자만 (D-079)
+  listNews: () => req('/api/news'),
+  getNews: (id) => req(`/api/news/${id}`),
+  createNews: (body) => req('/api/news', { method: 'POST', body }),
+  updateNews: (id, body) => req(`/api/news/${id}`, { method: 'PUT', body }),
+  deleteNews: (id) => req(`/api/news/${id}`, { method: 'DELETE' }),
+
   // courses — 목록은 공개 코스 요약, 상세는 정류장까지 (D-046)
   listCourses: ({ prefecture } = {}) => req(`/api/courses${query({ prefecture })}`),
   myCourses: () => req('/api/me/courses'),

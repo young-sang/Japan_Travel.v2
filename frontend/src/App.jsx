@@ -13,6 +13,8 @@ import MyPage from './pages/MyPage.jsx';
 import CourseBuilder from './pages/CourseBuilder.jsx';
 import Login from './pages/Login.jsx';
 import Signup from './pages/Signup.jsx';
+import News from './pages/News.jsx';
+import NewsDetail from './pages/NewsDetail.jsx';
 import NotFound from './pages/NotFound.jsx';
 import ProtectedRoute from './auth/ProtectedRoute.jsx';
 import ErrorBoundary from './components/ui/ErrorBoundary.jsx';
@@ -28,14 +30,16 @@ export default function App() {
         <ErrorBoundary>
           <Routes>
             <Route path="/" element={<Home />} />
-            {/* 관리자(D-009) 는 부를 API 가 없어 라우트에서 뺐다 (D-054). 파일은 남아 있다. 게시판은 D-061 로 삭제.
-                뉴스는 관리자가 직접 쓰는 방식(D-075)이 생길 때까지 숨긴다 (D-073) */}
+            {/* 옛 관리자 화면(D-009) 은 부를 API 가 없어 라우트에서 뺐다 (D-054). 파일은 남아 있다. 게시판은 D-061 로 삭제 */}
             <Route path="/destination" element={<Destination />} />
             <Route path="/festival" element={<Festival />} />
             <Route path="/course" element={<Course />} />
             <Route path="/top25" element={<Top25 />} />
             {/* 옛 주소 — Top100 은 Top25 로 바뀌었다 (D-076) */}
             <Route path="/top100" element={<Navigate to="/top25" replace />} />
+            {/* 뉴스는 관리자가 직접 쓴다 (D-075 · D-079) */}
+            <Route path="/news" element={<News />} />
+            <Route path="/news/:id" element={<NewsDetail />} />
             <Route path="/tip" element={<Tip />} />
             <Route path="/tip/:slug" element={<TipDetail />} />
             <Route path="/detail/:type/:id" element={<Detail />} />

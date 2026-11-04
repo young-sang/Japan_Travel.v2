@@ -1,4 +1,17 @@
-/* 졸업작품의 뉴스 디자인. 옛 화면(언론사 기사 링크)은 지웠고, S3c 에서 관리자가 쓰는 뉴스 화면이 이 스타일을 다시 쓴다 (D-073 · D-075) */
+/* 졸업작품의 뉴스 디자인. 옛 화면(언론사 기사 링크)은 지웠고(D-073), 관리자가 쓰는 뉴스가 이 스타일을 다시 쓴다 (D-079).
+   .cardDate · .empty 는 그때 더했다 */
+.cardDate {
+  font-size: 12px;
+  color: #999;
+  margin: 4px 0 0;
+}
+
+.empty {
+  text-align: center;
+  padding: 60px 0;
+  color: #888;
+}
+
 .container {
   display: flex;
   gap: 40px;

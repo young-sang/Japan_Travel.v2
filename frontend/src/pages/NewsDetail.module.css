@@ -1,0 +1,57 @@
+/* 뉴스 상세 (D-079). 목록(News.module.css)의 졸업작품 톤 — Noto Sans KR · 둥근 사진 — 에 맞춘다 */
+.article {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+  font-family: 'Noto Sans KR', sans-serif;
+  color: #222;
+}
+
+.back {
+  font-size: 14px;
+  color: #666;
+  text-decoration: none;
+}
+
+.title {
+  font-size: 30px;
+  font-weight: bold;
+  line-height: 1.35;
+  margin: 16px 0 8px;
+}
+
+.meta {
+  font-size: 14px;
+  color: #888;
+  margin: 0 0 24px;
+}
+
+.figure {
+  margin: 0 0 28px;
+}
+
+.figure img {
+  width: 100%;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.figure figcaption {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #999;
+}
+
+/* 관리자가 쓴 줄바꿈을 그대로 보인다 */
+.body {
+  white-space: pre-line;
+  font-size: 16px;
+  line-height: 1.9;
+  color: #333;
+}
+
+.loading {
+  text-align: center;
+  padding: 60px 0;
+  color: #888;
+}
