@@ -107,11 +107,19 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 | 메서드 | 경로 | 권한 | 설명 |
 |---|---|---|---|
 | GET | `/api/destinations?prefecture=` | 🌐 | 목록. 최신순(`id` 내림차순) |
+| GET | `/api/destinations/ranking` | 🌐 | Top25 — 종합 점수 순위 (D-074 · D-076) |
 | GET | `/api/destinations/{id}` | 🌐 | 상세 |
 
 - `prefecture` — 선택. 현 **이름**(예: `교토부`). 없는 이름이면 `404 PREFECTURE_NOT_FOUND`,
   실재하는 현인데 0건이면 빈 목록 `[]`.
 - 태그 필터(`?tag=`)는 1차에서 뺐다 (D-024).
+- `ranking` — 점수 = 본 사람 수(`history_destinations`) + 즐겨찾기 × 2 + 리뷰 × 3. **0점은 빠지고** 최대 25개.
+  동점이면 평균 평점 높은 순(리뷰 없는 곳은 뒤), 그다음 `id` 오름차순.
+
+```json
+{ "rank": 1, "score": 17, "viewerCount": 3, "favoriteCount": 2,
+  "destination": { "id": 198, "name": "후시미 이나리 타이샤", "prefecture": "교토부", "avgRating": 4.7, "reviewCount": 3, ... } }
+```
 
 **응답 `data`** — 목록은 배열, 상세는 객체 하나. 둘 다 `DestinationResponse` 이다.
 
