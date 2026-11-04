@@ -109,6 +109,46 @@ JOIN users u ON u.username = 'demo'
 JOIN festivals f ON f.name = v.place
 ORDER BY v.mins DESC;
 
+-- 리뷰어들의 최근 본 장소 · 즐겨찾기 — Top25 종합 점수(D-074 · D-076)가 25곳 이상 채워지게 한다.
+-- 리뷰를 쓴 곳은 본 곳이기도 하다. 그 밖에 둘러본 곳을 더한다
+INSERT INTO history_destinations (user_id, destination_id, visited_at)
+SELECT r.user_id, r.destination_id, MIN(r.created_at)
+FROM review_destinations r
+JOIN users u ON u.id = r.user_id AND u.username <> 'demo'
+GROUP BY r.user_id, r.destination_id
+ORDER BY MIN(r.created_at);
+
+INSERT INTO history_destinations (user_id, destination_id, visited_at)
+SELECT u.id, d.id, NOW(6) - INTERVAL v.days DAY - INTERVAL v.seq SECOND
+FROM (VALUES
+  ROW(1,  'weekend_trip', '도쿄 스카이트리', 12),      ROW(2,  'weekend_trip', '메이지 신궁', 12),
+  ROW(3,  'weekend_trip', '우에노 공원', 11),          ROW(4,  'photo_bear',   '하코다테산 야경', 16),
+  ROW(5,  'photo_bear',   '비에이 청의 호수', 15),     ROW(6,  'photo_bear',   '후라노 팜 도미타', 15),
+  ROW(7,  'photo_bear',   '가마쿠라 대불', 9),         ROW(8,  'weekend_trip', '하코네 오와쿠다니', 8),
+  ROW(9,  'photo_bear',   '슈리성', 13),               ROW(10, 'foodie_park',  '국제거리', 13),
+  ROW(11, 'foodie_park',  '유니버설 스튜디오 재팬', 26), ROW(12, 'foodie_park',  '다자이후 텐만구', 23),
+  ROW(13, 'kyoto_lover',  '이쓰쿠시마 신사', 34),      ROW(14, 'kyoto_lover',  '평화 기념 공원', 34),
+  ROW(15, 'kyoto_lover',  '도쿄 스카이트리', 50),      ROW(16, 'foodie_park',  '도쿄 스카이트리', 24),
+  ROW(17, 'kyoto_lover',  '기요미즈데라', 1),          ROW(18, 'foodie_park',  '도톤보리', 1)
+) AS v(seq, username, place, days)
+JOIN users u ON u.username = v.username
+JOIN destinations d ON d.name = v.place
+LEFT JOIN history_destinations h ON h.user_id = u.id AND h.destination_id = d.id
+WHERE h.id IS NULL
+ORDER BY v.days DESC, v.seq;
+
+INSERT INTO favorite_destinations (user_id, destination_id, created_at)
+SELECT u.id, d.id, NOW() - INTERVAL v.days DAY
+FROM (VALUES
+  ROW('kyoto_lover', '후시미 이나리 타이샤', 38), ROW('kyoto_lover', '킨카쿠지', 33),
+  ROW('foodie_park', '니시키 시장', 28),          ROW('foodie_park', '도톤보리', 27),
+  ROW('photo_bear',  '아라시야마 대나무 숲', 21), ROW('photo_bear',  '하코다테산 야경', 16),
+  ROW('weekend_trip', '센소지', 15),              ROW('weekend_trip', '하코네 오와쿠다니', 8)
+) AS v(username, place, days)
+JOIN users u ON u.username = v.username
+JOIN destinations d ON d.name = v.place
+ORDER BY v.days DESC;
+
 -- 코스 3개: demo 의 공개 · 비공개 코스, 다른 사용자의 공개 코스
 INSERT INTO courses (title, description, prefecture_id, owner_user_id, is_public, created_at)
 SELECT v.title, v.description, p.id, u.id, v.pub, NOW() - INTERVAL v.days DAY
@@ -148,7 +188,7 @@ LEFT JOIN destinations d ON d.name = v.dest
 LEFT JOIN festivals f ON f.name = v.fest
 ORDER BY c.id, v.day_no, v.seq;
 
--- 확인용 — 기대값: 사용자 5, 여행지 리뷰 29, 축제 리뷰 6, 즐겨찾기 10, 최근 본 10, 코스 3, 정류장 18
+-- 확인용 — 기대값: 사용자 5, 여행지 리뷰 29, 축제 리뷰 6, 즐겨찾기 18, 최근 본 53, 코스 3, 정류장 18, 점수 있는 여행지 32
 SELECT
   (SELECT COUNT(*) FROM users WHERE username IN ('demo', 'kyoto_lover', 'foodie_park', 'photo_bear', 'weekend_trip')) AS users,
   (SELECT COUNT(*) FROM review_destinations) AS review_dest,
@@ -156,4 +196,7 @@ SELECT
   (SELECT COUNT(*) FROM favorite_destinations) + (SELECT COUNT(*) FROM favorite_festivals) AS favorites,
   (SELECT COUNT(*) FROM history_destinations) + (SELECT COUNT(*) FROM history_festivals) AS history,
   (SELECT COUNT(*) FROM courses WHERE owner_user_id IS NOT NULL) AS courses,
-  (SELECT COUNT(*) FROM course_stops s JOIN courses c ON c.id = s.course_id WHERE c.owner_user_id IS NOT NULL) AS stops;
+  (SELECT COUNT(*) FROM course_stops s JOIN courses c ON c.id = s.course_id WHERE c.owner_user_id IS NOT NULL) AS stops,
+  (SELECT COUNT(DISTINCT x.id) FROM destinations x WHERE EXISTS (SELECT 1 FROM history_destinations WHERE destination_id = x.id)
+     OR EXISTS (SELECT 1 FROM favorite_destinations WHERE destination_id = x.id)
+     OR EXISTS (SELECT 1 FROM review_destinations WHERE destination_id = x.id)) AS ranked;
