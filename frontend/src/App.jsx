@@ -8,7 +8,7 @@ import Course from './pages/Course.jsx';
 import Detail from './pages/Detail.jsx';
 import Tip from './pages/Tip.jsx';
 import TipDetail from './pages/TipDetail.jsx';
-import Top100 from './pages/Top100.jsx';
+import Top25 from './pages/Top25.jsx';
 import MyPage from './pages/MyPage.jsx';
 import CourseBuilder from './pages/CourseBuilder.jsx';
 import Login from './pages/Login.jsx';
@@ -33,7 +33,9 @@ export default function App() {
             <Route path="/destination" element={<Destination />} />
             <Route path="/festival" element={<Festival />} />
             <Route path="/course" element={<Course />} />
-            <Route path="/top100" element={<Top100 />} />
+            <Route path="/top25" element={<Top25 />} />
+            {/* 옛 주소 — Top100 은 Top25 로 바뀌었다 (D-076) */}
+            <Route path="/top100" element={<Navigate to="/top25" replace />} />
             <Route path="/tip" element={<Tip />} />
             <Route path="/tip/:slug" element={<TipDetail />} />
             <Route path="/detail/:type/:id" element={<Detail />} />

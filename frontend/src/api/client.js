@@ -52,6 +52,8 @@ export const api = {
   // destinations
   listDestinations: ({ prefecture } = {}) => req(`/api/destinations${query({ prefecture })}`),
   getDestination: (id) => req(`/api/destinations/${id}`),
+  //  Top25 — 종합 점수 순위 (D-076)
+  destinationRanking: () => req('/api/destinations/ranking'),
 
   // festivals
   listFestivals: ({ prefecture, month } = {}) => req(`/api/festivals${query({ prefecture, month })}`),
