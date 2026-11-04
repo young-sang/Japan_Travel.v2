@@ -104,6 +104,10 @@ export default function Header() {
                       <button type="button" role="menuitem" onClick={() => { setUserOpen(false); navigate('/mypage'); }}>마이페이지</button>
                       <button type="button" role="menuitem" onClick={() => { setUserOpen(false); navigate('/mypage/favorites'); }}>즐겨찾기</button>
                       <button type="button" role="menuitem" onClick={() => { setUserOpen(false); navigate('/mypage/courses'); }}>내 코스</button>
+                      {/* 관리자에게만 — 뉴스 관리 (D-079) */}
+                      {user.role === 'ADMIN' && (
+                        <button type="button" role="menuitem" onClick={() => { setUserOpen(false); navigate('/admin/news'); }}>관리자</button>
+                      )}
                       <div className={styles.dropdownDivider} />
                       <button type="button" role="menuitem" onClick={onLogout}>로그아웃</button>
                     </>
@@ -144,6 +148,9 @@ export default function Header() {
             {user ? (
               <>
                 <button type="button" className={styles.mobileLink} onClick={() => { setMenuOpen(false); navigate('/mypage'); }} role="menuitem">마이페이지</button>
+                {user.role === 'ADMIN' && (
+                  <button type="button" className={styles.mobileLink} onClick={() => { setMenuOpen(false); navigate('/admin/news'); }} role="menuitem">관리자</button>
+                )}
                 <button type="button" className={styles.mobileLink} onClick={() => { setMenuOpen(false); onLogout(); }} role="menuitem">로그아웃</button>
               </>
             ) : (

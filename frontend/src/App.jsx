@@ -15,6 +15,8 @@ import Login from './pages/Login.jsx';
 import Signup from './pages/Signup.jsx';
 import News from './pages/News.jsx';
 import NewsDetail from './pages/NewsDetail.jsx';
+import NewsAdmin from './pages/admin/NewsAdmin.jsx';
+import NewsEditor from './pages/admin/NewsEditor.jsx';
 import NotFound from './pages/NotFound.jsx';
 import ProtectedRoute from './auth/ProtectedRoute.jsx';
 import ErrorBoundary from './components/ui/ErrorBoundary.jsx';
@@ -40,6 +42,10 @@ export default function App() {
             {/* 뉴스는 관리자가 직접 쓴다 (D-075 · D-079) */}
             <Route path="/news" element={<News />} />
             <Route path="/news/:id" element={<NewsDetail />} />
+            <Route path="/admin" element={<Navigate to="/admin/news" replace />} />
+            <Route path="/admin/news" element={<ProtectedRoute requireAdmin><NewsAdmin /></ProtectedRoute>} />
+            <Route path="/admin/news/new" element={<ProtectedRoute requireAdmin><NewsEditor /></ProtectedRoute>} />
+            <Route path="/admin/news/:id/edit" element={<ProtectedRoute requireAdmin><NewsEditor /></ProtectedRoute>} />
             <Route path="/tip" element={<Tip />} />
             <Route path="/tip/:slug" element={<TipDetail />} />
             <Route path="/detail/:type/:id" element={<Detail />} />
@@ -49,7 +55,7 @@ export default function App() {
             <Route path="/mypage/:tab" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
             <Route path="/mypage/courses/new" element={<ProtectedRoute><CourseBuilder /></ProtectedRoute>} />
             <Route path="/mypage/courses/:id/edit" element={<ProtectedRoute><CourseBuilder /></ProtectedRoute>} />
-            {/* 숨긴 화면(/admin) · 삭제한 게시판(/board) 의 옛 링크도 여기로. 홈으로 몰래 보내지 않는다 (D-068) */}
+            {/* 삭제한 게시판(/board) 같은 옛 링크도 여기로. 홈으로 몰래 보내지 않는다 (D-068) */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </ErrorBoundary>
