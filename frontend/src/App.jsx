@@ -6,7 +6,6 @@ import Destination from './pages/Destination.jsx';
 import Festival from './pages/Festival.jsx';
 import Course from './pages/Course.jsx';
 import Detail from './pages/Detail.jsx';
-import News from './pages/News.jsx';
 import Tip from './pages/Tip.jsx';
 import TipDetail from './pages/TipDetail.jsx';
 import Top100 from './pages/Top100.jsx';
@@ -29,12 +28,12 @@ export default function App() {
         <ErrorBoundary>
           <Routes>
             <Route path="/" element={<Home />} />
-            {/* 관리자(D-009) 는 부를 API 가 없어 라우트에서 뺐다 (D-054). 파일은 남아 있다. 게시판은 D-061 로 삭제 */}
+            {/* 관리자(D-009) 는 부를 API 가 없어 라우트에서 뺐다 (D-054). 파일은 남아 있다. 게시판은 D-061 로 삭제.
+                뉴스는 관리자가 직접 쓰는 방식(D-075)이 생길 때까지 숨긴다 (D-073) */}
             <Route path="/destination" element={<Destination />} />
             <Route path="/festival" element={<Festival />} />
             <Route path="/course" element={<Course />} />
             <Route path="/top100" element={<Top100 />} />
-            <Route path="/news" element={<News />} />
             <Route path="/tip" element={<Tip />} />
             <Route path="/tip/:slug" element={<TipDetail />} />
             <Route path="/detail/:type/:id" element={<Detail />} />
