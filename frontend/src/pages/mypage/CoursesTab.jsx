@@ -14,7 +14,7 @@ const FILTERS = [
   { key: 'private', label: '비공개' },
 ];
 
-export default function CoursesTab() {
+export default function CoursesTab({ onChange }) {
   const [courses, setCourses] = useState(null);
   const [filter, setFilter] = useState('');
   const toast = useToast();
@@ -36,6 +36,7 @@ export default function CoursesTab() {
       await api.deleteCourse(id);
       toast.info('코스를 삭제했어요');
       reload();
+      onChange?.();
     } catch { toast.error('삭제 실패'); }
   }
 
@@ -53,6 +54,7 @@ export default function CoursesTab() {
       });
       toast.success('비공개 복사본을 만들었어요');
       reload();
+      onChange?.();
     } catch { toast.error('복제 실패'); }
   }
 

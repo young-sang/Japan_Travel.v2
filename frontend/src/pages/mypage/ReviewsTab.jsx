@@ -5,7 +5,7 @@ import { api, typeSlug } from '../../api/client.js';
 const TYPE_LABEL = { destination: '여행지', festival: '축제' };
 
 // 내 리뷰 (D-055) — 여행지 · 축제 리뷰가 한 배열로 최근순. 삭제는 대상 아래 경로를 쓴다 (D-037).
-export default function ReviewsTab() {
+export default function ReviewsTab({ onChange }) {
   const [reviews, setReviews] = useState([]);
 
   async function reload() {
@@ -21,6 +21,7 @@ export default function ReviewsTab() {
     if (!confirm('리뷰를 삭제할까요?')) return;
     await api.deleteReview(typeSlug(r.type), r.targetId, r.id);
     reload();
+    onChange?.();
   }
 
   return (

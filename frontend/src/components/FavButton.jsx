@@ -28,7 +28,8 @@ export function invalidateFavorites() {
 // 즐겨찾기 대상은 여행지 · 축제뿐이다 (D-036). 코스 카드에는 하트를 그리지 않는다.
 const FAVORABLE = ['destination', 'festival'];
 
-export default function FavButton({ targetType, targetId, size = 'md' }) {
+//  onChange(on) — 성공한 뒤에만 부른다. 마이페이지 찜 탭이 해제한 카드를 빼는 데 쓴다 (D-081)
+export default function FavButton({ targetType, targetId, size = 'md', onChange }) {
   const [on, setOn] = useState(false);
   const [busy, setBusy] = useState(false);
   const toast = useToast();
@@ -68,6 +69,7 @@ export default function FavButton({ targetType, targetId, size = 'md' }) {
         toast.success('즐겨찾기에 추가했어요');
       }
       invalidateFavorites();
+      onChange?.(!on);
     } catch (err) {
       toast.error('즐겨찾기 처리에 실패했습니다');
     } finally {

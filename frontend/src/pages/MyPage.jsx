@@ -29,7 +29,8 @@ export default function MyPage() {
   const { user } = useAuth();
   const [stats, setStats] = useState({ favorites: 0, courses: 0, history: 0, reviews: 0 });
 
-  useEffect(() => {
+  //  위쪽 숫자. 탭이 바뀔 때와, 탭 안에서 찜 · 기록 · 코스 · 리뷰가 바뀔 때 다시 센다 (D-081)
+  function loadStats() {
     Promise.all([
       api.listFavorites().catch(() => ({ destinations: [], festivals: [] })),
       api.myCourses().catch(() => []),
@@ -39,7 +40,8 @@ export default function MyPage() {
       favorites: fav.destinations.length + fav.festivals.length,
       courses: courses.length, history: hist.length, reviews: revs.length,
     }));
-  }, [tab]);
+  }
+  useEffect(() => { loadStats(); }, [tab]);
 
   return (
     <>
@@ -78,12 +80,12 @@ export default function MyPage() {
 
       <Container>
         <section className={styles.content}>
-          {tab === 'favorites' && <FavoritesTab />}
-          {tab === 'courses' && <CoursesTab />}
-          {tab === 'history' && <HistoryTab />}
-          {tab === 'reviews' && <ReviewsTab />}
+          {tab === 'favorites' && <FavoritesTab onChange={loadStats} />}
+          {tab === 'courses' && <CoursesTab onChange={loadStats} />}
+          {tab === 'history' && <HistoryTab onChange={loadStats} />}
+          {tab === 'reviews' && <ReviewsTab onChange={loadStats} />}
           {tab === 'activity' && <ActivityTab />}
-          {tab === 'settings' && <SettingsTab />}
+          {tab === 'settings' && <SettingsTab onChange={loadStats} />}
         </section>
       </Container>
     </>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../api/client.js';
 import { useAuth } from '../../auth/useAuth.js';
@@ -118,14 +118,9 @@ function WithdrawSection() {
   );
 }
 
-export default function SettingsTab() {
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+//  다크모드(베타) 토글은 숨겼다 — 켜도 반응하는 CSS 가 없었다 (D-081)
+export default function SettingsTab({ onChange }) {
   const toast = useToast();
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    localStorage.setItem('theme', theme);
-  }, [theme]);
 
   async function clearFavorites() {
     if (!confirm('모든 즐겨찾기를 삭제할까요?')) return;
@@ -137,6 +132,7 @@ export default function SettingsTab() {
       ]);
       invalidateFavorites();
       toast.success('즐겨찾기를 초기화했어요');
+      onChange?.();
     } catch { toast.error('실패'); }
   }
 
@@ -145,6 +141,7 @@ export default function SettingsTab() {
     try {
       await api.clearHistory();
       toast.success('히스토리를 초기화했어요');
+      onChange?.();
     } catch { toast.error('실패'); }
   }
 
@@ -165,17 +162,6 @@ export default function SettingsTab() {
   return (
     <div style={{ maxWidth: 640, display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
       <AccountSection />
-
-      <section>
-        <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, marginBottom: 'var(--space-3)' }}>화면</h2>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 'var(--space-3)', background: 'var(--color-surface-1)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
-          <input type="checkbox" checked={theme === 'dark'} onChange={(e) => setTheme(e.target.checked ? 'dark' : 'light')} />
-          <div>
-            <div style={{ fontWeight: 600 }}>다크모드</div>
-            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--color-ink-500)' }}>아직 베타입니다</div>
-          </div>
-        </label>
-      </section>
 
       <section>
         <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 700, marginBottom: 'var(--space-3)' }}>데이터</h2>

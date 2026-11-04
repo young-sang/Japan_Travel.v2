@@ -13,7 +13,7 @@ const TYPES = [
   { key: 'festival', label: '축제' },
 ];
 
-export default function FavoritesTab() {
+export default function FavoritesTab({ onChange }) {
   const [fav, setFav] = useState(null);
   const [type, setType] = useState('destination');
 
@@ -22,6 +22,12 @@ export default function FavoritesTab() {
       .then(setFav)
       .catch(() => setFav({ destinations: [], festivals: [] }));
   }, []);
+
+  //  찜 탭에서는 하트를 해제하면 카드를 바로 뺀다 (D-081)
+  function onFavChange(key, id, on) {
+    if (!on) setFav((f) => ({ ...f, [`${key}s`]: f[`${key}s`].filter((it) => it.id !== id) }));
+    onChange?.();
+  }
 
   if (fav === null) return <SkeletonGrid count={6} />;
 
@@ -46,7 +52,7 @@ export default function FavoritesTab() {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 'var(--space-4)' }}>
           {shown.map((it) => (
-            <PlaceCard key={`${type}-${it.id}`} item={it} type={type} />
+            <PlaceCard key={`${type}-${it.id}`} item={it} type={type} onFavChange={(on) => onFavChange(type, it.id, on)} />
           ))}
         </div>
       )}

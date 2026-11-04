@@ -22,7 +22,7 @@ function groupByDate(items) {
 }
 
 // 응답이 이미 시간순 한 배열이고 이름 · 이미지까지 싣고 있다 (D-052). 항목마다 상세를 다시 부르지 않는다.
-export default function HistoryTab() {
+export default function HistoryTab({ onChange }) {
   const [items, setItems] = useState(null);
   const toast = useToast();
 
@@ -43,6 +43,7 @@ export default function HistoryTab() {
       await api.clearHistory();
       toast.info('히스토리를 모두 삭제했어요');
       reload();
+      onChange?.();
     } catch { toast.error('삭제 실패'); }
   }
 

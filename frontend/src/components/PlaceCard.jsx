@@ -14,7 +14,7 @@ function truncate(text, n = 120) {
   return text.length > n ? text.slice(0, n).trim() + '…' : text;
 }
 
-export default function PlaceCard({ item, type, onClick }) {
+export default function PlaceCard({ item, type, onClick, onFavChange }) {
   const name = item.name || item.title;
   const metaParts = [item.prefecture, item.dateText, item.duration].filter(Boolean);
   const desc = item.description || (item.tags ? '#' + (item.tags || []).join(' #') : '');
@@ -25,7 +25,7 @@ export default function PlaceCard({ item, type, onClick }) {
       <CardMedia src={img} alt={name} aspect="4/3" fallback="/placeholder.svg">
         <span className={`${styles.badge} ${styles[`badge_${type}`] || ''}`}>{CATEGORY_LABEL[type] || ''}</span>
         <div className={styles.fav}>
-          <FavButton targetType={type} targetId={item.id} />
+          <FavButton targetType={type} targetId={item.id} onChange={onFavChange} />
         </div>
       </CardMedia>
       <CardBody>
