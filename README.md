@@ -45,7 +45,19 @@ cd backend
 > Windows 에서는 `.\gradlew.bat bootRun`.
 
 기동할 때마다 `schema.sql` 로 테이블을 만들고 `data.sql` 로 시드를 넣는다 (`INSERT IGNORE` 라 중복되지 않는다, D-050).
-시드는 도도부현 47 · 여행지 219 · 축제 84 · 기본 제공 코스 26(정류장 110)이다. **계정은 시드하지 않는다** — 화면에서 가입한다.
+시드는 도도부현 47 · 여행지 219 · 축제 84 · 기본 제공 코스 26(정류장 110)이다. 기동 시드에 계정은 없다.
+
+### 시연 데이터 (선택)
+
+백엔드를 한 번 띄워 시드가 들어간 뒤에 돌린다. 몇 번을 돌려도 같은 상태로 돌아간다 (D-070).
+
+```bash
+mysql -uroot -p --default-character-set=utf8mb4 japan_travel < scripts/demo_seed.sql
+```
+
+시연 계정 `demo` / `demo1234` (닉네임 "하루") — 즐겨찾기 10 · 내 코스 2 · 최근 본 장소 10 · 리뷰 2.
+리뷰어 계정 4개(`kyoto_lover` · `foodie_park` · `photo_bear` · `weekend_trip`, 비밀번호 같음)가 주요 장소에 리뷰 33건을 더 남긴다.
+다시 돌리면 계정 id 가 바뀌므로 브라우저에서 다시 로그인한다.
 
 ### 2) 프론트엔드 (port 5173)
 
