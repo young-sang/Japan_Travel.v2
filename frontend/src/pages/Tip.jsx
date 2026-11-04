@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './Tip.module.css';
+import usePageTitle from '../utils/usePageTitle.js';
 
 const TIPS = [
   { slug: 'visa', img: '/image/tip1.png', alt: '무비자 입국', subject: '무비자 입국',
@@ -18,6 +19,7 @@ const TIPS = [
 ];
 
 export default function Tip() {
+  usePageTitle('여행 팁');
   const cardRefs = useRef([]);
 
   useEffect(() => {

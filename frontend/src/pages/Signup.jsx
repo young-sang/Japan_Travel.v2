@@ -5,8 +5,10 @@ import Field from '../components/ui/Field.jsx';
 import Button from '../components/ui/Button.jsx';
 import { useAuth } from '../auth/useAuth.js';
 import { useToast } from '../components/ui/Toast.jsx';
+import usePageTitle from '../utils/usePageTitle.js';
 
 export default function Signup() {
+  usePageTitle('회원가입');
   const { signup } = useAuth();
   const navigate = useNavigate();
   const toast = useToast();

@@ -1,4 +1,5 @@
 import styles from './Hotplace.module.css';
+import usePageTitle from '../utils/usePageTitle.js';
 
 const SPOTS = [
   {
@@ -22,6 +23,7 @@ const SPOTS = [
 ];
 
 export default function Hotplace() {
+  usePageTitle('핫플레이스');
   return (
     <div className={styles.page}>
       <div className={styles['fest-header']}>

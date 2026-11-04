@@ -12,6 +12,7 @@ import EmptyState from '../components/ui/EmptyState.jsx';
 import Button from '../components/ui/Button.jsx';
 import { useToast } from '../components/ui/Toast.jsx';
 import styles from './Detail.module.css';
+import usePageTitle from '../utils/usePageTitle.js';
 
 const CATEGORY_LABEL = { destination: '여행지', festival: '축제', course: '코스' };
 
@@ -37,6 +38,7 @@ export default function Detail() {
   const [item, setItem] = useState(null);
   const [error, setError] = useState(false);
   const [nearby, setNearby] = useState([]);
+  usePageTitle(item?.name || item?.title);
 
   useEffect(() => {
     let cancelled = false;

@@ -1,4 +1,5 @@
 import styles from './Top100.module.css';
+import usePageTitle from '../utils/usePageTitle.js';
 
 const ATTRACTIONS = [
   { name: '센소지', desc: '센소지는 도쿄 아사쿠사에 위치한 일본에서 가장 오래된 불교 사찰로, 전통적인 분위기와 상징적인 관광 명소입니다.' },
@@ -103,6 +104,7 @@ const ATTRACTIONS = [
 ];
 
 export default function Top100() {
+  usePageTitle('일본 관광 100선');
   return (
     <div className={styles.page}>
       <main className={styles.main}>

@@ -10,10 +10,12 @@ import { SkeletonGrid } from '../components/ui/Skeleton.jsx';
 import ListPageLayout, { ResultsGrid } from '../layouts/ListPageLayout.jsx';
 import { useToast } from '../components/ui/Toast.jsx';
 import filterStyles from '../components/FilterGroup.module.css';
+import usePageTitle from '../utils/usePageTitle.js';
 
 const MONTHS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 export default function Festival() {
+  usePageTitle('축제');
   const [prefecture, setPrefecture] = useState('');
   const [month, setMonth] = useState(null);
   const [items, setItems] = useState(null);

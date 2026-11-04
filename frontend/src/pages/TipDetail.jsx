@@ -1,10 +1,12 @@
 import { useParams, Navigate } from 'react-router-dom';
 import { TIP_DETAILS } from '../data/tipDetails.js';
 import styles from './TipDetail.module.css';
+import usePageTitle from '../utils/usePageTitle.js';
 
 export default function TipDetail() {
   const { slug } = useParams();
   const data = TIP_DETAILS[slug];
+  usePageTitle(data?.title);
   if (!data) return <Navigate to="/tip" replace />;
 
   return (

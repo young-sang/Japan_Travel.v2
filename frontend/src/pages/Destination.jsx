@@ -10,9 +10,11 @@ import Tag from '../components/ui/Tag.jsx';
 import { SkeletonGrid } from '../components/ui/Skeleton.jsx';
 import ListPageLayout, { ResultsGrid } from '../layouts/ListPageLayout.jsx';
 import { useToast } from '../components/ui/Toast.jsx';
+import usePageTitle from '../utils/usePageTitle.js';
 
 // 테마(태그) 필터는 없다 — 태그 테이블을 1차에서 만들지 않았다 (D-024). 현 필터만 서버가 받는다.
 export default function Destination() {
+  usePageTitle('여행지');
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const toast = useToast();

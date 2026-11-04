@@ -1,4 +1,5 @@
 import styles from './News.module.css';
+import usePageTitle from '../utils/usePageTitle.js';
 
 const MAIN = {
   href: 'https://www.yna.co.kr/view/AKR20251227021800073',
@@ -36,6 +37,7 @@ const SUBS = [
 ];
 
 export default function News() {
+  usePageTitle('뉴스');
   return (
     <div className={styles.container}>
       <a href={MAIN.href} className={`${styles.card} ${styles.mainCard}`} target="_blank" rel="noopener noreferrer">

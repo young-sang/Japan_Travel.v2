@@ -11,6 +11,7 @@ import SettingsTab from './mypage/SettingsTab.jsx';
 import Container from '../components/ui/Container.jsx';
 import Tabs from '../components/ui/Tabs.jsx';
 import styles from './MyPage.module.css';
+import usePageTitle from '../utils/usePageTitle.js';
 
 const TABS = [
   { key: 'favorites', label: '즐겨찾기' },
@@ -23,6 +24,7 @@ const TABS = [
 
 export default function MyPage() {
   const { tab } = useParams();
+  usePageTitle(`${TABS.find((t) => t.key === tab)?.label ?? '마이페이지'} - 마이페이지`);
   const navigate = useNavigate();
   const { user } = useAuth();
   const [stats, setStats] = useState({ favorites: 0, courses: 0, history: 0, reviews: 0 });

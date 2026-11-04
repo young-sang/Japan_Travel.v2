@@ -11,6 +11,7 @@ import EmptyState from '../components/ui/EmptyState.jsx';
 import Spinner from '../components/ui/Spinner.jsx';
 import { useToast } from '../components/ui/Toast.jsx';
 import styles from './CourseBuilder.module.css';
+import usePageTitle from '../utils/usePageTitle.js';
 
 // 코스 = 기본 정보 + 정류장 (D-041 · D-042). 정류장은 여행지 · 축제 하나를 가리키고
 // 일차 · 메모만 갖는다 — 시간은 없다 (D-043). 임시저장은 없고 공개 / 비공개만 고른다 (D-041).
@@ -18,6 +19,7 @@ import styles from './CourseBuilder.module.css';
 export default function CourseBuilder() {
   const { id } = useParams();
   const editing = !!id;
+  usePageTitle(editing ? '코스 수정' : '새 코스 만들기');
   const navigate = useNavigate();
   const toast = useToast();
 

@@ -14,10 +14,12 @@ import Spinner from '../components/ui/Spinner.jsx';
 import { SkeletonGrid } from '../components/ui/Skeleton.jsx';
 import ListPageLayout, { ResultsGrid } from '../layouts/ListPageLayout.jsx';
 import { useToast } from '../components/ui/Toast.jsx';
+import usePageTitle from '../utils/usePageTitle.js';
 
 // 테마(태그) 필터는 없다 — course_tags 를 만들지 않았다 (D-024).
 // 목록은 공개 코스의 요약이라 정류장이 없다 (D-046). 모달을 열 때 상세를 불러온다.
 export default function Course() {
+  usePageTitle('여행코스');
   const [prefecture, setPrefecture] = useState('');
   const [items, setItems] = useState(null);
   const [modal, setModal] = useState(null);

@@ -6,6 +6,7 @@ import IconButton from '../components/ui/IconButton.jsx';
 import PlaceCard from '../components/PlaceCard.jsx';
 import { SkeletonCard } from '../components/ui/Skeleton.jsx';
 import styles from './Home.module.css';
+import usePageTitle from '../utils/usePageTitle.js';
 
 //  배너 사진은 Wikimedia Commons 의 자유 라이선스 사진이다. CC BY · BY-SA 라 출처를 슬라이드에 표시한다 (D-064)
 const COMMONS = 'https://thumb.wikimedia.org/wikipedia/commons/thumb';
@@ -44,6 +45,7 @@ const QUICK = [
 ];
 
 export default function Home() {
+  usePageTitle(null);
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
   const [popular, setPopular] = useState(null);
@@ -56,7 +58,8 @@ export default function Home() {
 
   useEffect(() => {
     api.listCourses()
-      .then((r) => setPopular((r || []).slice(0, 6)))
+      //  코스는 인기를 셀 근거(즐겨찾기 · 조회수)가 없어 기본 제공 코스만 추천으로 싣는다 (D-067)
+      .then((r) => setPopular((r || []).filter((c) => c.ownerId === null).slice(0, 6)))
       .catch(() => setPopular([]));
   }, []);
 
@@ -116,15 +119,15 @@ export default function Home() {
           </div>
         </section>
 
-        <section className={styles.section} aria-label="인기 여행코스">
+        <section className={styles.section} aria-label="추천 여행코스">
           <header className={styles.sectionHead}>
-            <h2 className={styles.sectionTitle}>인기 여행코스</h2>
+            <h2 className={styles.sectionTitle}>추천 여행코스</h2>
             <Link to="/course" className={styles.sectionMore}>전체 보기 →</Link>
           </header>
           <div className={styles.cardGrid}>
             {popular === null && Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)}
             {popular !== null && popular.length === 0 && (
-              <p className={styles.empty}>아직 인기 코스가 없어요.</p>
+              <p className={styles.empty}>아직 추천 코스가 없어요.</p>
             )}
             {popular !== null && popular.map((c) => (
               <PlaceCard key={c.id} item={c} type="course" />
