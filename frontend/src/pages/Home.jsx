@@ -43,6 +43,24 @@ const QUICK = [
   { emoji: '💡', label: '여행 팁', to: '/tip' },
 ];
 
+//  홈 추천 코스 — 지역이 고루 퍼지도록 기본 제공 코스 6개를 제목으로 고른다 (D-081).
+//  제목이 바뀌어 못 찾으면 나머지 기본 제공 코스로 6칸을 채운다
+const FEATURED_TITLES = [
+  '도쿄 첫 방문 2박 3일',
+  '교토 핵심 2박 3일',
+  '오사카 먹방 1박 2일',
+  '삿포로·오타루 2박 3일',
+  '히로시마·미야지마 1박 2일',
+  '오키나와 본섬 2박 3일',
+];
+
+function pickFeatured(courses) {
+  const builtIn = courses.filter((c) => c.ownerId === null);
+  const featured = FEATURED_TITLES.map((t) => builtIn.find((c) => c.title === t)).filter(Boolean);
+  const rest = builtIn.filter((c) => !featured.includes(c));
+  return [...featured, ...rest].slice(0, 6);
+}
+
 export default function Home() {
   usePageTitle(null);
   const [idx, setIdx] = useState(0);
@@ -58,7 +76,7 @@ export default function Home() {
   useEffect(() => {
     api.listCourses()
       //  코스는 인기를 셀 근거(즐겨찾기 · 조회수)가 없어 기본 제공 코스만 추천으로 싣는다 (D-067)
-      .then((r) => setPopular((r || []).filter((c) => c.ownerId === null).slice(0, 6)))
+      .then((r) => setPopular(pickFeatured(r || [])))
       .catch(() => setPopular([]));
   }, []);
 
