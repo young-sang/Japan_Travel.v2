@@ -39,7 +39,6 @@ const SLIDES = [
 
 const QUICK = [
   { emoji: '🗾', label: '2025 일본 관광 100선', to: '/top100', badge: '100' },
-  { emoji: '🔥', label: '핫플레이스', to: '/hotplace' },
   { emoji: '📰', label: '뉴스', to: '/news' },
   { emoji: '💡', label: '여행 팁', to: '/tip' },
 ];
