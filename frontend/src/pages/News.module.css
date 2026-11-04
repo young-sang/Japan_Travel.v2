@@ -34,9 +34,11 @@
   transform: translateY(-4px);
 }
 
+/* 사진 비율이 제각각이라 16:10 으로 자른다 (D-081) */
 .cardImage img {
+  display: block;
   width: 100%;
-  height: auto;
+  aspect-ratio: 16 / 10;
   object-fit: cover;
   border-radius: 12px;
 }
