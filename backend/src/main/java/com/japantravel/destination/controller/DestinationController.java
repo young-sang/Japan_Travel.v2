@@ -1,6 +1,7 @@
 package com.japantravel.destination.controller;
 
 import com.japantravel.common.web.ApiResponse;
+import com.japantravel.destination.dto.DestinationRankingResponse;
 import com.japantravel.destination.dto.DestinationResponse;
 import com.japantravel.destination.service.DestinationService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,12 @@ public class DestinationController {
     @GetMapping
     public ApiResponse<List<DestinationResponse>> list(@RequestParam(required = false) String prefecture) {
         return ApiResponse.ok(destinationService.findAll(prefecture));
+    }
+
+//  Top25 (D-076). "/{id}" 보다 구체적인 경로라 먼저 잡힌다
+    @GetMapping("/ranking")
+    public ApiResponse<List<DestinationRankingResponse>> ranking() {
+        return ApiResponse.ok(destinationService.ranking());
     }
 
     @GetMapping("/{id}")
