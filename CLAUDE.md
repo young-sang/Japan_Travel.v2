@@ -13,6 +13,15 @@ unless explicitly requested.
 - Scalability considerations
 - Error recovery / retry strategies
 
+## 진행 방식: 하이퍼 애자일 (`docs/AGILE.md`)
+
+졸업작품 보완 작업은 `docs/AGILE.md`의 규칙과 백로그를 따른다. 스프린트를 시작하기 전에 그 문서부터 읽는다. 핵심 규칙은 다음과 같다.
+- 스프린트는 반나절에서 하루, 한 번에 하나만 한다. 끝날 때마다 시연할 수 있는 상태여야 한다.
+- **결정 게이트는 매번 묻는다.** 갈림길이 나오면 크기와 상관없이 멈추고, 추천안을 맨 앞에 둔 선택지로 묻는다. 답을 받으면 DECISIONS에 기록한다.
+- 완료 기준은 브라우저 확인, 백엔드 테스트 통과, 프론트 빌드, DECISIONS·README 반영, 커밋이다. push는 하지 않는다.
+- 스프린트가 끝나면 데모·회고를 보고하고 AGILE.md의 백로그와 로그를 갱신한 뒤 **멈춘다.** 사용자가 승인해야 다음 스프린트에 들어간다.
+- push와 태그 push는 매번 묻는다.
+
 ## Agent Team
 
 이 프로젝트는 4종 역할의 서브에이전트가 정의되어 있다 (`.claude/agents/`):
