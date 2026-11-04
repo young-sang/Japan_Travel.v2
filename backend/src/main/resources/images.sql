@@ -164,7 +164,7 @@ UPDATE destinations t JOIN prefectures p ON p.id = t.prefecture_id
    SET t.image_path = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c5/Tokyo_Skytree_%26_East_Tower.jpg/960px-Tokyo_Skytree_%26_East_Tower.jpg', t.image_credit = 'Kakidai / CC BY-SA 4.0 / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:Tokyo_Skytree_%26_East_Tower.jpg'
  WHERE p.name = '도쿄도' AND t.name = '도쿄 스카이트리' AND t.image_path IS NULL;
 UPDATE destinations t JOIN prefectures p ON p.id = t.prefecture_id
-   SET t.image_path = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1c/Tokyo_Tower_M4854.jpg/960px-Tokyo_Tower_M4854.jpg', t.image_credit = 'No machine-readable author provided. Fg2 assumed (based on copyright claims). / Public domain / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:Tokyo_Tower_M4854.jpg'
+   SET t.image_path = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1c/Tokyo_Tower_M4854.jpg/960px-Tokyo_Tower_M4854.jpg', t.image_credit = 'Fg2 / Public domain / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:Tokyo_Tower_M4854.jpg'
  WHERE p.name = '도쿄도' AND t.name = '도쿄 타워' AND t.image_path IS NULL;
 UPDATE destinations t JOIN prefectures p ON p.id = t.prefecture_id
    SET t.image_path = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c2/2018_Shibuya_Crossing.jpg/960px-2018_Shibuya_Crossing.jpg', t.image_credit = 'Kakidai / CC BY-SA 4.0 / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:2018_Shibuya_Crossing.jpg'
@@ -326,7 +326,7 @@ UPDATE destinations t JOIN prefectures p ON p.id = t.prefecture_id
    SET t.image_path = 'https://upload.wikimedia.org/wikipedia/commons/5/58/%E5%A4%A7%E9%A0%88%E5%95%86%E5%BA%97%E8%A1%97_-_3467815545.jpg', t.image_credit = '0* PrincessCCCC / CC BY 2.0 / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:%E5%A4%A7%E9%A0%88%E5%95%86%E5%BA%97%E8%A1%97_-_3467815545.jpg'
  WHERE p.name = '아이치현' AND t.name = '오스 상점가' AND t.image_path IS NULL;
 UPDATE destinations t JOIN prefectures p ON p.id = t.prefecture_id
-   SET t.image_path = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c9/Naiku_01.JPG/960px-Naiku_01.JPG', t.image_credit = 'No machine-readable author provided. N yotarou assumed (based on copyright claims). / CC BY 2.5 / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:Naiku_01.JPG'
+   SET t.image_path = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c9/Naiku_01.JPG/960px-Naiku_01.JPG', t.image_credit = 'N yotarou / CC BY 2.5 / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:Naiku_01.JPG'
  WHERE p.name = '미에현' AND t.name = '이세 신궁' AND t.image_path IS NULL;
 UPDATE destinations t JOIN prefectures p ON p.id = t.prefecture_id
    SET t.image_path = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/Okage_Yokocho01.JPG/960px-Okage_Yokocho01.JPG', t.image_credit = 'Oilstreet / CC BY 2.5 / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:Okage_Yokocho01.JPG'
@@ -461,7 +461,7 @@ UPDATE destinations t JOIN prefectures p ON p.id = t.prefecture_id
    SET t.image_path = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2b/Sand_Museum.JPG/960px-Sand_Museum.JPG', t.image_credit = 'KASEI / CC BY-SA 3.0 / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:Sand_Museum.JPG'
  WHERE p.name = '돗토리현' AND t.name = '모래 미술관' AND t.image_path IS NULL;
 UPDATE destinations t JOIN prefectures p ON p.id = t.prefecture_id
-   SET t.image_path = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/%E5%A2%83%E6%B8%AF%E6%9C%AC%E7%94%BA%E3%82%A2%E3%83%BC%E3%82%B1%E3%83%BC%E3%83%89%E5%95%86%E5%BA%97%E8%A1%972.JPG/960px-%E5%A2%83%E6%B8%AF%E6%9C%AC%E7%94%BA%E3%82%A2%E3%83%BC%E3%82%B1%E3%83%BC%E3%83%89%E5%95%86%E5%BA%97%E8%A1%972.JPG', t.image_credit = 'No machine-readable author provided. おぉたむすねィく探検隊 assumed (based on copyright claims). / CC BY-SA 3.0 / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:%E5%A2%83%E6%B8%AF%E6%9C%AC%E7%94%BA%E3%82%A2%E3%83%BC%E3%82%B1%E3%83%BC%E3%83%89%E5%95%86%E5%BA%97%E8%A1%972.JPG'
+   SET t.image_path = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/%E5%A2%83%E6%B8%AF%E6%9C%AC%E7%94%BA%E3%82%A2%E3%83%BC%E3%82%B1%E3%83%BC%E3%83%89%E5%95%86%E5%BA%97%E8%A1%972.JPG/960px-%E5%A2%83%E6%B8%AF%E6%9C%AC%E7%94%BA%E3%82%A2%E3%83%BC%E3%82%B1%E3%83%BC%E3%83%89%E5%95%86%E5%BA%97%E8%A1%972.JPG', t.image_credit = 'おぉたむすねィく探検隊 / CC BY-SA 3.0 / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:%E5%A2%83%E6%B8%AF%E6%9C%AC%E7%94%BA%E3%82%A2%E3%83%BC%E3%82%B1%E3%83%BC%E3%83%89%E5%95%86%E5%BA%97%E8%A1%972.JPG'
  WHERE p.name = '돗토리현' AND t.name = '미즈키 시게루 로드' AND t.image_path IS NULL;
 UPDATE destinations t JOIN prefectures p ON p.id = t.prefecture_id
    SET t.image_path = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1c/Haiden_of_Izumo-taisha-1.JPG/960px-Haiden_of_Izumo-taisha-1.JPG', t.image_credit = 'Saigen Jiro / CC0 / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:Haiden_of_Izumo-taisha-1.JPG'
@@ -542,7 +542,7 @@ UPDATE destinations t JOIN prefectures p ON p.id = t.prefecture_id
    SET t.image_path = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/79/Kochi_Katsurahama_Daytime_2.JPG/960px-Kochi_Katsurahama_Daytime_2.JPG', t.image_credit = '京浜にけ / CC BY-SA 3.0 / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:Kochi_Katsurahama_Daytime_2.JPG'
  WHERE p.name = '고치현' AND t.name = '가쓰라하마' AND t.image_path IS NULL;
 UPDATE destinations t JOIN prefectures p ON p.id = t.prefecture_id
-   SET t.image_path = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/Shimantogawa_2000-08.jpeg/960px-Shimantogawa_2000-08.jpeg', t.image_credit = 'No machine-readable author provided. Hokanomono assumed (based on copyright claims). / CC BY-SA 3.0 / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:Shimantogawa_2000-08.jpeg'
+   SET t.image_path = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/Shimantogawa_2000-08.jpeg/960px-Shimantogawa_2000-08.jpeg', t.image_credit = 'Hokanomono / CC BY-SA 3.0 / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:Shimantogawa_2000-08.jpeg'
  WHERE p.name = '고치현' AND t.name = '시만토강' AND t.image_path IS NULL;
 UPDATE destinations t JOIN prefectures p ON p.id = t.prefecture_id
    SET t.image_path = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e6/Dazaihu_keinai.jpg/960px-Dazaihu_keinai.jpg', t.image_credit = '上条ジョー / CC0 / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:Dazaihu_keinai.jpg'
@@ -566,7 +566,7 @@ UPDATE destinations t JOIN prefectures p ON p.id = t.prefecture_id
    SET t.image_path = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/49/%E5%90%89%E9%87%8E%E3%83%B6%E9%87%8C%E6%AD%B4%E5%8F%B2%E5%85%AC%E5%9C%92_-_panoramio.jpg/960px-%E5%90%89%E9%87%8E%E3%83%B6%E9%87%8C%E6%AD%B4%E5%8F%B2%E5%85%AC%E5%9C%92_-_panoramio.jpg', t.image_credit = 'shikabane taro / CC BY 3.0 / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:%E5%90%89%E9%87%8E%E3%83%B6%E9%87%8C%E6%AD%B4%E5%8F%B2%E5%85%AC%E5%9C%92_-_panoramio.jpg'
  WHERE p.name = '사가현' AND t.name = '요시노가리 역사공원' AND t.image_path IS NULL;
 UPDATE destinations t JOIN prefectures p ON p.id = t.prefecture_id
-   SET t.image_path = 'https://upload.wikimedia.org/wikipedia/commons/b/b0/ImariA.JPG', t.image_credit = 'No machine-readable author provided. N@ldo assumed (based on copyright claims). / CC BY-SA 2.5 / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:ImariA.JPG'
+   SET t.image_path = 'https://upload.wikimedia.org/wikipedia/commons/b/b0/ImariA.JPG', t.image_credit = 'N@ldo / CC BY-SA 2.5 / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:ImariA.JPG'
  WHERE p.name = '사가현' AND t.name = '아리타 도자기 마을' AND t.image_path IS NULL;
 UPDATE destinations t JOIN prefectures p ON p.id = t.prefecture_id
    SET t.image_path = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5b/Y%C5%ABtoku_Inari_Shrine_sanmon_and_main_hall.JPG/960px-Y%C5%ABtoku_Inari_Shrine_sanmon_and_main_hall.JPG', t.image_credit = 'Underbar dk / CC BY-SA 4.0 / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:Y%C5%ABtoku_Inari_Shrine_sanmon_and_main_hall.JPG'
@@ -905,8 +905,28 @@ UPDATE festivals t JOIN prefectures p ON p.id = t.prefecture_id
    SET t.image_path = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/13/Tree_of_Hakodate_Christmas_Fantasy_in_sunset_time.jpg/960px-Tree_of_Hakodate_Christmas_Fantasy_in_sunset_time.jpg', t.image_credit = '掬茶 / CC BY-SA 4.0 / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:Tree_of_Hakodate_Christmas_Fantasy_in_sunset_time.jpg'
  WHERE p.name = '홋카이도' AND t.name = '하코다테 크리스마스 판타지' AND t.image_path IS NULL;
 UPDATE festivals t JOIN prefectures p ON p.id = t.prefecture_id
-   SET t.image_path = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/32/1cho_london1.jpg/960px-1cho_london1.jpg', t.image_credit = 'Unknown authorUnknown author / Public domain / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:1cho_london1.jpg'
+   SET t.image_path = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/32/1cho_london1.jpg/960px-1cho_london1.jpg', t.image_credit = '작자 미상 / Public domain / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:1cho_london1.jpg'
  WHERE p.name = '도쿄도' AND t.name = '마루노우치 일루미네이션' AND t.image_path IS NULL;
 UPDATE festivals t JOIN prefectures p ON p.id = t.prefecture_id
    SET t.image_path = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8b/Huis_Ten_Bosch_-_01.jpg/960px-Huis_Ten_Bosch_-_01.jpg', t.image_credit = 'JKT-c / CC BY 3.0 / Wikimedia Commons', t.image_source = 'https://commons.wikimedia.org/wiki/File:Huis_Ten_Bosch_-_01.jpg'
  WHERE p.name = '나가사키현' AND t.name = '하우스텐보스 빛의 왕국' AND t.image_path IS NULL;
+
+-- 출처 문구 정리 (D-081). 같은 사진(image_source)의 정리 전 출처만 바꾼다 — 다시 돌려도 같다.
+UPDATE destinations t JOIN prefectures p ON p.id = t.prefecture_id
+   SET t.image_credit = 'Fg2 / Public domain / Wikimedia Commons'
+ WHERE p.name = '도쿄도' AND t.name = '도쿄 타워' AND t.image_source = 'https://commons.wikimedia.org/wiki/File:Tokyo_Tower_M4854.jpg' AND t.image_credit = 'No machine-readable author provided. Fg2 assumed (based on copyright claims). / Public domain / Wikimedia Commons';
+UPDATE destinations t JOIN prefectures p ON p.id = t.prefecture_id
+   SET t.image_credit = 'N yotarou / CC BY 2.5 / Wikimedia Commons'
+ WHERE p.name = '미에현' AND t.name = '이세 신궁' AND t.image_source = 'https://commons.wikimedia.org/wiki/File:Naiku_01.JPG' AND t.image_credit = 'No machine-readable author provided. N yotarou assumed (based on copyright claims). / CC BY 2.5 / Wikimedia Commons';
+UPDATE destinations t JOIN prefectures p ON p.id = t.prefecture_id
+   SET t.image_credit = 'おぉたむすねィく探検隊 / CC BY-SA 3.0 / Wikimedia Commons'
+ WHERE p.name = '돗토리현' AND t.name = '미즈키 시게루 로드' AND t.image_source = 'https://commons.wikimedia.org/wiki/File:%E5%A2%83%E6%B8%AF%E6%9C%AC%E7%94%BA%E3%82%A2%E3%83%BC%E3%82%B1%E3%83%BC%E3%83%89%E5%95%86%E5%BA%97%E8%A1%972.JPG' AND t.image_credit = 'No machine-readable author provided. おぉたむすねィく探検隊 assumed (based on copyright claims). / CC BY-SA 3.0 / Wikimedia Commons';
+UPDATE destinations t JOIN prefectures p ON p.id = t.prefecture_id
+   SET t.image_credit = 'Hokanomono / CC BY-SA 3.0 / Wikimedia Commons'
+ WHERE p.name = '고치현' AND t.name = '시만토강' AND t.image_source = 'https://commons.wikimedia.org/wiki/File:Shimantogawa_2000-08.jpeg' AND t.image_credit = 'No machine-readable author provided. Hokanomono assumed (based on copyright claims). / CC BY-SA 3.0 / Wikimedia Commons';
+UPDATE destinations t JOIN prefectures p ON p.id = t.prefecture_id
+   SET t.image_credit = 'N@ldo / CC BY-SA 2.5 / Wikimedia Commons'
+ WHERE p.name = '사가현' AND t.name = '아리타 도자기 마을' AND t.image_source = 'https://commons.wikimedia.org/wiki/File:ImariA.JPG' AND t.image_credit = 'No machine-readable author provided. N@ldo assumed (based on copyright claims). / CC BY-SA 2.5 / Wikimedia Commons';
+UPDATE festivals t JOIN prefectures p ON p.id = t.prefecture_id
+   SET t.image_credit = '작자 미상 / Public domain / Wikimedia Commons'
+ WHERE p.name = '도쿄도' AND t.name = '마루노우치 일루미네이션' AND t.image_source = 'https://commons.wikimedia.org/wiki/File:1cho_london1.jpg' AND t.image_credit = 'Unknown authorUnknown author / Public domain / Wikimedia Commons';

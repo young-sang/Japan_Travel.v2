@@ -196,6 +196,19 @@ def find_commons_search(ja):
     return None
 
 
+#   Commons 가 작가 칸에 넣는 기본 문구를 걷어낸다 (D-081).
+#   "No machine-readable author provided. X assumed (based on copyright claims)." → X / "Unknown authorUnknown author" → 작자 미상
+ASSUMED_AUTHOR = re.compile(r'^No machine-readable author provided\. (.+?) assumed \(based on copyright claims\)\.?$')
+UNKNOWN_AUTHOR = re.compile(r'^(Unknown author)+$')
+
+
+def clean_artist(artist):
+    m = ASSUMED_AUTHOR.match(artist)
+    if m:
+        return m.group(1)
+    return '작자 미상' if UNKNOWN_AUTHOR.match(artist) else artist
+
+
 def commons_info(filename):
     data = api('commons.wikimedia.org', action='query', prop='imageinfo', titles=f'File:{filename}',
                iiprop='url|extmetadata', iiurlwidth=THUMB_WIDTH)
@@ -210,10 +223,12 @@ def commons_info(filename):
     if meta.get('NonFree', {}).get('value') == 'true' or not FREE_LICENSE.match(license_):
         return None
     artist = unescape(re.sub(r'<[^>]+>', '', meta.get('Artist', {}).get('value', ''))).strip()
-    artist = re.sub(r'\s+', ' ', artist) or '작자 미상'
+    raw = re.sub(r'\s+', ' ', artist) or '작자 미상'
+    artist = clean_artist(raw)
     return {
         'url': (info.get('thumburl') or info['url']).split('?')[0],   # 뒤에 붙는 utm_ 추적 파라미터는 뗀다
         'credit': f'{artist[:200]} / {license_} / Wikimedia Commons',
+        'raw_credit': f'{raw[:200]} / {license_} / Wikimedia Commons',   # 정리 전 — 이미 DB 에 들어간 값을 고칠 때 쓴다
         'source': info['descriptionurl'],
     }
 
@@ -275,6 +290,17 @@ def main():
             f'UPDATE {table} t JOIN prefectures p ON p.id = t.prefecture_id\n'
             f'   SET t.image_path = {q(hit["url"])}, t.image_credit = {q(hit["credit"])}, t.image_source = {q(hit["source"])}\n'
             f' WHERE p.name = {q(pref)} AND t.name = {q(name)} AND t.image_path IS NULL;'
+        )
+    # 위 UPDATE 는 빈 행만 채우므로, 출처 문구를 정리하기 전에 들어간 행은 같은 사진일 때만 출처를 고친다 (D-081)
+    fixes = [(table, pref, name, hit) for table, pref, name, hit in found if hit['raw_credit'] != hit['credit']]
+    if fixes:
+        sql += ['', '-- 출처 문구 정리 (D-081). 같은 사진(image_source)의 정리 전 출처만 바꾼다 — 다시 돌려도 같다.']
+    for table, pref, name, hit in fixes:
+        sql.append(
+            f'UPDATE {table} t JOIN prefectures p ON p.id = t.prefecture_id\n'
+            f'   SET t.image_credit = {q(hit["credit"])}\n'
+            f' WHERE p.name = {q(pref)} AND t.name = {q(name)} AND t.image_source = {q(hit["source"])}'
+            f' AND t.image_credit = {q(hit["raw_credit"])};'
         )
     OUT_SQL.write_text('\n'.join(sql) + '\n', encoding='utf-8')
 
