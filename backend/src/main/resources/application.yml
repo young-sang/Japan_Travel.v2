@@ -10,8 +10,9 @@ spring:
     exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
   datasource:
     # characterEncoding=UTF-8 이 없으면 도도부현 한글 시드가 깨진다
-    url: jdbc:mysql://localhost:3306/japan_travel?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
-    username: root
+    # Docker Compose 는 DB_URL · DB_USERNAME 으로 db 컨테이너를 가리킨다. 기본값은 로컬 개발 그대로 (D-085)
+    url: ${DB_URL:jdbc:mysql://localhost:3306/japan_travel?characterEncoding=UTF-8&serverTimezone=Asia/Seoul}
+    username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:

@@ -1,0 +1,72 @@
+# 시연 환경 (D-085). 저장소 맨 위에서 `docker compose up -d --build` 한 줄로 뜬다 → http://localhost
+#   db      MySQL 8. 데이터는 db-data 볼륨에 남는다
+#   backend 스키마 · 여행지 · 축제 시드는 기동할 때 스스로 넣는다 (D-050)
+#   seed    backend 가 뜬 뒤 시연 데이터(scripts/demo_seed.sql, D-070)를 처음 한 번만 넣고 끝난다
+#   web     nginx 가 화면을 내주고 /api 를 backend 로 넘긴다
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-japantravel}
+      MYSQL_DATABASE: japan_travel
+      TZ: Asia/Seoul
+    # 서버 기본 문자셋을 utf8mb4 로 — 한글 시드가 깨지지 않게
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - db-data:/var/lib/mysql
+    # 127.0.0.1(TCP)로 확인한다. 첫 기동 때 초기화용 임시 서버는 소켓으로만 받아서,
+    # localhost(소켓)로 확인하면 진짜 서버가 뜨기 전에 healthy 가 되어 backend 가 접속에 실패한다
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${DB_PASSWORD:-japantravel}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  backend:
+    build: ./backend
+    environment:
+      DB_URL: jdbc:mysql://db:3306/japan_travel?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+      DB_USERNAME: root
+      DB_PASSWORD: ${DB_PASSWORD:-japantravel}
+      TZ: Asia/Seoul
+    depends_on:
+      db:
+        condition: service_healthy
+    # 8080 이 열리면 시드까지 다 들어간 것이다 (Tomcat 은 SQL 초기화가 끝난 뒤 포트를 연다)
+    healthcheck:
+      test: ["CMD", "bash", "-c", "</dev/tcp/localhost/8080"]
+      interval: 5s
+      timeout: 3s
+      retries: 60
+
+  seed:
+    image: mysql:8.0
+    environment:
+      MYSQL_PWD: ${DB_PASSWORD:-japantravel}
+    volumes:
+      - ./scripts/demo_seed.sql:/seed/demo_seed.sql:ro
+    # demo 계정이 이미 있으면 건너뛴다 — 시연 중 바꾼 내용을 재기동이 되돌리지 않게
+    command:
+      - sh
+      - -c
+      - |
+        if [ "$$(mysql -hdb -uroot -N -e "SELECT COUNT(*) FROM japan_travel.users WHERE username='demo'")" = "0" ]; then
+          mysql -hdb -uroot --default-character-set=utf8mb4 japan_travel < /seed/demo_seed.sql && echo "시연 데이터를 넣었습니다"
+        else
+          echo "시연 데이터가 이미 있어 건너뜁니다"
+        fi
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: "no"
+
+  web:
+    build: ./frontend
+    ports:
+      - "${WEB_PORT:-80}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  db-data:
