@@ -13,8 +13,12 @@ import Button from '../components/ui/Button.jsx';
 import { useToast } from '../components/ui/Toast.jsx';
 import styles from './Detail.module.css';
 import usePageTitle from '../utils/usePageTitle.js';
+import NotFound from './NotFound.jsx';
 
 const CATEGORY_LABEL = { destination: '여행지', festival: '축제', course: '코스' };
+
+// 모르는 종류(/detail/hotel/57)는 코스로 처리하지 않고 없는 페이지로 알린다 (D-084)
+const isKnownType = (type) => Object.hasOwn(CATEGORY_LABEL, type);
 
 // 최근 본 장소 · 리뷰 · 즐겨찾기는 여행지 · 축제만 대상이다 (D-036 · D-052). 코스는 셋 다 없다.
 const isPlace = (type) => type === 'destination' || type === 'festival';
@@ -43,6 +47,7 @@ export default function Detail() {
   useEffect(() => {
     let cancelled = false;
     setItem(null); setError(false); setNearby([]);
+    if (!isKnownType(type)) return;
     const fn = type === 'destination' ? api.getDestination
               : type === 'festival' ? api.getFestival
               : api.getCourse;
@@ -54,7 +59,13 @@ export default function Detail() {
         if (isPlace(type) && tokenStore.get()) api.touchHistory(type, Number(id)).catch(() => {});
         if (d && d.prefecture) {
           api.listDestinations({ prefecture: d.prefecture })
-            .then((list) => { if (!cancelled) setNearby(list.filter((x) => !(type === 'destination' && x.id === d.id)).slice(0, 6)); })
+            .then((list) => {
+              if (cancelled) return;
+              // 지금 보는 여행지, 코스라면 이미 코스에 든 여행지는 근처 추천에서 뺀다 (D-084)
+              const shown = new Set(type === 'destination' ? [d.id]
+                : (d.stops || []).filter((s) => s.type === 'DESTINATION').map((s) => s.targetId));
+              setNearby(list.filter((x) => !shown.has(x.id)).slice(0, 6));
+            })
             .catch(() => {});
         }
       })
@@ -72,6 +83,8 @@ export default function Detail() {
       catch { toast.error('복사 실패'); }
     }
   }
+
+  if (!isKnownType(type)) return <NotFound />;
 
   if (error) {
     return (

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api, typeSlug } from '../api/client.js';
 import { PREFECTURES } from '../data/prefectures.js';
 import Container from '../components/ui/Container.jsx';
@@ -237,7 +237,7 @@ export default function CourseBuilder() {
                 {favsLoading && <div className={styles.resultsLoading}><Spinner size={20} /></div>}
                 {!favsLoading && favs && favs.length === 0 && (
                   <p className={styles.resultsEmpty}>
-                    즐겨찾기가 없어요. <a href="/destination">여행지</a> 또는 <a href="/festival">축제</a>에서 추가해보세요.
+                    즐겨찾기가 없어요. <Link to="/destination">여행지</Link> 또는 <Link to="/festival">축제</Link>에서 추가해보세요.
                   </p>
                 )}
                 {!favsLoading && favs && favs.map((f) => (

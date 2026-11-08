@@ -45,7 +45,7 @@ export default function Top25() {
                 <div className={styles.content}>
                   <div className={styles.name}>{d.name}</div>
                   <div className={styles.meta}>
-                    📍 {d.prefecture}
+                    {d.prefecture}
                     {d.avgRating != null && <> · ★ {d.avgRating} ({d.reviewCount})</>}
                     {favoriteCount > 0 && <> · ♥ {favoriteCount}</>}
                   </div>

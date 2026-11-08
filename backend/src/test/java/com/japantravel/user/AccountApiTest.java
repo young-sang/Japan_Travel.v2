@@ -51,6 +51,19 @@ class AccountApiTest extends IntegrationTest {
                 Map.of("currentPassword", "wrong", "newPassword", "new5678")), token)), 400, "WRONG_PASSWORD");
     }
 
+//  탈퇴 확인창 전에 비밀번호만 확인한다. 아무것도 바꾸지 않는다 (D-084)
+    @Test
+    void 비밀번호_확인은_맞으면_200_틀리면_400_이고_계정은_남는다() throws Exception {
+        String token = signup("tanaka");
+
+        mockMvc.perform(auth(withJson(post("/api/me/password/check"), Map.of("password", "pw1234")), token))
+                .andExpect(status().isOk());
+        expectError(mockMvc.perform(auth(withJson(post("/api/me/password/check"),
+                Map.of("password", "wrong")), token)), 400, "WRONG_PASSWORD");
+        mockMvc.perform(auth(get("/api/auth/me"), token))
+                .andExpect(status().isOk());
+    }
+
     @Test
     void 탈퇴하면_계정과_활동이_함께_지워진다() throws Exception {
         String token = signup("tanaka");

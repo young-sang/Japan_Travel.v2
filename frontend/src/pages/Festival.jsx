@@ -11,16 +11,20 @@ import ListPageLayout, { ResultsGrid } from '../layouts/ListPageLayout.jsx';
 import { useToast } from '../components/ui/Toast.jsx';
 import filterStyles from '../components/FilterGroup.module.css';
 import usePageTitle from '../utils/usePageTitle.js';
+import useQueryState from '../utils/useQueryState.js';
 
 const MONTHS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 export default function Festival() {
   usePageTitle('축제');
-  const [prefecture, setPrefecture] = useState('');
-  const [month, setMonth] = useState(null);
+  // 필터 · 보기 · 정렬은 주소에 둔다 (D-084)
+  const [prefecture, setPrefecture] = useQueryState('prefecture');
+  const [monthText, setMonthText] = useQueryState('month');
+  const month = monthText ? Number(monthText) : null;
+  const setMonth = (m) => setMonthText(m ?? '');
   const [items, setItems] = useState(null);
-  const [view, setView] = useState('list');
-  const [sort, setSort] = useState('default');
+  const [view, setView] = useQueryState('view', 'list');
+  const [sort, setSort] = useQueryState('sort', 'default');
   const toast = useToast();
 
   async function load() {

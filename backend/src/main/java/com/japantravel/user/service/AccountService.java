@@ -40,6 +40,11 @@ public class AccountService {
         userRepository.delete(user);
     }
 
+    @Transactional(readOnly = true)
+    public void checkPassword(Long userId, String raw) {
+        checkPassword(find(userId), raw);
+    }
+
 //  토큰은 유효한데 사용자가 없으면 AuthService.me() 와 같이 401.
     private User find(Long userId) {
         return userRepository.findById(userId)

@@ -2,6 +2,7 @@ package com.japantravel.user.controller;
 
 import com.japantravel.common.web.ApiResponse;
 import com.japantravel.user.dto.PasswordChangeRequest;
+import com.japantravel.user.dto.PasswordCheckRequest;
 import com.japantravel.user.dto.ProfileUpdateRequest;
 import com.japantravel.user.dto.UserResponse;
 import com.japantravel.user.dto.WithdrawRequest;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,6 +35,14 @@ public class AccountController {
     public ApiResponse<Void> changePassword(@AuthenticationPrincipal Long userId,
                                            @RequestBody PasswordChangeRequest req) {
         accountService.changePassword(userId, req);
+        return ApiResponse.ok();
+    }
+
+//  비밀번호가 맞는지만 본다. 틀리면 400 WRONG_PASSWORD. 탈퇴 확인창을 띄우기 전에 부른다 (D-084)
+    @PostMapping("/password/check")
+    public ApiResponse<Void> checkPassword(@AuthenticationPrincipal Long userId,
+                                          @RequestBody PasswordCheckRequest req) {
+        accountService.checkPassword(userId, req.password());
         return ApiResponse.ok();
     }
 

@@ -102,5 +102,6 @@ export const api = {
   // account — 계정 관리 (D-056). 비밀번호 불일치는 code WRONG_PASSWORD (400)
   updateProfile: (nickname) => req('/api/me/profile', { method: 'PATCH', body: { nickname } }),
   changePassword: (currentPassword, newPassword) => req('/api/me/password', { method: 'PUT', body: { currentPassword, newPassword } }),
+  checkPassword: (password) => req('/api/me/password/check', { method: 'POST', body: { password } }),
   withdraw: (password) => req('/api/me', { method: 'DELETE', body: { password } }),
 };

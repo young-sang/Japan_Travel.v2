@@ -80,6 +80,7 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 |---|---|---|---|---|
 | PATCH | `/api/me/profile` | 🔑 | 200 | 닉네임 수정 |
 | PUT | `/api/me/password` | 🔑 | 200 | 비밀번호 변경. 현재 비밀번호 확인 |
+| POST | `/api/me/password/check` | 🔑 | 200 | 비밀번호가 맞는지만 확인. 틀리면 400 `WRONG_PASSWORD`. 탈퇴 확인창 전에 부른다 (D-084) |
 | DELETE | `/api/me` | 🔑 | 200 | 회원 탈퇴. 찜 · 리뷰 · 코스 · 기록도 CASCADE 로 삭제 |
 
 **요청**
@@ -91,11 +92,14 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 // PUT /api/me/password — PasswordChangeRequest
 { "currentPassword": "pw1234", "newPassword": "newpw5678" }
 
+// POST /api/me/password/check — PasswordCheckRequest
+{ "password": "pw1234" }
+
 // DELETE /api/me — WithdrawRequest
 { "password": "pw1234" }
 ```
 
-**응답 `data`** — profile 은 바뀐 `UserResponse`, password · 탈퇴는 `null`.
+**응답 `data`** — profile 은 바뀐 `UserResponse`, password · password/check · 탈퇴는 `null`.
 비밀번호를 바꿔도 이미 받은 토큰은 만료까지 유효하다 (D-033).
 
 **에러** — `WRONG_PASSWORD`(400, password · 탈퇴) · `UNAUTHORIZED`(401, 토큰 없음 · 사용자 삭제됨)

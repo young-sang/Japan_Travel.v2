@@ -100,7 +100,7 @@ export default function ReviewSection({ targetType, targetId }) {
               </Button>
             )}
             <Button type="submit" variant="primary" loading={submitting}>
-              {editingId ? '수정' : '작성'}
+              {editingId ? '저장' : '작성'}
             </Button>
           </div>
         </form>

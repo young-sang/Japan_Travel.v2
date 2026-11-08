@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import PrefectureGrid from '../components/PrefectureGrid.jsx';
 import PlaceCard from '../components/PlaceCard.jsx';
 import { api } from '../api/client.js';
@@ -11,17 +11,17 @@ import { SkeletonGrid } from '../components/ui/Skeleton.jsx';
 import ListPageLayout, { ResultsGrid } from '../layouts/ListPageLayout.jsx';
 import { useToast } from '../components/ui/Toast.jsx';
 import usePageTitle from '../utils/usePageTitle.js';
+import useQueryState from '../utils/useQueryState.js';
 
 // 테마(태그) 필터는 없다 — 태그 테이블을 1차에서 만들지 않았다 (D-024). 현 필터만 서버가 받는다.
 export default function Destination() {
   usePageTitle('여행지');
-  const [params] = useSearchParams();
   const navigate = useNavigate();
   const toast = useToast();
-  // 상세의 "근처 추천 → 더 보기" 가 ?prefecture= 로 들어온다
-  const [prefecture, setPrefecture] = useState(params.get('prefecture') || '');
+  // 필터 · 정렬은 주소에 둔다 (D-084). 상세의 "근처 추천 → 더 보기" 도 ?prefecture= 로 들어온다
+  const [prefecture, setPrefecture] = useQueryState('prefecture');
   const [items, setItems] = useState(null);
-  const [sort, setSort] = useState('default');
+  const [sort, setSort] = useQueryState('sort', 'default');
 
   async function load() {
     setItems(null);

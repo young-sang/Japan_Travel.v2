@@ -88,9 +88,14 @@ function WithdrawSection() {
 
   async function onSubmit(e) {
     e.preventDefault();
-    if (!confirm('탈퇴하면 즐겨찾기 · 리뷰 · 코스 · 히스토리가 모두 삭제되고 되돌릴 수 없어요. 탈퇴할까요?')) return;
     setBusy(true);
     try {
+      // 비밀번호가 틀리면 확인창 없이 바로 알린다 (D-084)
+      await api.checkPassword(password);
+      if (!confirm('탈퇴하면 즐겨찾기 · 리뷰 · 코스 · 히스토리가 모두 삭제되고 되돌릴 수 없어요. 탈퇴할까요?')) {
+        setBusy(false);
+        return;
+      }
       await withdraw(password);
       invalidateFavorites();
       toast.success('탈퇴했어요. 이용해 주셔서 감사합니다');

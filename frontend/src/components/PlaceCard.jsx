@@ -32,7 +32,6 @@ export default function PlaceCard({ item, type, onClick, onFavChange }) {
         <CardTitle>{name}</CardTitle>
         {metaParts.length > 0 && (
           <CardMeta>
-            <span aria-hidden="true">📍</span>
             <span>{metaParts.join(' · ')}</span>
           </CardMeta>
         )}
