@@ -152,7 +152,7 @@ export default function Detail() {
           <h1 className={styles.title}>{name}</h1>
           {metaItems.length > 0 && (
             <p className={styles.meta}>
-              <span aria-hidden="true">📍</span> {metaItems.join(' · ')}
+              {metaItems.join(' · ')}
             </p>
           )}
           {(item.tags || []).length > 0 && (
