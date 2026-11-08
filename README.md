@@ -18,6 +18,30 @@ Japan_Travel.v2/
 백엔드 패키지는 도메인 단위다 — `com.japantravel.<domain>.{controller,service,repository,entity,dto}`.
 도메인: `destination` `festival` `prefecture` `user` `favorite` `review` `history` `course` `search`, 공통은 `common`.
 
+## 빠른 실행 — Docker Compose (D-085)
+
+Docker Desktop 만 있으면 된다. Java · Node · MySQL 은 설치하지 않아도 된다. 저장소 맨 위에서:
+
+```bash
+docker compose up -d --build
+```
+
+처음에는 이미지 빌드와 시드 때문에 몇 분 걸린다. 끝나면 http://localhost 에 접속한다.
+MySQL · 백엔드 · 화면이 뜨고, 시연 데이터(아래 "시연 데이터")가 처음 한 번 자동으로 들어간다. `demo` / `demo1234` 로 로그인한다.
+
+| 명령 | 하는 일 |
+|---|---|
+| `docker compose ps` | 상태 보기. `seed` 는 시연 데이터를 넣고 끝나는 것이 정상이다 |
+| `docker compose logs -f backend` | 백엔드 로그 |
+| `docker compose exec -T db sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" --default-character-set=utf8mb4 japan_travel' < scripts/demo_seed.sql` | 시연 직전 상태로 되돌리기 |
+| `docker compose down` | 끄기. 데이터는 볼륨에 남는다 |
+| `docker compose down -v` | 끄고 데이터까지 지우기. 다음 `up` 때 처음부터 다시 넣는다 |
+
+80 포트를 이미 쓰고 있으면 `WEB_PORT=8088 docker compose up -d --build` 처럼 바꾼다. DB 비밀번호 기본값은 `japantravel` 이고 `DB_PASSWORD` 로 바꾼다.
+사진(Wikimedia Commons)과 지도 타일은 인터넷에서 불러온다.
+
+아래는 Docker 없이 개발 모드로 띄우는 방법이다.
+
 ## 사전 요구사항
 
 - **Java 17+** — Gradle 은 래퍼(`backend/gradlew`)가 있어 설치하지 않아도 된다
@@ -34,6 +58,8 @@ CREATE DATABASE japan_travel DEFAULT CHARACTER SET utf8mb4;
 
 | 환경변수 | 용도 | 기본값 |
 |---|---|---|
+| `DB_URL` | JDBC 주소 | `localhost:3306/japan_travel` |
+| `DB_USERNAME` | MySQL 계정 | `root` |
 | `DB_PASSWORD` | MySQL `root` 비밀번호 | 빈 값 |
 | `JWT_SECRET` | JWT 서명 키 (32바이트 이상) | 개발용 키 |
 
