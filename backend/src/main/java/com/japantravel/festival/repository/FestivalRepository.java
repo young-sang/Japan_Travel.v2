@@ -1,16 +1,18 @@
 package com.japantravel.festival.repository;
 
 import com.japantravel.festival.entity.Festival;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface FestivalRepository extends JpaRepository<Festival, Long> {
+public interface FestivalRepository extends JpaRepository<Festival, Long>,
+        JpaSpecificationExecutor<Festival> {
 
     @EntityGraph(attributePaths = "prefecture")
     Optional<Festival> findById(Long id);
@@ -30,11 +32,8 @@ public interface FestivalRepository extends JpaRepository<Festival, Long> {
     List<Festival> findByPrefectureNameAndMonthOrderByMonthAscIdDesc(
             String prefectureName, Integer month);
 
-//  통합 검색 (D-053). 목록과 같은 정렬. 건수는 Pageable 이 자른다
+//  통합 검색 (D-053 · D-083). 조건은 SearchService 가 KeywordSpec 으로 만든다. 건수 · 정렬은 Pageable 이 정한다
+    @Override
     @EntityGraph(attributePaths = "prefecture")
-    @Query("""
-            select f from Festival f
-            where f.name like %:q% or f.description like %:q% or f.prefecture.name like %:q%
-            order by f.month asc, f.id desc""")
-    List<Festival> search(@Param("q") String q, Pageable pageable);
+    Page<Festival> findAll(Specification<Festival> spec, Pageable pageable);
 }

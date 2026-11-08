@@ -53,4 +53,23 @@ class SearchApiTest extends IntegrationTest {
                 .andExpect(jsonPath("$.data.courses.length()").value(1))
                 .andExpect(jsonPath("$.data.courses[0].title").value("검색용코스true"));
     }
+
+//  띄어 쓴 검색어는 낱말로 나눠, 모든 낱말이 (서로 다른 칸에 있어도) 들어간 것만 찾는다 (D-083)
+    @Test
+    void 띄어_쓴_검색어는_모든_낱말이_들어간_것만_찾는다() throws Exception {
+        String token = signup("suzuki");
+        String prefecture = prefectureOfDestination(destinationId());
+        for (String title : new String[]{"낱말갑 낱말을", "낱말갑"}) {
+            mockMvc.perform(auth(withJson(post("/api/courses"), Map.of("title", title,
+                    "prefecture", prefecture, "isPublic", true, "stops", List.of())), token))
+                    .andExpect(status().isCreated());
+        }
+
+        mockMvc.perform(get("/api/search").param("q", "낱말을  낱말갑"))
+                .andExpect(jsonPath("$.data.courses.length()").value(1))
+                .andExpect(jsonPath("$.data.courses[0].title").value("낱말갑 낱말을"));
+
+        mockMvc.perform(get("/api/search").param("q", "낱말갑 " + prefecture))
+                .andExpect(jsonPath("$.data.courses.length()").value(2));
+    }
 }

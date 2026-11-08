@@ -10,12 +10,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,11 +41,15 @@ class SearchServiceTest {
     }
 
     @Test
-    void 검색어는_앞뒤_공백을_떼고_대상별_20건으로_자른다() {
-        searchService.search("  교토 ");
+    void 대상별로_20건으로_자른다() {
+        when(destinationRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(Page.empty());
+        when(festivalRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(Page.empty());
+        when(courseRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(Page.empty());
 
-        verify(destinationRepository).search(eq("교토"), argThat((Pageable p) -> p.getPageSize() == 20));
-        verify(festivalRepository).search(eq("교토"), argThat((Pageable p) -> p.getPageSize() == 20));
-        verify(courseRepository).searchPublic(eq("교토"), argThat((Pageable p) -> p.getPageSize() == 20));
+        searchService.search("  교토 단풍 ");
+
+        verify(destinationRepository).findAll(any(Specification.class), argThat((Pageable p) -> p.getPageSize() == 20));
+        verify(festivalRepository).findAll(any(Specification.class), argThat((Pageable p) -> p.getPageSize() == 20));
+        verify(courseRepository).findAll(any(Specification.class), argThat((Pageable p) -> p.getPageSize() == 20));
     }
 }

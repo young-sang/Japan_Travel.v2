@@ -1,9 +1,12 @@
 package com.japantravel.destination.repository;
 
 import com.japantravel.destination.entity.Destination;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -11,7 +14,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-public interface DestinationRepository extends JpaRepository<Destination, Long> {
+public interface DestinationRepository extends JpaRepository<Destination, Long>,
+        JpaSpecificationExecutor<Destination> {
 
     @EntityGraph(attributePaths = "prefecture")
     Optional<Destination> findById(Long id);
@@ -23,13 +27,10 @@ public interface DestinationRepository extends JpaRepository<Destination, Long> 
     @EntityGraph(attributePaths = "prefecture")
     List<Destination> findByPrefectureNameOrderByIdDesc(String prefectureName);
 
-//  통합 검색 (D-053). 이름 · 설명 · 현 중 하나라도 포함하면 맞는다. 건수는 Pageable 이 자른다
+//  통합 검색 (D-053 · D-083). 조건은 SearchService 가 KeywordSpec 으로 만든다. 건수 · 정렬은 Pageable 이 정한다
+    @Override
     @EntityGraph(attributePaths = "prefecture")
-    @Query("""
-            select d from Destination d
-            where d.name like %:q% or d.description like %:q% or d.prefecture.name like %:q%
-            order by d.id desc""")
-    List<Destination> search(@Param("q") String q, Pageable pageable);
+    Page<Destination> findAll(Specification<Destination> spec, Pageable pageable);
 
 //  Top25 순위 (D-074 · D-076). 점수 = 본 사람 수 + 즐겨찾기 × 2 + 리뷰 × 3, 0점은 뺀다.
 //  동점이면 평균 평점 높은 순(리뷰 없는 곳은 뒤), 그다음 id 오름차순

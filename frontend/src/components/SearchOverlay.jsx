@@ -7,9 +7,10 @@ import Spinner from './ui/Spinner.jsx';
 import EmptyState from './ui/EmptyState.jsx';
 import styles from './SearchOverlay.module.css';
 
+//  누르면 그대로 검색어가 된다. 모두 결과가 나오는 검색어로 둔다 (D-083)
 const TRENDING = [
-  '교토 단풍', '오키나와 바다', '도쿄 야경', '홋카이도 눈축제',
-  '오사카 음식', '기온 마츠리', '후지산 트레킹', '나라 사슴',
+  '교토 단풍', '오키나와 바다', '도쿄 벚꽃', '홋카이도 눈축제',
+  '오사카 시장', '기온 마쓰리', '후지산 호수', '나라 사슴',
 ];
 
 const CATEGORY_LABEL = { destination: '여행지', festival: '축제', course: '여행코스' };

@@ -165,7 +165,7 @@ class CourseServiceTest {
         assertCode(() -> courseService.update(2L, 5L, request("t", true, List.of())), ErrorCode.FORBIDDEN);
         assertCode(() -> courseService.delete(2L, 5L), ErrorCode.FORBIDDEN);
         assertCode(() -> courseService.update(1L, 6L, request("t", true, List.of())), ErrorCode.FORBIDDEN);
-        verify(courseRepository, never()).delete(any());
+        verify(courseRepository, never()).delete(any(Course.class));
     }
 
     @Test
