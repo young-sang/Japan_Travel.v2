@@ -3,6 +3,7 @@
 #   backend 스키마 · 여행지 · 축제 시드는 기동할 때 스스로 넣는다 (D-050)
 #   seed    backend 가 뜬 뒤 시연 데이터(scripts/demo_seed.sql, D-070)를 처음 한 번만 넣고 끝난다
 #   web     nginx 가 화면을 내주고 /api 를 backend 로 넘긴다
+# 공개 서버에서는 .env 로 DB 비밀번호 · JWT 키 · admin 비밀번호를 바꾼다 (.env.example, D-086)
 services:
   db:
     image: mysql:8.0
@@ -28,6 +29,8 @@ services:
       DB_URL: jdbc:mysql://db:3306/japan_travel?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
       DB_USERNAME: root
       DB_PASSWORD: ${DB_PASSWORD:-japantravel}
+      # 빈 값을 넘기면 application.yml 의 기본값 대신 빈 키가 들어가 기동에 실패한다. 그래서 같은 개발용 키를 기본값으로 둔다
+      JWT_SECRET: ${JWT_SECRET:-japan-travel-dev-secret-key-0123456789abcdef}
       TZ: Asia/Seoul
     depends_on:
       db:
@@ -43,6 +46,10 @@ services:
     image: mysql:8.0
     environment:
       MYSQL_PWD: ${DB_PASSWORD:-japantravel}
+      # 1 이면 demo 가 있어도 다시 넣는다 — 시연 직전 되돌리기: docker compose run --rm -e FORCE_SEED=1 seed
+      FORCE_SEED: ${FORCE_SEED:-0}
+      # 있으면 시드 뒤에 admin 비밀번호를 이 BCrypt 해시로 바꾼다. 공개 서버용 (D-086)
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:-}
     volumes:
       - ./scripts/demo_seed.sql:/seed/demo_seed.sql:ro
     # demo 계정이 이미 있으면 건너뛴다 — 시연 중 바꾼 내용을 재기동이 되돌리지 않게
@@ -50,10 +57,16 @@ services:
       - sh
       - -c
       - |
-        if [ "$$(mysql -hdb -uroot -N -e "SELECT COUNT(*) FROM japan_travel.users WHERE username='demo'")" = "0" ]; then
-          mysql -hdb -uroot --default-character-set=utf8mb4 japan_travel < /seed/demo_seed.sql && echo "시연 데이터를 넣었습니다"
+        set -e
+        if [ "$$FORCE_SEED" = "1" ] || [ "$$(mysql -hdb -uroot -N -e "SELECT COUNT(*) FROM japan_travel.users WHERE username='demo'")" = "0" ]; then
+          mysql -hdb -uroot --default-character-set=utf8mb4 japan_travel < /seed/demo_seed.sql
+          echo "시연 데이터를 넣었습니다"
         else
           echo "시연 데이터가 이미 있어 건너뜁니다"
+        fi
+        if [ -n "$$ADMIN_PASSWORD_HASH" ]; then
+          mysql -hdb -uroot japan_travel -e "UPDATE users SET password_hash='$$ADMIN_PASSWORD_HASH' WHERE username='admin'"
+          echo "admin 비밀번호를 .env 의 값으로 바꿨습니다"
         fi
     depends_on:
       backend:
