@@ -80,3 +80,5 @@ data/japan_travel.db
 scripts/wiki/cache.json
 scripts/wiki/extracts.json
 scripts/wiki/batches/
+scripts/wiki_fest/extracts.json
+scripts/wiki_fest/batches/
