@@ -81,6 +81,23 @@ class FestivalApiTest extends IntegrationTest {
         expectError(mockMvc.perform(get("/api/festivals/{id}", MISSING_ID)), 404, "FESTIVAL_NOT_FOUND");
     }
 
+//  설명 출처 (D-092). 시드는 읽기만 하므로 출처가 있는 행을 직접 넣고 끝나면 지운다
+    @Test
+    void 상세에_설명_출처가_나온다() throws Exception {
+        jdbc.update("""
+                INSERT INTO festivals (name, prefecture_id, month, description, wikidata_id, source_url, created_at)
+                SELECT '출처 테스트 축제', MIN(id), 8, '설명', 'Q456', 'https://ja.wikipedia.org/wiki/テスト祭', NOW() FROM prefectures""");
+        long id = jdbc.queryForObject("SELECT id FROM festivals WHERE name = '출처 테스트 축제'", Long.class);
+        try {
+            mockMvc.perform(get("/api/festivals/{id}", id))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.wikidataId").value("Q456"))
+                    .andExpect(jsonPath("$.data.sourceUrl").value("https://ja.wikipedia.org/wiki/テスト祭"));
+        } finally {
+            jdbc.update("DELETE FROM festivals WHERE id = ?", id);
+        }
+    }
+
     @Test
     void 리뷰_집계가_상세에_실린다() throws Exception {
         long id = festivalId();

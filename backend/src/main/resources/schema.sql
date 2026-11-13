@@ -44,6 +44,8 @@ CREATE TABLE IF NOT EXISTS festivals (
   image_path    VARCHAR(500),
   image_credit  VARCHAR(300),
   image_source  VARCHAR(500),
+  wikidata_id   VARCHAR(20),                     -- 설명 출처 (D-092). Wikidata 항목이 없는 축제도 있다
+  source_url    VARCHAR(500),                    -- 설명 원문 (ja 위키백과 문서 주소)
   created_at    DATETIME NOT NULL,
   UNIQUE (name, prefecture_id),
   FOREIGN KEY (prefecture_id) REFERENCES prefectures(id),
@@ -74,6 +76,14 @@ SET @ddl = (SELECT IF(COUNT(*) = 0,
   'ALTER TABLE destinations ADD COLUMN wikidata_id VARCHAR(20) AFTER image_source, ADD COLUMN source_url VARCHAR(500) AFTER wikidata_id',
   'DO 0') FROM information_schema.columns
   WHERE table_schema = DATABASE() AND table_name = 'destinations' AND column_name = 'wikidata_id');
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @ddl = (SELECT IF(COUNT(*) = 0,
+  'ALTER TABLE festivals ADD COLUMN wikidata_id VARCHAR(20) AFTER image_source, ADD COLUMN source_url VARCHAR(500) AFTER wikidata_id',
+  'DO 0') FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'festivals' AND column_name = 'wikidata_id');
 PREPARE stmt FROM @ddl;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;

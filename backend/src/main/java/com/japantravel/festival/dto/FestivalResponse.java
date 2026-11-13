@@ -17,6 +17,9 @@ public record FestivalResponse(
         String imagePath,
         String imageCredit,
         String imageSource,
+//      설명 출처 (D-092). 출처가 없는 행이면 null
+        String wikidataId,
+        String sourceUrl,
         LocalDateTime createdAt,
 //      리뷰 집계 (D-057). 평균은 소수 첫째 자리, 리뷰가 없으면 null
         Double avgRating,
@@ -35,6 +38,8 @@ public record FestivalResponse(
                 f.getImagePath(),
                 f.getImageCredit(),
                 f.getImageSource(),
+                f.getWikidataId(),
+                f.getSourceUrl(),
                 f.getCreatedAt(),
                 round1(f.getAvgRating()),
                 f.getReviewCount()
