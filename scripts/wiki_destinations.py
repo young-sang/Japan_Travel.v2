@@ -228,10 +228,19 @@ def coords_of(qid):
     return (v['latitude'], v['longitude']) if v else None
 
 
+# 사진 매칭 때 쓴 문서가 장소 자체가 아니었던 경우 — 검수하다 찾으면 여기에 더한다 (기존 이름 → ja 문서 제목)
+MATCH_OVERRIDE = {
+    '아시노코': '芦ノ湖',                 # 사진 문서는 芦ノ湖遊覧船(유람선)
+    '나카스 포장마차 거리': '中洲',        # 사진 문서는 이웃 동네 西中洲
+}
+
+
 def match_existing(dest, page):
-    """기존 장소 → Wikidata 항목. 사진 매칭 때 쓴 문서 → 일본어 이름표 순으로 찾고, 좌표가 가까워야 짝으로 본다."""
+    """기존 장소 → Wikidata 항목. 직접 정한 짝 → 사진 매칭 때 쓴 문서 → 일본어 이름표 순으로 찾고, 좌표가 가까워야 짝으로 본다."""
     tries = []
-    if page.startswith('wikidata:'):
+    if dest['name'] in MATCH_OVERRIDE:
+        tries.append(('ja.wikipedia.org', MATCH_OVERRIDE[dest['name']]))
+    elif page.startswith('wikidata:'):
         tries.append(('wikidata', page.split()[0].removeprefix('wikidata:')))
     elif page.startswith('ja:'):
         tries.append(('ja.wikipedia.org', page.removeprefix('ja:')))

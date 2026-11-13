@@ -3779,15 +3779,15 @@
     "keep_name": "하코네 오와쿠다니"
    },
    {
-    "qid": "Q11614758",
-    "ja": "芦ノ湖遊覧船",
-    "ko": null,
-    "ko_label": null,
-    "kana": "あしのこゆうらんせん",
-    "lat": 35.234073,
-    "lng": 138.997832111,
-    "links": 3,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/AshinokoYuransen8382.jpg",
+    "qid": "Q187053",
+    "ja": "芦ノ湖",
+    "ko": "아시노호",
+    "ko_label": "아시노호",
+    "kana": null,
+    "lat": 35.21167,
+    "lng": 139.00389,
+    "links": 25,
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Lake%20Ashi%20%26%20Mt%20Fuji%20%26%20Hakone%20Shrine.jpg",
     "types": [
      "기타"
     ],
@@ -11147,15 +11147,15 @@
     "keep_name": "다자이후 텐만구"
    },
    {
-    "qid": "Q11627118",
-    "ja": "西中洲 (福岡市)",
-    "ko": null,
-    "ko_label": null,
-    "kana": "にしなかす",
-    "lat": 33.591627777,
-    "lng": 130.404447222,
-    "links": 2,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Yakuinshingawa%20River%20and%20cherry%20blossoms%20from%20Fukuhaku%20Deaibashi%20Bridge.jpg",
+    "qid": "Q6960335",
+    "ja": "中洲",
+    "ko": "나카스",
+    "ko_label": "나카스",
+    "kana": "なかす",
+    "lat": 33.592194444,
+    "lng": 130.40675,
+    "links": 5,
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Nakasu02.jpg",
     "types": [
      "기타"
     ],
@@ -14110,9 +14110,9 @@
    "lat": 35.2046,
    "lng": 139.0247,
    "referenced": true,
-   "qid": "Q11614758",
-   "via": "ja:芦ノ湖遊覧船",
-   "km": 4.1
+   "qid": "Q187053",
+   "via": "ja:芦ノ湖",
+   "km": 2.0
   },
   {
    "pref": "가나가와현",
@@ -15250,8 +15250,8 @@
    "lat": 33.5903,
    "lng": 130.4056,
    "referenced": true,
-   "qid": "Q11627118",
-   "via": "ja:西中洲 (福岡市)",
+   "qid": "Q6960335",
+   "via": "ja:中洲",
    "km": 0.2
   },
   {
