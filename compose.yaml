@@ -7,6 +7,9 @@
 services:
   db:
     image: mysql:8.0
+    # 서버(EC2)를 껐다 켜면 Docker 엔진만 켜진다. 이 정책이 있어야 컨테이너도 다시 뜬다.
+    # docker compose stop 으로 직접 끈 것은 그대로 둔다 (D-086)
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-japantravel}
       MYSQL_DATABASE: japan_travel
@@ -25,6 +28,7 @@ services:
 
   backend:
     build: ./backend
+    restart: unless-stopped
     environment:
       DB_URL: jdbc:mysql://db:3306/japan_travel?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
       DB_USERNAME: root
@@ -75,6 +79,7 @@ services:
 
   web:
     build: ./frontend
+    restart: unless-stopped
     ports:
       - "${WEB_PORT:-80}:80"
     depends_on:
