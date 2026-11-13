@@ -97,8 +97,12 @@ cd backend
 
 > Windows 에서는 `.\gradlew.bat bootRun`.
 
-기동할 때마다 `schema.sql` 로 테이블을 만들고 `data.sql` 로 시드를 넣는다 (`INSERT IGNORE` 라 중복되지 않는다, D-050).
-시드는 도도부현 47 · 여행지 219 · 축제 84 · 기본 제공 코스 26(정류장 110)이다. 기동 시드에 계정은 없다.
+기동할 때마다 `schema.sql` 로 테이블을 만들고 `destinations.sql` · `data.sql` · `images.sql` 로 시드를 넣는다 (`INSERT IGNORE` 라 중복되지 않는다, D-050).
+시드는 도도부현 47 · 여행지 940 · 축제 84 · 기본 제공 코스 26(정류장 110)이다. 기동 시드에 계정은 없다.
+
+**여행지 데이터 출처 (D-089 · D-090)** — 목록 · 좌표 · 사진은 [Wikidata](https://www.wikidata.org)(CC0) · Wikimedia Commons, 설명은 ja 위키백과 원문을 AI 가 원문 안의 내용만으로 한국어로 요약한 것이다(CC BY-SA 4.0, 상세 화면에 원문 링크).
+`scripts/wiki_destinations.py` 가 단계별로 만든다(사용법은 파일 머리말). 축제는 아직 AI 로 만든 데이터다(S4e 에서 바꾼다).
+이미 있는 DB 에는 `INSERT IGNORE` 라 새 여행지가 반영되지 않는다. 바꾸려면 DB 를 백업한 뒤 `DELETE FROM destinations; DELETE FROM courses WHERE owner_user_id IS NULL;` → 백엔드 재기동 → 시연 데이터를 다시 넣는다.
 
 ### 시연 데이터 (선택)
 
