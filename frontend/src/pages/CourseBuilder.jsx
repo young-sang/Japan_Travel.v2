@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { api, typeSlug } from '../api/client.js';
 import { PREFECTURES } from '../data/prefectures.js';
 import Container from '../components/ui/Container.jsx';
@@ -54,6 +54,25 @@ export default function CourseBuilder() {
         .catch(() => toast.error('코스를 불러오지 못했습니다'));
     }
   }, [id, editing]);
+
+  // 상세 · 즐겨찾기에서 담아 온 장소로 새 코스를 채운다 (D-094). ?add=destination-575,festival-209
+  // 고른 순서대로 1일차 정류장이 되고, 현은 고른 장소가 가장 많이 속한 현을 기본값으로 넣는다.
+  const [params] = useSearchParams();
+  const adding = !editing ? params.get('add') : null;
+  useEffect(() => {
+    if (!adding) return;
+    const picks = adding.split(',').map((p) => p.split('-')).filter(([t, n]) => ['destination', 'festival'].includes(t) && n);
+    Promise.all(picks.map(([t, n]) => (t === 'festival' ? api.getFestival(n) : api.getDestination(n))
+      .then((it) => ({ ...it, _type: t })).catch(() => null)))
+      .then((found) => {
+        const items = found.filter(Boolean);
+        if (!items.length) return;
+        setStops(items.map((it) => ({ dayNo: 1, type: it._type, targetId: it.id, name: it.name, memo: '' })));
+        const counts = {};
+        items.forEach((it) => { counts[it.prefecture] = (counts[it.prefecture] || 0) + 1; });
+        setPrefecture(Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0]);
+      });
+  }, [adding]);
 
   useEffect(() => {
     if (!query.trim()) { setResults([]); return; }

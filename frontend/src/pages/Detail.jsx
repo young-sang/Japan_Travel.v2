@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { MapContainer, TileLayer, CircleMarker, Polyline, Popup } from 'react-leaflet';
 import FavButton from '../components/FavButton.jsx';
+import AddToCourse from '../components/AddToCourse.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
 import { api, tokenStore } from '../api/client.js';
 import Container from '../components/ui/Container.jsx';
@@ -171,6 +172,12 @@ export default function Detail() {
           {(item.tags || []).length > 0 && (
             <div className={styles.tags}>
               {item.tags.map((t) => <Tag key={t} variant="neutral" size="sm">#{t}</Tag>)}
+            </div>
+          )}
+          {/* 보고 · 찜하고 · 일정 짜기를 한 흐름으로 (D-094). 코스 상세에는 두지 않는다 */}
+          {isPlace(type) && (
+            <div className={styles.actions}>
+              <AddToCourse type={type} id={Number(id)} />
             </div>
           )}
         </header>
