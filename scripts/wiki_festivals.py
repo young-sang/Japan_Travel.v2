@@ -139,6 +139,10 @@ def municipality_coord(title, pref_ja):
 def existing_festivals():
     """data.sql 의 축제 (현, 이름). 참조 여부는 기본 코스 정류장과 시연 시드에 이름이 나오는지로 본다."""
     sql = DATA_SQL.read_text(encoding='utf-8')
+    if 'INSERT IGNORE INTO festivals' not in sql:
+#       AI 축제는 festivals.sql 로 바꾸며 data.sql 에서 뺐다 (D-092). 그 뒤에는 처음 짝지은 결과를 그대로 쓴다
+        return [{k: f[k] for k in ('pref', 'name', 'referenced')}
+                for f in json.loads(CANDIDATES.read_text(encoding='utf-8'))['existing']]
     part = sql[sql.index('INSERT IGNORE INTO festivals'):sql.index('INSERT INTO courses')]
     rows = re.findall(r"SELECT '([^']+)'(?: AS pref)?, '((?:[^']|'')+)'", part)
     stops = sql.split('INSERT IGNORE INTO course_stops')[1]

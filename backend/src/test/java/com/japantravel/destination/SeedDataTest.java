@@ -23,6 +23,17 @@ class SeedDataTest extends IntegrationTest {
         assertThat(withoutSource).isZero();
     }
 
+//  축제도 ja 위키 원문 요약이다 (D-092). Wikidata 항목이 없는 축제가 있어 wikidata_id 는 검사하지 않는다
+    @Test
+    void 모든_축제에_설명_출처와_개최_달이_있다() {
+        Integer total = jdbc.queryForObject("SELECT COUNT(*) FROM festivals", Integer.class);
+        Integer withoutSource = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM festivals WHERE source_url IS NULL OR date_text IS NULL", Integer.class);
+
+        assertThat(total).isGreaterThan(300);
+        assertThat(withoutSource).isZero();
+    }
+
     @Test
     void 기본_코스_정류장이_하나도_빠지지_않는다() throws Exception {
         String sql = new ClassPathResource("data.sql").getContentAsString(StandardCharsets.UTF_8);
