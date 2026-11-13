@@ -7,6 +7,9 @@
     python scripts/wiki_destinations.py batches      # 3. 요약할 장소를 25건씩 scripts/wiki/batches/ 에 나눈다
         (서브에이전트가 scripts/wiki/summary_prompt.md 대로 scripts/wiki/summaries/ 에 이름 · 설명을 쓴다)
     python scripts/wiki_destinations.py check        # 4. 요약 검수 보고서 → scripts/wiki/summary_check.md
+    python scripts/wiki_destinations.py sql          # 5. backend/src/main/resources/destinations.sql (사진은 Commons 라이선스 확인)
+
+이미 있는 DB 에는 INSERT IGNORE 라 반영되지 않는다. 교체할 때는 백업 → 여행지 · 기본 코스 삭제 → 재기동 → demo_seed.sql (D-090).
 
 결과
 - scripts/wiki/candidates.json : 현마다 후보 전체(유명도 순)와 이번에 고른 장소. 건수를 늘릴 때는 PER_PREF 만 바꾼다

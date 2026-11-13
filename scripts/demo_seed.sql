@@ -56,11 +56,11 @@ FROM (VALUES
   ROW(4,  'kyoto_lover',  '후시미 이나리 타이샤', 5, '센본도리이는 입구 쪽만 붐비고, 30분만 올라가도 한적해져요.', 38),
   ROW(5,  'weekend_trip', '후시미 이나리 타이샤', 4, '정상까지는 왕복 2~3시간. 편한 신발 필수입니다.', 12),
   ROW(6,  'photo_bear',   '후시미 이나리 타이샤', 5, '해 질 무렵 도리이 사이로 들어오는 빛이 사진 찍기 제일 좋아요.', 22),
-  ROW(7,  'photo_bear',   '아라시야마 대나무 숲', 4, '이른 아침이 아니면 사람 없는 사진은 어렵습니다. 길이는 생각보다 짧아요.', 21),
-  ROW(8,  'kyoto_lover',  '아라시야마 대나무 숲', 4, '도게쓰교와 묶어서 반나절 코스로 좋습니다.', 35),
+  ROW(7,  'photo_bear',   '아라시야마', 4, '이른 아침이 아니면 사람 없는 사진은 어렵습니다. 대나무 숲 길은 생각보다 짧아요.', 21),
+  ROW(8,  'kyoto_lover',  '아라시야마', 4, '도게쓰교와 묶어서 반나절 코스로 좋습니다.', 35),
   ROW(9,  'kyoto_lover',  '킨카쿠지', 5, '맑은 날 연못에 비친 금각이 정말 사진 그대로예요.', 33),
   ROW(10, 'weekend_trip', '킨카쿠지', 3, '예쁘지만 관람 동선이 짧아서 금방 끝나요. 료안지와 같이 가세요.', 10),
-  ROW(11, 'kyoto_lover',  '기온 하나미코지', 4, '저녁에 가면 등불이 켜져서 분위기가 좋아요. 사유지 촬영 금지 표지는 꼭 지키세요.', 30),
+  ROW(11, 'kyoto_lover',  '기온', 4, '저녁에 가면 등불이 켜져서 분위기가 좋아요. 사유지 촬영 금지 표지는 꼭 지키세요.', 30),
   ROW(12, 'foodie_park',  '니시키 시장', 5, '두부 도넛, 계란말이 꼬치, 문어 사탕까지. 점심을 여기서 해결했어요.', 28),
   ROW(13, 'demo',         '니시키 시장', 4, '오후 5시면 문 닫는 가게가 많아요. 일찍 가는 걸 추천합니다.', 2),
   ROW(14, 'foodie_park',  '도톤보리', 5, '타코야키는 줄 긴 집보다 골목 안쪽 가게가 더 맛있었어요.', 27),
@@ -102,7 +102,7 @@ ORDER BY v.days DESC, v.seq;
 INSERT INTO favorite_destinations (user_id, destination_id, created_at)
 SELECT u.id, d.id, NOW() - INTERVAL v.days DAY
 FROM (VALUES
-  ROW('기요미즈데라', 9), ROW('후시미 이나리 타이샤', 9), ROW('아라시야마 대나무 숲', 8),
+  ROW('기요미즈데라', 9), ROW('후시미 이나리 타이샤', 9), ROW('아라시야마', 8),
   ROW('니시키 시장', 8), ROW('나라 공원', 7), ROW('도톤보리', 6), ROW('오사카성', 6), ROW('오타루 운하', 2)
 ) AS v(place, days)
 JOIN users u ON u.username = 'demo'
@@ -167,7 +167,7 @@ SELECT u.id, d.id, NOW() - INTERVAL v.days DAY
 FROM (VALUES
   ROW('kyoto_lover', '후시미 이나리 타이샤', 38), ROW('kyoto_lover', '킨카쿠지', 33),
   ROW('foodie_park', '니시키 시장', 28),          ROW('foodie_park', '도톤보리', 27),
-  ROW('photo_bear',  '아라시야마 대나무 숲', 21), ROW('photo_bear',  '하코다테산 야경', 16),
+  ROW('photo_bear',  '아라시야마', 21), ROW('photo_bear',  '하코다테산 야경', 16),
   ROW('weekend_trip', '센소지', 15),              ROW('weekend_trip', '하코네 오와쿠다니', 8)
 ) AS v(username, place, days)
 JOIN users u ON u.username = v.username
@@ -190,10 +190,10 @@ INSERT INTO course_stops (course_id, day_no, seq, destination_id, festival_id, m
 SELECT c.id, v.day_no, v.seq, d.id, f.id, v.memo
 FROM (VALUES
   ROW('교토 · 나라 · 오사카 3박 4일', 1, 1, '기요미즈데라',         NULL,           '아침 일찍. 산넨자카로 내려오기'),
-  ROW('교토 · 나라 · 오사카 3박 4일', 1, 2, '기온 하나미코지',       NULL,           NULL),
+  ROW('교토 · 나라 · 오사카 3박 4일', 1, 2, '기온',                 NULL,           NULL),
   ROW('교토 · 나라 · 오사카 3박 4일', 1, 3, '니시키 시장',           NULL,           '5시 전에 도착'),
   ROW('교토 · 나라 · 오사카 3박 4일', 2, 1, '후시미 이나리 타이샤', NULL,           '요쓰쓰지 교차로까지만'),
-  ROW('교토 · 나라 · 오사카 3박 4일', 2, 2, '아라시야마 대나무 숲', NULL,           NULL),
+  ROW('교토 · 나라 · 오사카 3박 4일', 2, 2, '아라시야마', NULL,           NULL),
   ROW('교토 · 나라 · 오사카 3박 4일', 2, 3, '도게쓰교',             NULL,           '해 질 녘'),
   ROW('교토 · 나라 · 오사카 3박 4일', 3, 1, '나라 공원',             NULL,           '사슴 센베이 사기'),
   ROW('교토 · 나라 · 오사카 3박 4일', 3, 2, '도다이지',             NULL,           NULL),
