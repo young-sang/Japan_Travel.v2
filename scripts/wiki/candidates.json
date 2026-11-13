@@ -694,7 +694,7 @@
     "lat": 38.9933,
     "lng": 141.109,
     "links": 10,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Mount%20Kinkeisan.JPG",
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Kinkeizan%2020200801%20%E2%91%A1.jpg",
     "types": [
      "산"
     ]
@@ -6657,8 +6657,8 @@
     "ko": "가미시마섬 (미에현)",
     "ko_label": "가미시마섬",
     "kana": "かみしま",
-    "lat": 34.54732,
-    "lng": 136.98265,
+    "lat": 34.533333333,
+    "lng": 136.983333333,
     "links": 10,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Kami-island.JPG",
     "types": [
@@ -7383,20 +7383,6 @@
     ]
    },
    {
-    "qid": "Q1052803",
-    "ja": "長岡京",
-    "ko": "나가오카쿄",
-    "ko_label": "나가오카쿄",
-    "kana": null,
-    "lat": 34.943204,
-    "lng": 135.703232,
-    "links": 25,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Nagaoka-kyu-ato%20daigoku-den-2.jpg",
-    "types": [
-     "사적"
-    ]
-   },
-   {
     "qid": "Q1202871",
     "ja": "仁和寺",
     "ko": "닌나지",
@@ -7422,6 +7408,20 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/260214%20Kyoto%20National%20Museum%20Kyoto%20Japan04bs4.jpg",
     "types": [
      "박물관"
+    ]
+   },
+   {
+    "qid": "Q1157535",
+    "ja": "醍醐寺",
+    "ko": "다이고지",
+    "ko_label": "다이고지",
+    "kana": null,
+    "lat": 34.95111111,
+    "lng": 135.81944444,
+    "links": 23,
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/DaigojiPagoda3242.jpg",
+    "types": [
+     "절"
     ]
    }
   ],
@@ -7577,20 +7577,6 @@
     ]
    },
    {
-    "qid": "Q1098123",
-    "ja": "石山本願寺",
-    "ko": "이시야마 혼간지",
-    "ko_label": "이시야마 혼간지",
-    "kana": null,
-    "lat": 34.687361111,
-    "lng": 135.525694444,
-    "links": 18,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Ishiyamah6.jpg",
-    "types": [
-     "절"
-    ]
-   },
-   {
     "qid": "Q705949",
     "ja": "住吉大社",
     "ko": "스미요시 대사",
@@ -7717,6 +7703,20 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/National%20museum%20of%20ethnology%20Japan.jpg",
     "types": [
      "박물관"
+    ]
+   },
+   {
+    "qid": "Q2969493",
+    "ja": "岸和田城",
+    "ko": null,
+    "ko_label": null,
+    "kana": null,
+    "lat": 34.45881667,
+    "lng": 135.37078056,
+    "links": 11,
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Kishiwada%20Castle%20Kishiwada%20Osaka%20pref%20Japan04s3.jpg",
+    "types": [
+     "성"
     ]
    }
   ],
@@ -11177,20 +11177,6 @@
     "keep_name": "구시다 신사"
    },
    {
-    "qid": "Q7082047",
-    "ja": "沖ノ島",
-    "ko": "오키노섬",
-    "ko_label": "오키노섬",
-    "kana": null,
-    "lat": 34.244281638,
-    "lng": 130.105760611,
-    "links": 31,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Okinoshima%20viewing%2001.jpg",
-    "types": [
-     "섬"
-    ]
-   },
-   {
     "qid": "Q148543",
     "ja": "九州国立博物館",
     "ko": "규슈 국립박물관",
@@ -11402,17 +11388,31 @@
     ]
    },
    {
-    "qid": "Q168754",
-    "ja": "スペースワールド",
-    "ko": "스페이스월드",
-    "ko_label": "스페이스 월드",
-    "kana": null,
-    "lat": 33.87352,
-    "lng": 130.81215,
+    "qid": "Q29682",
+    "ja": "住吉神社 (福岡市)",
+    "ko": null,
+    "ko_label": null,
+    "kana": "すみよしじんじゃ",
+    "lat": 33.58575,
+    "lng": 130.41375,
     "links": 8,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Space%20World%2001.jpg",
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Haiden%20of%20Sumiyoshi%20Shrine.JPG",
     "types": [
-     "관광명소"
+     "신사"
+    ]
+   },
+   {
+    "qid": "Q3077260",
+    "ja": "志賀島",
+    "ko": "시카노섬",
+    "ko_label": "시카노섬",
+    "kana": "しかのしま",
+    "lat": 33.675,
+    "lng": 130.3,
+    "links": 8,
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Shikanoshima%20Island%2C%20enkei.jpg",
+    "types": [
+     "섬"
     ]
    }
   ],
@@ -16259,7 +16259,7 @@
     "lat": 44.133333333,
     "lng": 145.161111111,
     "links": 12,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Shiretoko01.JPG",
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/140828%20Kamuiwakka%20Falls%20and%20Mount%20Io%20Shiretoko%20Hokkaido%20Japan02sbs13.jpg",
     "types": [
      "산"
     ]
@@ -16943,8 +16943,8 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 42.86667,
-    "lng": 140.65,
+    "lat": 42.875,
+    "lng": 140.658889,
     "links": 7,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Mt-nisekoannupuri-summer.jpg",
     "types": [
@@ -17393,8 +17393,8 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 42.2731,
-    "lng": 143.1113,
+    "lat": 42.2725,
+    "lng": 143.111111,
     "links": 7,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Mt%20RAKKO%208.JPG",
     "types": [
@@ -19804,8 +19804,8 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 45.05833,
-    "lng": 142.5,
+    "lat": 45.06,
+    "lng": 142.504194,
     "links": 3,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/%E5%8C%97%E8%A6%8B%E7%A5%9E%E5%A8%81%E5%B2%AC%20%E7%A5%9E%E5%A8%81%E5%B2%AC%E5%85%AC%E5%9C%92%20%E3%82%88%E3%82%8AP6260503.jpg",
     "types": [
@@ -20793,7 +20793,7 @@
     "lat": 43.6217,
     "lng": 142.781,
     "links": 3,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Tenninkyo%20onsengai.JPG",
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Tenninkaku%20roten.JPG",
     "types": [
      "온천"
     ]
@@ -25921,20 +25921,6 @@
     "image": null,
     "types": [
      "공원"
-    ]
-   },
-   {
-    "qid": "Q11454073",
-    "ja": "宮尾登美子文学記念館",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 42.471666666,
-    "lng": 140.873333333,
-    "links": 1,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Tomiko%20miyao%20memorials%20literature.jpg",
-    "types": [
-     "박물관"
     ]
    },
    {
@@ -32854,8 +32840,8 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 40.436111111,
-    "lng": 140.589722222,
+    "lat": 40.436138888,
+    "lng": 140.589694444,
     "links": 3,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Zinkitimori%20%28Akita%2CAomori%29.JPG",
     "types": [
@@ -35729,7 +35715,7 @@
     "lat": 38.9933,
     "lng": 141.109,
     "links": 10,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Mount%20Kinkeisan.JPG",
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Kinkeizan%2020200801%20%E2%91%A1.jpg",
     "types": [
      "산"
     ]
@@ -39506,8 +39492,8 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 38.348639,
-    "lng": 140.522333,
+    "lat": 38.349722222,
+    "lng": 140.522222222,
     "links": 4,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Omoshiroyama%20Mt%202006.jpg",
     "types": [
@@ -40320,20 +40306,6 @@
     ]
    },
    {
-    "qid": "Q11400686",
-    "ja": "化女沼レジャーランド",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 38.632277777,
-    "lng": 140.966444444,
-    "links": 2,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Kejonumarejaarando.JPG",
-    "types": [
-     "관광명소"
-    ]
-   },
-   {
     "qid": "Q11410465",
     "ja": "双林寺 (栗原市)",
     "ko": null,
@@ -41001,8 +40973,8 @@
     "ko": null,
     "ko_label": null,
     "kana": "かしまおなたじんじゃ",
-    "lat": 38.075861,
-    "lng": 140.82775,
+    "lat": 38.075845,
+    "lng": 140.827856,
     "links": 2,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Approach%20to%20Kashima%20Onata-jinja%20shrine.JPG",
     "types": [
@@ -50331,7 +50303,7 @@
     "lat": 37.2214,
     "lng": 139.3397,
     "links": 4,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Aizuasahidake%20080910%202.JPG",
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Aizuasahidake%20080910.JPG",
     "types": [
      "산"
     ]
@@ -50770,20 +50742,6 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/%E9%A1%8D%E5%8F%96%E5%B1%B1%EF%BC%88%E5%AE%89%E7%A9%8D%E5%B1%B1%EF%BC%89%20-%20panoramio.jpg",
     "types": [
      "산"
-    ]
-   },
-   {
-    "qid": "Q11669123",
-    "ja": "高子沼グリーンランド",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 37.805,
-    "lng": 140.519166666,
-    "links": 3,
-    "image": null,
-    "types": [
-     "관광명소"
     ]
    },
    {
@@ -56425,7 +56383,7 @@
     "ja": "金村別雷神社",
     "ko": null,
     "ko_label": null,
-    "kana": "かなむらわけいかづちじんじゃ",
+    "kana": "かなむらべつらいじんじゃ",
     "lat": 36.087972222,
     "lng": 139.9995,
     "links": 3,
@@ -66240,20 +66198,6 @@
     ]
    },
    {
-    "qid": "Q11306622",
-    "ja": "東武トレジャーガーデン",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 36.227167,
-    "lng": 139.534722,
-    "links": 3,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Tatebayashi%20Yachonomori%20Garden%20Shibazakuragarden%201.jpg",
-    "types": [
-     "식물원"
-    ]
-   },
-   {
     "qid": "Q11356265",
     "ja": "三波石峡",
     "ko": null,
@@ -66568,8 +66512,8 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 36.4115,
-    "lng": 138.6449,
+    "lat": 36.410833,
+    "lng": 138.645278,
     "links": 3,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Mt.Hanamagari%20from%20Mt.Asamakakushi.jpg",
     "types": [
@@ -66602,20 +66546,6 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Arts%20Maebashi.jpg",
     "types": [
      "박물관"
-    ]
-   },
-   {
-    "qid": "Q1891321",
-    "ja": "満徳寺",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 36.25343333,
-    "lng": 139.286625,
-    "links": 3,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Ota%20Gunma%20Mantokuji%20Hondo%201.JPG",
-    "types": [
-     "절"
     ]
    },
    {
@@ -72141,8 +72071,8 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 35.9183,
-    "lng": 138.9467,
+    "lat": 35.917917,
+    "lng": 138.947556,
     "links": 4,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/%E4%B8%89%E5%B3%AF%E7%A5%9E%E7%A4%BE%E3%81%AE%E5%A5%A5%E5%AE%AE%E9%81%A5%E6%8B%9D%E6%AE%BF%E3%81%8B%E3%82%89%E3%81%AE%E5%A6%99%E6%B3%95%E3%81%8C%E5%B2%B3.jpg",
     "types": [
@@ -72737,8 +72667,8 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 35.93651,
-    "lng": 139.56544,
+    "lat": 35.935083,
+    "lng": 139.565417,
     "links": 3,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Akiba%20Forest%20General%20park%201.jpg",
     "types": [
@@ -76522,8 +76452,8 @@
     "ko": null,
     "ko_label": null,
     "kana": "いまきあおやさかいなみいけがみじんじゃ",
-    "lat": 36.269083333,
-    "lng": 139.153888888,
+    "lat": 36.269184,
+    "lng": 139.153937,
     "links": 2,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/ImakiAosakaInamiIkegami-jinja%28Kamisato-machi%2CShibo%29.jpg",
     "types": [
@@ -89119,6 +89049,20 @@
     ]
    },
    {
+    "qid": "Q134735609",
+    "ja": "円福寺 (埼玉県皆野町)",
+    "ko": null,
+    "ko_label": null,
+    "kana": "えんぷくじ",
+    "lat": 36.066166,
+    "lng": 139.090347,
+    "links": 1,
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/%E5%86%86%E7%A6%8F%E5%AF%BA%E5%85%A8%E6%99%AF.jpg",
+    "types": [
+     "절"
+    ]
+   },
+   {
     "qid": "Q134735667",
     "ja": "法光寺 (埼玉県伊奈町)",
     "ko": null,
@@ -93164,7 +93108,7 @@
     "lat": 35.608986,
     "lng": 140.12465,
     "links": 2,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/KyuuKawasakiGinkouChibashiten.jpg",
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Chuo%20Ward%20Office%2C%20Chiba.jpg",
     "types": [
      "박물관"
     ]
@@ -94533,21 +94477,6 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Syoujyouji%20in%20Kisarazu.jpg",
     "types": [
      "절"
-    ]
-   },
-   {
-    "qid": "Q11633027",
-    "ja": "谷津遊園",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 35.680861,
-    "lng": 140.005556,
-    "links": 2,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Yatsuyuuen%2C1954.jpg",
-    "types": [
-     "관광명소",
-     "식물원"
     ]
    },
    {
@@ -98748,20 +98677,6 @@
     ]
    },
    {
-    "qid": "Q11571173",
-    "ja": "犬吠オーシャンランド",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 35.705333333,
-    "lng": 140.853111111,
-    "links": 1,
-    "image": null,
-    "types": [
-     "관광명소"
-    ]
-   },
-   {
     "qid": "Q11571177",
     "ja": "犬吠埼温泉",
     "ko": null,
@@ -102916,20 +102831,6 @@
     ]
    },
    {
-    "qid": "Q908529",
-    "ja": "沖ノ鳥島",
-    "ko": "오키노토리 암초",
-    "ko_label": "오키노토리 암초",
-    "kana": null,
-    "lat": 20.4225,
-    "lng": 136.09,
-    "links": 33,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Okinotorishima20070602.jpg",
-    "types": [
-     "섬"
-    ]
-   },
-   {
     "qid": "Q615183",
     "ja": "浅草寺",
     "ko": "센소지",
@@ -103732,21 +103633,6 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Nezu%20museum%20entrance%20tokyo%202014.jpg",
     "types": [
      "박물관"
-    ]
-   },
-   {
-    "qid": "Q3071089",
-    "ja": "凌雲閣",
-    "ko": "료운카쿠",
-    "ko_label": "료운카쿠",
-    "kana": null,
-    "lat": 35.715744331,
-    "lng": 139.793162476,
-    "links": 12,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Jintan%2012kai%20cropped.jpg",
-    "types": [
-     "관광명소",
-     "전망대"
     ]
    },
    {
@@ -104554,34 +104440,6 @@
     ]
    },
    {
-    "qid": "Q3736155",
-    "ja": "原美術館",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 35.62102778,
-    "lng": 139.73605556,
-    "links": 8,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Hara%20Museum%20of%20Contemporary%20Art%202010.jpg",
-    "types": [
-     "박물관"
-    ]
-   },
-   {
-    "qid": "Q423559",
-    "ja": "としまえん",
-    "ko": "도시마엔",
-    "ko_label": "도시마엔",
-    "kana": null,
-    "lat": 35.745,
-    "lng": 139.64527778,
-    "links": 8,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Toshimaen%20entrance.jpg",
-    "types": [
-     "관광명소"
-    ]
-   },
-   {
     "qid": "Q4404489",
     "ja": "甘泉園公園",
     "ko": null,
@@ -105080,20 +104938,6 @@
     ]
    },
    {
-    "qid": "Q1714592",
-    "ja": "東京高速道路",
-    "ko": "도쿄 고속도로",
-    "ko_label": "도쿄 고속도로",
-    "kana": null,
-    "lat": 35.674306,
-    "lng": 139.771,
-    "links": 6,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Tokyo%20Expressway%201.jpg",
-    "types": [
-     "공원"
-    ]
-   },
-   {
     "qid": "Q3296031",
     "ja": "丸山神社 (東京都港区)",
     "ko": null,
@@ -105364,20 +105208,6 @@
     ]
    },
    {
-    "qid": "Q104235671",
-    "ja": "森ビル デジタルアート ミュージアム:エプソン チームラボボーダレス",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 35.626306,
-    "lng": 139.783,
-    "links": 5,
-    "image": null,
-    "types": [
-     "박물관"
-    ]
-   },
-   {
     "qid": "Q10860225",
     "ja": "井の頭自然文化園",
     "ko": null,
@@ -105583,8 +105413,8 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 27.166667,
-    "lng": 142.191667,
+    "lat": 27.16238,
+    "lng": 142.18999,
     "links": 5,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Otouto-Jima%20Island%20Aerial%20photograph.2014.jpg",
     "types": [
@@ -106377,8 +106207,8 @@
     "ko": null,
     "ko_label": null,
     "kana": "おのじんじゃ",
-    "lat": 35.652876,
-    "lng": 139.442442,
+    "lat": 35.653002777,
+    "lng": 139.442272222,
     "links": 4,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Tama-Ono-jinja%20haiden.jpeg",
     "types": [
@@ -106840,8 +106670,8 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 35.783111,
-    "lng": 139.150076,
+    "lat": 35.782833,
+    "lng": 139.15,
     "links": 4,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Mitake%20Shrine.jpg",
     "types": [
@@ -107369,20 +107199,6 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Yome-jima%20island%20Aerial%20Photograph.JPG",
     "types": [
      "섬"
-    ]
-   },
-   {
-    "qid": "Q11448881",
-    "ja": "学習院大学史料館",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 35.71955,
-    "lng": 139.709427,
-    "links": 3,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Gakushuin%20University%20Museum%20of%20History%20-%20Jul%205%2C%202011%20%281%29.jpg",
-    "types": [
-     "박물관"
     ]
    },
    {
@@ -107932,7 +107748,7 @@
     "lat": 35.650472,
     "lng": 139.688,
     "links": 3,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Meguro%20Sky%20Garden%20Scale%20Model.jpg",
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Meguro%20Sky%20Garden%2020130506%20009.jpg",
     "types": [
      "공원",
      "정원"
@@ -116012,20 +115828,6 @@
     ]
    },
    {
-    "qid": "Q11404812",
-    "ja": "十二社池",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 35.688888888,
-    "lng": 139.688194444,
-    "links": 2,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/100%20views%20edo%20064.jpg",
-    "types": [
-     "호수"
-    ]
-   },
-   {
     "qid": "Q11405346",
     "ja": "千住本氷川神社",
     "ko": null,
@@ -116810,20 +116612,6 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Hoju%20Inari%20Jinja%20%28Chuo%2C%20Tokyo%29.JPG",
     "types": [
      "신사"
-    ]
-   },
-   {
-    "qid": "Q114543844",
-    "ja": "瓢簞池 (浅草)",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 35.714897,
-    "lng": 139.793658,
-    "links": 2,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Ryounkaku-beforedestruction-pond.jpg",
-    "types": [
-     "호수"
     ]
    },
    {
@@ -118473,20 +118261,6 @@
     ]
    },
    {
-    "qid": "Q11557239",
-    "ja": "浅草観音温泉",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 35.714906,
-    "lng": 139.794992,
-    "links": 2,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Asakusa-Kannon-Onsen2.jpg",
-    "types": [
-     "온천"
-    ]
-   },
-   {
     "qid": "Q11557473",
     "ja": "氷川神社 (東久留米市南沢)",
     "ko": null,
@@ -119428,20 +119202,6 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Shibaura%20island%20overview%20minato%20tokyo%202009-2.JPG",
     "types": [
      "섬"
-    ]
-   },
-   {
-    "qid": "Q11617940",
-    "ja": "茶の木稲荷",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 35.647833333,
-    "lng": 139.745,
-    "links": 2,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Chanoki%20Inari.jpg",
-    "types": [
-     "신사"
     ]
    },
    {
@@ -133192,20 +132952,6 @@
     ]
    },
    {
-    "qid": "Q106852432",
-    "ja": "目黒護國神社",
-    "ko": null,
-    "ko_label": null,
-    "kana": "めぐろごこくじんじゃ",
-    "lat": 35.634174,
-    "lng": 139.688873,
-    "links": 1,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Meguro%20fire%20brigade%206th%20branch.jpg",
-    "types": [
-     "신사"
-    ]
-   },
-   {
     "qid": "Q106852451",
     "ja": "岩戸八幡神社",
     "ko": null,
@@ -135962,20 +135708,6 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Gyokeiji%20togoshi%20shinagawa.JPG",
     "types": [
      "절"
-    ]
-   },
-   {
-    "qid": "Q11627138",
-    "ja": "西久保八幡貝塚",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 35.66150278,
-    "lng": 139.74260556,
-    "links": 1,
-    "image": null,
-    "types": [
-     "사적"
     ]
    },
    {
@@ -144393,8 +144125,8 @@
     "ko": null,
     "ko_label": null,
     "kana": "うばこおんせん",
-    "lat": 35.242777777,
-    "lng": 139.009444444,
+    "lat": 35.243056,
+    "lng": 139.009444,
     "links": 3,
     "image": null,
     "types": [
@@ -144492,10 +144224,10 @@
     "ko": null,
     "ko_label": null,
     "kana": "こうたくじおんせん",
-    "lat": 35.453139,
-    "lng": 139.283611,
+    "lat": 35.453333333,
+    "lng": 139.283333333,
     "links": 3,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Koutakuji%20Onsen%20Gyokusuiro%20-%2003.JPG",
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Koutakuji%20Onsen%20Gyokusuiro%20-%2005.JPG",
     "types": [
      "온천"
     ]
@@ -145802,22 +145534,6 @@
     ]
    },
    {
-    "qid": "Q11374325",
-    "ja": "京急油壺マリンパーク",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 35.161472,
-    "lng": 139.612556,
-    "links": 2,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/A-marinepark-01.JPG",
-    "types": [
-     "관광명소",
-     "동물원",
-     "수족관"
-    ]
-   },
-   {
     "qid": "Q11378955",
     "ja": "伊勢原大神宮",
     "ko": null,
@@ -146882,8 +146598,8 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 35.274531,
-    "lng": 139.673613,
+    "lat": 35.274583,
+    "lng": 139.673611,
     "links": 2,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Yokosuka%20City%20Museum.JPG",
     "types": [
@@ -150528,20 +150244,6 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Ryushoin%20Temple.jpg",
     "types": [
      "절"
-    ]
-   },
-   {
-    "qid": "Q110193977",
-    "ja": "横浜温泉チャレンジャー",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 35.501722222,
-    "lng": 139.495777777,
-    "links": 1,
-    "image": null,
-    "types": [
-     "온천"
     ]
    },
    {
@@ -157245,20 +156947,6 @@
     ]
    },
    {
-    "qid": "Q65249868",
-    "ja": "南加瀬貝塚",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 35.5470278,
-    "lng": 139.6685833,
-    "links": 1,
-    "image": null,
-    "types": [
-     "사적"
-    ]
-   },
-   {
     "qid": "Q65272278",
     "ja": "泉小次郎親衡館",
     "ko": null,
@@ -158012,8 +157700,8 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 37.10368,
-    "lng": 139.0239,
+    "lat": 37.103888888,
+    "lng": 139.024722222,
     "links": 4,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/%E5%85%AB%E6%B5%B7%E5%B1%B1.jpg",
     "types": [
@@ -159537,7 +159225,7 @@
     "lat": 36.810528,
     "lng": 137.798722,
     "links": 2,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Renge%20Onsen%20rodge.jpg",
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Renge%20spa%20Senki.jpg",
     "types": [
      "온천"
     ]
@@ -161923,8 +161611,8 @@
     "ko": null,
     "ko_label": null,
     "kana": "せなみはぐろじんじゃ",
-    "lat": 38.217522222,
-    "lng": 139.478241666,
+    "lat": 38.217511,
+    "lng": 139.478476,
     "links": 1,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Senami-Haguro%20Jinja%20Shrine%2C%20Murakami%2C%20Niigata%2C%20Japan%2C%20October%202021.jpg",
     "types": [
@@ -162489,20 +162177,6 @@
     "image": null,
     "types": [
      "성"
-    ]
-   },
-   {
-    "qid": "Q135438404",
-    "ja": "金割鉱泉",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 37.651666666,
-    "lng": 139.134722222,
-    "links": 1,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/OnsenNiigata%20Kanewarikousen1.jpg",
-    "types": [
-     "온천"
     ]
    },
    {
@@ -163956,7 +163630,7 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 36.421111111,
+    "lat": 36.422222222,
     "lng": 137.512222222,
     "links": 4,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Kitanomatadake.jpg",
@@ -164236,8 +163910,8 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 36.525555555,
-    "lng": 137.583055555,
+    "lat": 36.53438611,
+    "lng": 137.58622778,
     "links": 4,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Goshikigahara%20from%20shishidake%201993-9-25.jpg",
     "types": [
@@ -164404,8 +164078,8 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 36.36509,
-    "lng": 136.80369,
+    "lat": 36.365278,
+    "lng": 136.803611,
     "links": 3,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Daimonsan%20from%20Ogasayama%202010-10-17.jpg",
     "types": [
@@ -171319,20 +170993,6 @@
     ]
    },
    {
-    "qid": "Q11579575",
-    "ja": "白山市立鶴来博物館",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 36.447777777,
-    "lng": 136.63225,
-    "links": 1,
-    "image": null,
-    "types": [
-     "박물관"
-    ]
-   },
-   {
     "qid": "Q11579606",
     "ja": "金城学園白山美術館",
     "ko": null,
@@ -175723,8 +175383,8 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 35.486944444,
-    "lng": 138.931666666,
+    "lat": 35.486944,
+    "lng": 138.931667,
     "links": 4,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Mt.Mishotai%20from%20Mt.Takagawa%2003.jpg",
     "types": [
@@ -181038,8 +180698,8 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 35.912823,
-    "lng": 137.863022,
+    "lat": 35.91297,
+    "lng": 137.86263,
     "links": 5,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Kyougatake%20cyuuou%20Alps%202009-4-30.jpg",
     "types": [
@@ -181108,8 +180768,8 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 35.5925,
-    "lng": 137.644167,
+    "lat": 35.59178,
+    "lng": 137.64376,
     "links": 4,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Mount%20Nagiso%20from%20south%20winter.jpg",
     "types": [
@@ -181640,8 +181300,8 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 36.322778,
-    "lng": 137.738056,
+    "lat": 36.322777777,
+    "lng": 137.738611111,
     "links": 3,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Mount%20MaeJonen%20from%20Mitsumata%202001-11-22.jpg",
     "types": [
@@ -183289,20 +182949,6 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Omiya%20Atsuta%20Shrine%20haiden.jpg",
     "types": [
      "신사"
-    ]
-   },
-   {
-    "qid": "Q11434798",
-    "ja": "大峰城",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 36.675604,
-    "lng": 138.176962,
-    "links": 2,
-    "image": null,
-    "types": [
-     "성"
     ]
    },
    {
@@ -190441,8 +190087,8 @@
     "ko": null,
     "ko_label": null,
     "kana": "ふせじんじゃ",
-    "lat": 36.579445,
-    "lng": 138.133293,
+    "lat": 36.579388888,
+    "lng": 138.133305555,
     "links": 1,
     "image": null,
     "types": [
@@ -192967,7 +192613,7 @@
     "ja": "道樹山",
     "ko": null,
     "ko_label": null,
-    "kana": "どうじゅさん",
+    "kana": "どうずさん",
     "lat": 35.306473,
     "lng": 137.071958,
     "links": 2,
@@ -194915,8 +194561,8 @@
     "ko": null,
     "ko_label": null,
     "kana": "えなじんじゃ",
-    "lat": 36.135563,
-    "lng": 137.270402,
+    "lat": 36.1351,
+    "lng": 137.270997,
     "links": 2,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Ena%20shrine%20takayama.jpg",
     "types": [
@@ -208658,8 +208304,8 @@
     "ko": null,
     "ko_label": null,
     "kana": "やなぎはらじんじゃ",
-    "lat": 35.085712,
-    "lng": 138.871288,
+    "lat": 35.085583,
+    "lng": 138.871222,
     "links": 2,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Yanagihara-jinja%20%28Numazu%29%20keidai.JPG",
     "types": [
@@ -208981,8 +208627,8 @@
     "ko": null,
     "ko_label": null,
     "kana": "くずみじんじゃ",
-    "lat": 34.964056,
-    "lng": 139.098889,
+    "lat": 34.964068,
+    "lng": 139.098764,
     "links": 2,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Kuzumi-jinja%2020100612.jpg",
     "types": [
@@ -215618,8 +215264,8 @@
     "ko": null,
     "ko_label": null,
     "kana": "みょうかくじ",
-    "lat": 35.090553,
-    "lng": 138.854797,
+    "lat": 35.090388888,
+    "lng": 138.857305555,
     "links": 1,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Myokaku-ji%20%28Numazu%29.JPG",
     "types": [
@@ -217280,7 +216926,7 @@
     "ja": "那古野神社",
     "ko": null,
     "ko_label": null,
-    "kana": "なごのじんじゃ",
+    "kana": "なごやじんじゃ",
     "lat": 35.1775,
     "lng": 136.89972222,
     "links": 4,
@@ -218430,20 +218076,6 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Hakkenguu.jpg",
     "types": [
      "신사"
-    ]
-   },
-   {
-    "qid": "Q56347345",
-    "ja": "久昌寺 (江南市)",
-    "ko": null,
-    "ko_label": null,
-    "kana": "きゅうしょうじ",
-    "lat": 35.309333333,
-    "lng": 136.874944444,
-    "links": 3,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Kyushoji1.jpg",
-    "types": [
-     "절"
     ]
    },
    {
@@ -222729,7 +222361,7 @@
     "lat": 35.213888888,
     "lng": 137.502944444,
     "links": 2,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Roadside%20Station%20Dongurinosato%20ac%20%281%29.jpg",
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Roadside%20Station%20Dongurinosato%20ac%20%282%29.jpg",
     "types": [
      "온천"
     ]
@@ -224751,20 +224383,6 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Sououji4.JPG",
     "types": [
      "절"
-    ]
-   },
-   {
-    "qid": "Q21653837",
-    "ja": "豊田市郷土資料館",
-    "ko": null,
-    "ko_label": null,
-    "kana": "とよたしきょうどしりょうかん",
-    "lat": 35.094078,
-    "lng": 137.160033,
-    "links": 2,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Toyota%20City%20Local%20History%20Museum%20ac%20%286%29.jpg",
-    "types": [
-     "박물관"
     ]
    },
    {
@@ -231574,8 +231192,8 @@
     "ko": "가미시마섬 (미에현)",
     "ko_label": "가미시마섬",
     "kana": "かみしま",
-    "lat": 34.54732,
-    "lng": 136.98265,
+    "lat": 34.533333333,
+    "lng": 136.983333333,
     "links": 10,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Kami-island.JPG",
     "types": [
@@ -232745,20 +232363,6 @@
     ]
    },
    {
-    "qid": "Q109594974",
-    "ja": "安濃城",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 34.776472222,
-    "lng": 136.456805555,
-    "links": 2,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Anoujyou%20zenkei2.jpg",
-    "types": [
-     "성"
-    ]
-   },
-   {
     "qid": "Q109597715",
     "ja": "志氐神社",
     "ko": null,
@@ -233796,20 +233400,6 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Iga%20city%20Sugawara-jinja%20ac.jpg",
     "types": [
      "신사"
-    ]
-   },
-   {
-    "qid": "Q17222158",
-    "ja": "オーストラリア記念館",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 34.985222,
-    "lng": 136.648611,
-    "links": 2,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Japan%20World%20Exposition%20Australia%20Memorial.jpg",
-    "types": [
-     "박물관"
     ]
    },
    {
@@ -239332,7 +238922,7 @@
     "ja": "水尾神社",
     "ko": null,
     "ko_label": null,
-    "kana": "みをじんじゃ",
+    "kana": "みおじんじゃ",
     "lat": 35.306595,
     "lng": 135.988227,
     "links": 2,
@@ -239522,20 +239112,6 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Tamura%20jinja%20Honden.jpg",
     "types": [
      "신사"
-    ]
-   },
-   {
-    "qid": "Q11577981",
-    "ja": "甲賀ファミリーランド",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 34.953,
-    "lng": 136.108527777,
-    "links": 2,
-    "image": null,
-    "types": [
-     "관광명소"
     ]
    },
    {
@@ -242368,20 +241944,6 @@
     ]
    },
    {
-    "qid": "Q20043046",
-    "ja": "安楽律院",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 35.091666666,
-    "lng": 135.864555555,
-    "links": 1,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Anrakuritsuin.jpg",
-    "types": [
-     "절"
-    ]
-   },
-   {
     "qid": "Q22117831",
     "ja": "五百井神社",
     "ko": null,
@@ -242915,20 +242477,6 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Amanohashidate%20view%20from%20Mt%20Moju02s3s4592.jpg",
     "types": [
      "섬"
-    ]
-   },
-   {
-    "qid": "Q1052803",
-    "ja": "長岡京",
-    "ko": "나가오카쿄",
-    "ko_label": "나가오카쿄",
-    "kana": null,
-    "lat": 34.943204,
-    "lng": 135.703232,
-    "links": 25,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Nagaoka-kyu-ato%20daigoku-den-2.jpg",
-    "types": [
-     "사적"
     ]
    },
    {
@@ -243664,20 +243212,6 @@
     ]
    },
    {
-    "qid": "Q910041",
-    "ja": "聚楽第",
-    "ko": "주라쿠다이",
-    "ko_label": "주라쿠다이",
-    "kana": null,
-    "lat": 35.025,
-    "lng": 135.74583333,
-    "links": 10,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Jurakudai-Palace-Kyoto-Folding-Screen.jpg",
-    "types": [
-     "성"
-    ]
-   },
-   {
     "qid": "Q1075034",
     "ja": "神護寺",
     "ko": null,
@@ -243855,7 +243389,7 @@
     "lat": 35.008938,
     "lng": 135.674681,
     "links": 8,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Iwatayama%20Monkey%20Park.jpg",
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Iwatayama%20Monkey%20Park%2C%20Kyoto%203-25%20%2826396971592%29.jpg",
     "types": [
      "공원",
      "동물원"
@@ -244210,20 +243744,6 @@
     "lng": 135.668,
     "links": 7,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Nisonin03s3200.jpg",
-    "types": [
-     "절"
-    ]
-   },
-   {
-    "qid": "Q3141015",
-    "ja": "法勝寺",
-    "ko": null,
-    "ko_label": null,
-    "kana": "ほっしょうじ",
-    "lat": 35.013783,
-    "lng": 135.787817,
-    "links": 7,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/%E7%99%BD%E6%B2%B3%E9%99%A2%E5%BA%AD%E5%9C%92.JPG",
     "types": [
      "절"
     ]
@@ -253064,20 +252584,6 @@
     ]
    },
    {
-    "qid": "Q11482389",
-    "ja": "平安博物館",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 35.00875,
-    "lng": 135.762222222,
-    "links": 1,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Former%20Bank%20of%20Japan%20building%2C%20Kyoto%20Branch.jpg",
-    "types": [
-     "박물관"
-    ]
-   },
-   {
     "qid": "Q11486852",
     "ja": "建部山城",
     "ko": null,
@@ -253153,8 +252659,8 @@
     "ko": null,
     "ko_label": null,
     "kana": "あたごじんじゃ",
-    "lat": 35.041037,
-    "lng": 135.586948,
+    "lat": 35.041055555,
+    "lng": 135.586944444,
     "links": 1,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Atago-jinja%20%28Kameoka%20city%29%20honden.JPG",
     "types": [
@@ -253257,20 +252763,6 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Tohoku-in%2C%20Kyoto.jpg",
     "types": [
      "절"
-    ]
-   },
-   {
-    "qid": "Q11526754",
-    "ja": "東山霊山城",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 34.998861111,
-    "lng": 135.785388888,
-    "links": 1,
-    "image": null,
-    "types": [
-     "성"
     ]
    },
    {
@@ -255562,20 +255054,6 @@
     ]
    },
    {
-    "qid": "Q1098123",
-    "ja": "石山本願寺",
-    "ko": "이시야마 혼간지",
-    "ko_label": "이시야마 혼간지",
-    "kana": null,
-    "lat": 34.687361111,
-    "lng": 135.525694444,
-    "links": 18,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Ishiyamah6.jpg",
-    "types": [
-     "절"
-    ]
-   },
-   {
     "qid": "Q705949",
     "ja": "住吉大社",
     "ko": "스미요시 대사",
@@ -255844,20 +255322,6 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Akutagawamj3.jpg",
     "types": [
      "성"
-    ]
-   },
-   {
-    "qid": "Q1384663",
-    "ja": "エキスポランド",
-    "ko": "엑스포랜드",
-    "ko_label": "엑스포랜드",
-    "kana": null,
-    "lat": 34.80555556,
-    "lng": 135.535,
-    "links": 9,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Expoland%20Ferris%20wheel%20wide%20shot.jpg",
-    "types": [
-     "관광명소"
     ]
    },
    {
@@ -257168,20 +256632,6 @@
     ]
    },
    {
-    "qid": "Q11639591",
-    "ja": "通法寺",
-    "ko": null,
-    "ko_label": null,
-    "kana": "つうほうじ",
-    "lat": 34.526722,
-    "lng": 135.627278,
-    "links": 4,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Tsuho-ji%20%28Habikino%29%2C%20keidai.jpg",
-    "types": [
-     "절"
-    ]
-   },
-   {
     "qid": "Q11645008",
     "ja": "野中寺",
     "ko": null,
@@ -257531,21 +256981,6 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Aicelshurahall01%201024.jpg",
     "types": [
      "박물관"
-    ]
-   },
-   {
-    "qid": "Q11289722",
-    "ja": "エキスポタワー",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 34.802542,
-    "lng": 135.53305,
-    "links": 3,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/EXPO%20TOWER.JPG",
-    "types": [
-     "관광명소",
-     "전망대"
     ]
    },
    {
@@ -258560,10 +257995,10 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 34.86008333,
-    "lng": 135.44488889,
+    "lat": 34.860083333,
+    "lng": 135.444888888,
     "links": 2,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/240810%20Kyuan-ji%20Ikeda%20Osaka%20pref%20Japan05s3.jpg",
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/240810%20Kyuan-ji%20Ikeda%20Osaka%20pref%20Japan13s3.jpg",
     "types": [
      "절"
     ]
@@ -262288,20 +261723,6 @@
     ]
    },
    {
-    "qid": "Q11669137",
-    "ja": "高安城",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 34.61340833,
-    "lng": 135.65346111,
-    "links": 2,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/%E9%AB%98%E5%AE%89%E5%9F%8E%E5%80%89%E5%BA%AB%E8%B7%A101.JPG",
-    "types": [
-     "성"
-    ]
-   },
-   {
     "qid": "Q11669240",
     "ja": "高尾山 (大阪府)",
     "ko": null,
@@ -264347,20 +263768,6 @@
     "lng": 135.617523,
     "links": 1,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/%E7%B4%AB%E9%9B%B2%E5%B1%B1%E5%A4%A9%E5%8F%B0%E9%99%A201.JPG",
-    "types": [
-     "절"
-    ]
-   },
-   {
-    "qid": "Q11442841",
-    "ja": "天満本願寺",
-    "ko": null,
-    "ko_label": null,
-    "kana": "てんまほんがんじ",
-    "lat": 34.696108,
-    "lng": 135.520778,
-    "links": 1,
-    "image": null,
     "types": [
      "절"
     ]
@@ -269980,21 +269387,6 @@
     ]
    },
    {
-    "qid": "Q11482263",
-    "ja": "平和観音寺",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 34.502944,
-    "lng": 134.976778,
-    "links": 4,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Heiwakannonji%2C%E5%B9%B3%E5%92%8C%E8%A6%B3%E9%9F%B3%E5%AF%BA%2C%E4%B8%96%E7%95%8C%E5%B9%B3%E5%92%8C%E5%A4%A7%E8%A6%B3%E9%9F%B3%E5%83%8F%20DSCF3854.JPG",
-    "types": [
-     "박물관",
-     "절"
-    ]
-   },
-   {
     "qid": "Q11484399",
     "ja": "広峯神社",
     "ko": null,
@@ -270273,7 +269665,7 @@
     "lat": 34.8118,
     "lng": 135.386,
     "links": 4,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Aramaki%20rose%20park12s2400.jpg",
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Aramaki%20rose%20park%20mainroad%2020071019.jpg",
     "types": [
      "공원",
      "식물원",
@@ -271648,20 +271040,6 @@
     ]
    },
    {
-    "qid": "Q11257003",
-    "ja": "兵庫県立明石西公園",
-    "ko": "효고현립 아카시니시 공원",
-    "ko_label": "아카시니시 공원",
-    "kana": "ひょうごけんりつ あかしにしこうえん",
-    "lat": 34.66175,
-    "lng": 134.982528,
-    "links": 2,
-    "image": null,
-    "types": [
-     "공원"
-    ]
-   },
-   {
     "qid": "Q11257182",
     "ja": "あさご芸術の森美術館",
     "ko": null,
@@ -272737,7 +272115,7 @@
     "lat": 34.565667,
     "lng": 135.015556,
     "links": 2,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/AKNGP07s3872.jpg",
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/AKNGP04s3200.jpg",
     "types": [
      "공원"
     ]
@@ -276693,20 +276071,6 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Miki-art-museum.jpg",
     "types": [
      "박물관"
-    ]
-   },
-   {
-    "qid": "Q23985153",
-    "ja": "大社村",
-    "ko": "다이샤촌",
-    "ko_label": "다이샤촌",
-    "kana": "たいしゃむら",
-    "lat": 34.751416666,
-    "lng": 135.323333333,
-    "links": 2,
-    "image": null,
-    "types": [
-     "신사"
     ]
    },
    {
@@ -284829,7 +284193,7 @@
     "ja": "平群坐紀氏神社",
     "ko": null,
     "ko_label": null,
-    "kana": "へぐりにますきしじんじゃ",
+    "kana": "へぐりにいますきうじのじんじや",
     "lat": 34.635519,
     "lng": 135.703294,
     "links": 2,
@@ -285436,20 +284800,6 @@
     "lng": 135.954112689,
     "links": 2,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Hotokuji03s5s3200.jpg",
-    "types": [
-     "절"
-    ]
-   },
-   {
-    "qid": "Q11616703",
-    "ja": "若草伽藍",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 34.613138888,
-    "lng": 135.736083333,
-    "links": 2,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/%E6%B3%95%E9%9A%86%E5%AF%BA%E8%8B%A5%E8%8D%89%E4%BC%BD%E8%97%8D%E5%9D%80%E7%99%BA%E6%8E%98%E7%8F%BE%E7%8A%B6.jpg",
     "types": [
      "절"
     ]
@@ -289743,7 +289093,7 @@
     "lat": 34.238,
     "lng": 135.411333333,
     "links": 4,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/%E7%B4%80%E5%B7%9E%E5%AF%8C%E5%A3%AB%20%E9%BE%8D%E9%96%80%E5%B1%B1.png",
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Ry%C5%ABmon-Zan.jpg",
     "types": [
      "산"
     ]
@@ -291839,20 +291189,6 @@
     ]
    },
    {
-    "qid": "Q11430670",
-    "ja": "多富気王子",
-    "ko": null,
-    "ko_label": null,
-    "kana": "たふけおうじ",
-    "lat": 33.671388888,
-    "lng": 135.8985,
-    "links": 1,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Daimonzaka17%201024.jpg",
-    "types": [
-     "신사"
-    ]
-   },
-   {
     "qid": "Q11431018",
     "ja": "多聞院 (和歌山県高野町)",
     "ko": null,
@@ -293026,20 +292362,6 @@
     "lng": 135.986028,
     "links": 1,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Shingu%20Josen-ji%202021-10%20ac%20%281%29.jpg",
-    "types": [
-     "절"
-    ]
-   },
-   {
-    "qid": "Q55532128",
-    "ja": "青巌寺",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 34.216796726,
-    "lng": 135.587154419,
-    "links": 1,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Kongobuji%20Koyasan01n4272.jpg",
     "types": [
      "절"
     ]
@@ -299955,20 +299277,6 @@
     ]
    },
    {
-    "qid": "Q11528003",
-    "ja": "東湖園",
-    "ko": null,
-    "ko_label": null,
-    "kana": "とうこえん",
-    "lat": 34.65580045,
-    "lng": 133.939317974,
-    "links": 2,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Toukoen1.jpg",
-    "types": [
-     "정원"
-    ]
-   },
-   {
     "qid": "Q11543484",
     "ja": "横野滝",
     "ko": null,
@@ -304180,20 +303488,6 @@
     ]
    },
    {
-    "qid": "Q6447737",
-    "ja": "草戸千軒町",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 34.475,
-    "lng": 133.35,
-    "links": 4,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Kusadosengentyou.JPG",
-    "types": [
-     "사적"
-    ]
-   },
-   {
     "qid": "Q6897278",
     "ja": "紅葉谷公園",
     "ko": "모미지다니 공원",
@@ -307197,20 +306491,6 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Kannonin2010.jpg",
     "types": [
      "절"
-    ]
-   },
-   {
-    "qid": "Q11635438",
-    "ja": "赤坂遊園",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 34.4765,
-    "lng": 133.305111111,
-    "links": 1,
-    "image": null,
-    "types": [
-     "관광명소"
     ]
    },
    {
@@ -313504,8 +312784,8 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 34.059944,
-    "lng": 134.460167,
+    "lat": 34.0608,
+    "lng": 134.4604,
     "links": 2,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Kinobeyama.jpg",
     "types": [
@@ -314218,8 +313498,8 @@
     "ko": null,
     "ko_label": null,
     "kana": "たけふつじんじゃ",
-    "lat": 34.083333333,
-    "lng": 134.298916666,
+    "lat": 34.083315,
+    "lng": 134.298947,
     "links": 2,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/%E9%98%BF%E6%B3%A2%E5%9B%BD%E5%BC%8F%E5%86%85%E7%A4%BE%E8%AB%96%E7%A4%BE%E5%BB%BA%E5%B8%83%E9%83%BD%E7%A5%9E%E7%A4%BE%28%E5%B8%82%E5%A0%B4%E7%94%BA%E9%A6%99%E7%BE%8E%29.jpg",
     "types": [
@@ -316524,20 +315804,6 @@
     "image": null,
     "types": [
      "공원"
-    ]
-   },
-   {
-    "qid": "Q11675413",
-    "ja": "鳴門ガレの森美術館",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 34.178278,
-    "lng": 134.620361,
-    "links": 1,
-    "image": null,
-    "types": [
-     "박물관"
     ]
    },
    {
@@ -320836,20 +320102,6 @@
     ]
    },
    {
-    "qid": "Q11376349",
-    "ja": "仁尾サンシャインランド",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 34.194166666,
-    "lng": 133.644444444,
-    "links": 1,
-    "image": null,
-    "types": [
-     "관광명소"
-    ]
-   },
-   {
     "qid": "Q11388603",
     "ja": "克軍寺",
     "ko": null,
@@ -321359,7 +320611,7 @@
     "ja": "太麻山",
     "ko": null,
     "ko_label": null,
-    "kana": "たいまさん",
+    "kana": "たいまやま",
     "lat": 34.494333,
     "lng": 134.223639,
     "links": 1,
@@ -321499,7 +320751,7 @@
     "ja": "水主神社 (東かがわ市)",
     "ko": null,
     "ko_label": null,
-    "kana": "みずしじんじゃ",
+    "kana": "みぬしじんじゃ",
     "lat": 34.223876,
     "lng": 134.298868,
     "links": 1,
@@ -322595,8 +321847,8 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 33.535,
-    "lng": 132.465,
+    "lat": 33.535147222,
+    "lng": 132.465255555,
     "links": 4,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Izuisisan07.jpg",
     "types": [
@@ -328943,20 +328195,6 @@
   ],
   "후쿠오카현": [
    {
-    "qid": "Q7082047",
-    "ja": "沖ノ島",
-    "ko": "오키노섬",
-    "ko_label": "오키노섬",
-    "kana": null,
-    "lat": 34.244281638,
-    "lng": 130.105760611,
-    "links": 31,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Okinoshima%20viewing%2001.jpg",
-    "types": [
-     "섬"
-    ]
-   },
-   {
     "qid": "Q148543",
     "ja": "九州国立博物館",
     "ko": "규슈 국립박물관",
@@ -329193,20 +328431,6 @@
     "types": [
      "관광명소",
      "전망대"
-    ]
-   },
-   {
-    "qid": "Q168754",
-    "ja": "スペースワールド",
-    "ko": "스페이스월드",
-    "ko_label": "스페이스 월드",
-    "kana": null,
-    "lat": 33.87352,
-    "lng": 130.81215,
-    "links": 8,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Space%20World%2001.jpg",
-    "types": [
-     "관광명소"
     ]
    },
    {
@@ -331730,20 +330954,6 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Nanakumakikuchi.JPG",
     "types": [
      "신사"
-    ]
-   },
-   {
-    "qid": "Q11629923",
-    "ja": "西鉄香椎花園",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 33.666889,
-    "lng": 130.434889,
-    "links": 2,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Kashii-kaen.jpg",
-    "types": [
-     "관광명소"
     ]
    },
    {
@@ -337602,8 +336812,8 @@
     "ko": null,
     "ko_label": null,
     "kana": "ひらしま",
-    "lat": 33.006388888,
-    "lng": 129.244222222,
+    "lat": 33.006944444,
+    "lng": 129.242777777,
     "links": 3,
     "image": null,
     "types": [
@@ -339608,8 +338818,8 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 33.181944444,
-    "lng": 129.020277777,
+    "lat": 33.18177778,
+    "lng": 129.02008333,
     "links": 2,
     "image": null,
     "types": [
@@ -341898,7 +341108,7 @@
     "ja": "国造神社",
     "ko": null,
     "ko_label": null,
-    "kana": "くにのみやつこ じんじゃ",
+    "kana": "こくぞう じんじゃ",
     "lat": 32.989554,
     "lng": 131.124281,
     "links": 2,
@@ -342207,8 +341417,8 @@
     "ko": null,
     "ko_label": null,
     "kana": null,
-    "lat": 32.50471,
-    "lng": 130.30588,
+    "lat": 32.505555555,
+    "lng": 130.305722222,
     "links": 2,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Michinoeki%20ariake.jpg",
     "types": [
@@ -351091,20 +350301,6 @@
     ]
    },
    {
-    "qid": "Q11593833",
-    "ja": "福昌寺 (鹿児島市)",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 31.61137778,
-    "lng": 130.56137222,
-    "links": 2,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Sangoku%20meisho%20zue%20vol5%20Kagoshima%20Fukushoji.png",
-    "types": [
-     "절"
-    ]
-   },
-   {
     "qid": "Q11599366",
     "ja": "竹田神社 (南さつま市)",
     "ko": null,
@@ -351753,20 +350949,6 @@
     ]
    },
    {
-    "qid": "Q11310142",
-    "ja": "ジャングルパーク遊園地",
-    "ko": null,
-    "ko_label": null,
-    "kana": null,
-    "lat": 31.57,
-    "lng": 130.565,
-    "links": 1,
-    "image": null,
-    "types": [
-     "관광명소"
-    ]
-   },
-   {
     "qid": "Q11312115",
     "ja": "スターランドAIRA",
     "ko": null,
@@ -352116,20 +351298,6 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Tokko%20shrine.jpg",
     "types": [
      "신사"
-    ]
-   },
-   {
-    "qid": "Q11490584",
-    "ja": "心岳寺",
-    "ko": null,
-    "ko_label": null,
-    "kana": "しんがくじ",
-    "lat": 31.671111,
-    "lng": 130.611389,
-    "links": 1,
-    "image": null,
-    "types": [
-     "절"
     ]
    },
    {

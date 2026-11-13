@@ -55,6 +55,11 @@ TYPES = {
 }
 # 옛 거리 — 유형(P31)이 아니라 문화재 지정(P1435)으로 붙는다
 PRESERVATION_DISTRICT = 'Q850649'
+# 여행자가 갈 수 없는 곳 — 검수하다 찾으면 여기에 더한다 (일본어 문서 제목)
+EXCLUDE = {
+    '沖ノ鳥島',   # 사람이 살지 않는 산호초, 일반 방문 불가
+    '沖ノ島',     # 무나카타 대사의 신역, 일반인 상륙 금지
+}
 
 PREF_JA = {
     '홋카이도': '北海道', '아오모리현': '青森県', '이와테현': '岩手県', '미야기현': '宮城県', '아키타현': '秋田県',
@@ -139,6 +144,10 @@ def prefecture_candidates(pref_qid):
           UNION {{ ?item wdt:P1435 wd:{PRESERVATION_DISTRICT} . BIND(wd:{PRESERVATION_DISTRICT} AS ?t) }}
           ?item wdt:P131+ wd:{pref_qid} ; wdt:P625 ?coord ; wikibase:sitelinks ?links .
           ?jaArt schema:about ?item ; schema:isPartOf <https://ja.wikipedia.org/> ; schema:name ?ja .
+          # 문을 닫거나 없어진 곳(폐쇄 · 해체일 P576). 성 · 문화재는 폐성 · 폐지일이 붙어도 유적으로 남아 있어 둔다
+          FILTER NOT EXISTS {{ ?item wdt:P576 [] .
+                               FILTER NOT EXISTS {{ ?item wdt:P1435 [] }}
+                               FILTER NOT EXISTS {{ VALUES ?castle {{ wd:Q92026 wd:Q23413 }} ?item wdt:P31 ?castle }} }}
           OPTIONAL {{ ?koArt schema:about ?item ; schema:isPartOf <https://ko.wikipedia.org/> ; schema:name ?ko . }}
           OPTIONAL {{ ?item rdfs:label ?koLabel . FILTER(LANG(?koLabel) = "ko") }}
           OPTIONAL {{ ?item wdt:P1814 ?kana . }}
@@ -149,7 +158,7 @@ def prefecture_candidates(pref_qid):
     for r in rows:
         qid = r['item']['value'].rsplit('/', 1)[1]
         point = parse_point(r['coord']['value'])
-        if qid in items or not point:
+        if qid in items or not point or r['ja']['value'] in EXCLUDE:
             continue   # 좌표 · 사진이 여러 개면 행이 여러 개 나온다 — 첫 행만 쓴다
         lat, lng = point
         type_ids = {t.rsplit('/', 1)[1] for t in r['types']['value'].split()}
