@@ -182,6 +182,12 @@ export default function Detail() {
               <section className={styles.section}>
                 <h2 className={styles.h2}>소개</h2>
                 <p className={styles.desc}>{desc}</p>
+                {/* 설명은 ja 위키백과 원문 요약이라 출처와 라이선스를 밝힌다 (D-089) */}
+                {item.sourceUrl && (
+                  <p className={styles.descSource}>
+                    설명 출처: <a href={item.sourceUrl} target="_blank" rel="noreferrer">위키백과(일본어)</a> · CC BY-SA 4.0
+                  </p>
+                )}
               </section>
             )}
 
