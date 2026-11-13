@@ -40,6 +40,33 @@ MySQL · 백엔드 · 화면이 뜨고, 시연 데이터(아래 "시연 데이�
 80 포트를 이미 쓰고 있으면 `WEB_PORT=8088 docker compose up -d --build` 처럼 바꾼다. DB 비밀번호 기본값은 `japantravel` 이고 `DB_PASSWORD` 로 바꾼다.
 사진(Wikimedia Commons)과 지도 타일은 인터넷에서 불러온다.
 
+## 서버에 올리기 — AWS EC2 (D-086 · D-087)
+
+리눅스 서버 한 대(RAM 2GB 이상, Ubuntu 24.04)에 위의 compose 를 그대로 띄운다. 보안 그룹은 22(관리자 IP 만) · 80(전체)만 연다.
+
+```bash
+# 서버에서 한 번 — Docker 설치는 docs.docker.com 의 Ubuntu 안내를 따른다
+git clone -b greenfield https://github.com/young-sang/Japan_Travel.v2.git japan-travel
+cd japan-travel
+
+# 공개 서버용 비밀 값 (.env.example 참고). admin 비밀번호 원문은 서버의 파일에만 둔다
+openssl rand -base64 12 > ~/admin-password.txt && chmod 600 ~/admin-password.txt
+HASH=$(docker run --rm httpd:2.4-alpine htpasswd -nbBC 10 "" "$(cat ~/admin-password.txt)" | tr -d ':\n')
+printf "DB_PASSWORD=%s\nJWT_SECRET=%s\nADMIN_PASSWORD_HASH='%s'\nWEB_PORT=80\n" "$(openssl rand -hex 16)" "$(openssl rand -hex 32)" "$HASH" > .env && chmod 600 .env
+
+docker compose up -d --build
+```
+
+| 할 일 | 명령 |
+|---|---|
+| 새 코드로 바꾸기 | `git pull && docker compose up -d --build` |
+| 시연 직전 되돌리기 | `docker compose run --rm -e FORCE_SEED=1 seed` (admin 비밀번호는 `.env` 값 그대로) |
+| 상태 · 로그 | `docker compose ps -a` · `docker compose logs -f backend` |
+
+서버에서는 `admin` 이 README 의 `demo1234` 로 로그인되지 않는다. `demo` 와 리뷰어 계정은 그대로 `demo1234` 다.
+`db` · `backend` · `web` 은 `restart: unless-stopped` 라 서버를 껐다 켜도 다시 뜬다.
+비용: 시연이 없으면 EC2 콘솔에서 인스턴스를 **중지**한다. 다 쓰면 인스턴스 **종료** 후 **탄력적 IP 릴리스**까지 해야 요금이 멈춘다.
+
 아래는 Docker 없이 개발 모드로 띄우는 방법이다.
 
 ## 사전 요구사항
