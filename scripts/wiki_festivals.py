@@ -299,7 +299,7 @@ def selection():
         keep = {f['ja']: f['name'] for f in data['existing'] if f['pref'] == pref and f['referenced'] and f['ja']}
         picked = [{**x, 'keep_name': keep[x['ja']]} for x in items if x['ja'] in keep]
         for x in items:
-            if sum(1 for p in picked if 'skip' not in done.get(p['ja'], {})) >= PER_PREF:
+            if sum(1 for p in picked if 'skip' not in done.get(p['ja'], {}) and p['ja'] not in DROP) >= PER_PREF:
                 break
             if x['ja'] in keep or x['length'] < MIN_BYTES:
                 continue
@@ -388,5 +388,89 @@ def check():
     print('\n'.join(lines[2:5]))
 
 
+# ---- 5. SQL ----
+
+FEST_SQL = ROOT / 'backend/src/main/resources/festivals.sql'
+# 축제가 아닌 문서(정원 · 바위)를 요약 때 축제로 쓴 경우 — 축제 이름으로 고치거나 뺀다 (ja 문서 제목 기준)
+NAME_FIX = {'偕楽園': '미토 매화 축제'}          # 정원 문서. 설명은 미토 매화 축제(2~3월) 기준으로 쓰였다
+DROP = {'殺生石'}                                  # 바위 문서. 행사는 곁가지다
+
+
+def build_sql():
+    sel = selection()
+    done = summaries()
+    coords = json.loads(COORDS.read_text(encoding='utf-8'))
+    rows, no_coord = [], []
+    for pref, v in sel.items():
+        for x in v:
+            s = done.get(x['ja'])
+            if not s or 'skip' in s or x['ja'] in DROP:
+                continue
+            c = coords.get(x['ja'], {}).get('coord')
+            if not c and s.get('venue'):   # 원문의 개최 시정촌 (D-092)
+                for title in (s['venue'], wd.PREF_JA[pref] + s['venue']):
+                    info = next(iter(page_info([title]).values()), None)
+                    if info and info['page_coord']:
+                        c = info['page_coord']
+                        break
+            if not c:
+                no_coord.append(f'{pref} · {x["ja"]}')
+                continue
+            rows.append({**x, 'pref': pref, 'coord': c, 'name': NAME_FIX.get(x['ja'], s['name'].strip()),
+                         'description': s['description'].strip(), 'month': int(s['month']),
+                         'date_text': s['date_text'].strip()})
+
+#   UNIQUE(name, prefecture_id) — 같은 현에 같은 이름이면 ja 문서의 괄호 구분어를 붙인다
+    seen = {}
+    for r in rows:
+        seen.setdefault((r['pref'], r['name']), []).append(r)
+    for same in seen.values():
+        if len(same) > 1:
+            for r in same:
+                if not r.get('keep_name'):
+                    m = re.search(r'[(（](.+?)[)）]', r['ja'])
+                    r['name'] = f'{r["name"]} ({m.group(1) if m else r["ja"]})'
+
+    sys.path.insert(0, str(ROOT / 'scripts'))
+    import fetch_commons_images as fc
+    for r in rows:
+        r['img'] = wd.commons_image(r['image']) if r.get('image') else None
+    fc.CACHE.write_text(json.dumps(fc.cache, ensure_ascii=False), encoding='utf-8')
+
+    def q(v):
+        return 'NULL' if v is None else "'" + str(v).replace('\\', '\\\\').replace("'", "''") + "'"
+
+    order = list(wd.PREF_JA)
+    rows.sort(key=lambda r: (order.index(r['pref']), r['month'], -r['links'], r['ja']))
+    out = [
+        '-- 축제 시드 (D-092). scripts/wiki_festivals.py sql 이 만든다 — 손으로 고치지 말 것.',
+        '-- 목록은 ja 위키백과 현별 축제 분류, 설명 · 개최 시기는 원문을 한국어로 요약한 것 (CC BY-SA 4.0, 출처는 source_url).',
+        '-- 기동할 때마다 실행된다. INSERT IGNORE + UNIQUE(name, prefecture_id) 로 중복을 막는다 (D-050).',
+        '',
+        'INSERT IGNORE INTO festivals (name, prefecture_id, month, date_text, description, lat, lng, image_path, image_credit,',
+        '                              image_source, wikidata_id, source_url, created_at)',
+        'SELECT v.name, p.id, v.month, v.date_text, v.description, v.lat, v.lng, v.image_path, v.image_credit, v.image_source,',
+        '       v.wikidata_id, v.source_url, NOW()',
+        'FROM (VALUES',
+    ]
+    values = []
+    for r in rows:
+        img = r['img'] or {}
+        url = 'https://ja.wikipedia.org/wiki/' + wd.urllib.parse.quote(r['ja'].replace(' ', '_'))
+        values.append(f'  ROW({q(r["pref"])}, {q(r["name"])}, {r["month"]}, {q(r["date_text"])}, {q(r["description"])}, '
+                      f'{r["coord"][0]:.6f}, {r["coord"][1]:.6f}, {q(img.get("url"))}, {q(img.get("credit"))}, '
+                      f'{q(img.get("source"))}, {q(r.get("qid"))}, {q(url)})')
+    out.append(',\n'.join(values))
+    out += [') AS v(pref, name, month, date_text, description, lat, lng, image_path, image_credit, image_source, wikidata_id, source_url)',
+            'JOIN prefectures p ON p.name = v.pref;', '']
+    FEST_SQL.write_text('\n'.join(out), encoding='utf-8')
+
+    per_month = {m: sum(1 for r in rows if r['month'] == m) for m in range(1, 13)}
+    print(f'축제 {len(rows)}건 · 사진 {sum(1 for r in rows if r["img"])}건 · 좌표 없어 뺌 {len(no_coord)}건 {no_coord} · '
+          f'이름 구분어 {sum(len(v) for v in seen.values() if len(v) > 1)}건')
+    print('월별', per_month)
+
+
 if __name__ == '__main__':
-    {'candidates': candidates, 'extracts': extracts, 'batches': batches, 'check': check}[sys.argv[1]]()
+    {'candidates': candidates, 'extracts': extracts, 'batches': batches, 'check': check,
+     'sql': build_sql}[sys.argv[1]]()
