@@ -13,7 +13,8 @@ export default function ProtectedRoute({ children, requireAdmin = false, denyAdm
     );
   }
   if (!user) {
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+    // 쿼리까지 기억한다 — 담아 온 장소(?add=…)가 로그인 뒤에도 빌더에 남도록 (D-094)
+    return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
   }
   if (requireAdmin && user.role !== 'ADMIN') {
     return <Navigate to="/" replace />;
