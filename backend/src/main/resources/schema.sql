@@ -25,6 +25,8 @@ CREATE TABLE IF NOT EXISTS destinations (
   image_path    VARCHAR(500),
   image_credit  VARCHAR(300),                    -- 사진 출처 "작가 / 라이선스 / Wikimedia Commons" (D-063)
   image_source  VARCHAR(500),                    -- 사진 원본 페이지 주소
+  wikidata_id   VARCHAR(20),                     -- 설명 출처 (D-089). Wikidata 항목 ID
+  source_url    VARCHAR(500),                    -- 설명 원문 (ja 위키백과 문서 주소)
   created_at    DATETIME NOT NULL,
   UNIQUE (name, prefecture_id),
   FOREIGN KEY (prefecture_id) REFERENCES prefectures(id)
@@ -63,6 +65,15 @@ SET @ddl = (SELECT IF(COUNT(*) = 0,
   'ALTER TABLE festivals ADD COLUMN image_credit VARCHAR(300) AFTER image_path, ADD COLUMN image_source VARCHAR(500) AFTER image_credit',
   'DO 0') FROM information_schema.columns
   WHERE table_schema = DATABASE() AND table_name = 'festivals' AND column_name = 'image_credit');
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- 설명 출처 컬럼 (D-089). 위와 같은 방식으로 기존 DB 에 더한다
+SET @ddl = (SELECT IF(COUNT(*) = 0,
+  'ALTER TABLE destinations ADD COLUMN wikidata_id VARCHAR(20) AFTER image_source, ADD COLUMN source_url VARCHAR(500) AFTER wikidata_id',
+  'DO 0') FROM information_schema.columns
+  WHERE table_schema = DATABASE() AND table_name = 'destinations' AND column_name = 'wikidata_id');
 PREPARE stmt FROM @ddl;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;

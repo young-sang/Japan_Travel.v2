@@ -16,6 +16,9 @@ public record DestinationResponse(
 //      사진 출처 "작가 / 라이선스 / Wikimedia Commons" 와 원본 페이지 (D-063). 사진이 없거나 직접 넣은 사진이면 null
         String imageCredit,
         String imageSource,
+//      설명 출처 (D-089). Wikidata 항목 ID 와 ja 위키백과 원문 주소. 출처가 없는 행이면 null
+        String wikidataId,
+        String sourceUrl,
         LocalDateTime createdAt,
 //      리뷰 집계 (D-057). 평균은 소수 첫째 자리, 리뷰가 없으면 null
         Double avgRating,
@@ -33,6 +36,8 @@ public record DestinationResponse(
                 d.getImagePath(),
                 d.getImageCredit(),
                 d.getImageSource(),
+                d.getWikidataId(),
+                d.getSourceUrl(),
                 d.getCreatedAt(),
                 round1(d.getAvgRating()),
                 d.getReviewCount()

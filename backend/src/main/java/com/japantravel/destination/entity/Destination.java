@@ -36,6 +36,13 @@ public class Destination {
     @Column(name = "image_source")
     private String imageSource;
 
+//  설명 출처 (D-089). Wikidata 항목 ID 와 ja 위키백과 원문 주소
+    @Column(name = "wikidata_id")
+    private String wikidataId;
+
+    @Column(name = "source_url")
+    private String sourceUrl;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

@@ -49,6 +49,23 @@ class DestinationApiTest extends IntegrationTest {
                 .andExpect(jsonPath("$.data.prefecture").value(prefectureOfDestination(id)));
     }
 
+//  설명 출처 (D-089). 시드는 읽기만 하므로 출처가 있는 행을 직접 넣고 끝나면 지운다
+    @Test
+    void 상세에_설명_출처가_나온다() throws Exception {
+        jdbc.update("""
+                INSERT INTO destinations (name, prefecture_id, description, wikidata_id, source_url, created_at)
+                SELECT '출처 테스트 장소', MIN(id), '설명', 'Q123', 'https://ja.wikipedia.org/wiki/テスト', NOW() FROM prefectures""");
+        long id = jdbc.queryForObject("SELECT id FROM destinations WHERE name = '출처 테스트 장소'", Long.class);
+        try {
+            mockMvc.perform(get("/api/destinations/{id}", id))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.wikidataId").value("Q123"))
+                    .andExpect(jsonPath("$.data.sourceUrl").value("https://ja.wikipedia.org/wiki/テスト"));
+        } finally {
+            jdbc.update("DELETE FROM destinations WHERE id = ?", id);
+        }
+    }
+
     @Test
     void 없는_id_면_404_숫자가_아니면_400() throws Exception {
         expectError(mockMvc.perform(get("/api/destinations/{id}", MISSING_ID)), 404, "DESTINATION_NOT_FOUND");
