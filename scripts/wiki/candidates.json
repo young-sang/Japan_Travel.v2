@@ -173,20 +173,6 @@
     "keep_name": "노보리베쓰 지옥계곡"
    },
    {
-    "qid": "Q35581",
-    "ja": "北海道",
-    "ko": "홋카이도",
-    "ko_label": "홋카이도",
-    "kana": null,
-    "lat": 43.460555555,
-    "lng": 142.792222222,
-    "links": 164,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/140829%20Ichiko%20of%20Shiretoko%20Goko%20Lakes%20Hokkaido%20Japan04s3.jpg",
-    "types": [
-     "섬"
-    ]
-   },
-   {
     "qid": "Q495476",
     "ja": "利尻島",
     "ko": "리시리섬",
@@ -294,6 +280,20 @@
     "lng": 141.333333333,
     "links": 23,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Shikotsuko1.jpg",
+    "types": [
+     "호수"
+    ]
+   },
+   {
+    "qid": "Q1329031",
+    "ja": "サロマ湖",
+    "ko": "사로마호",
+    "ko_label": "사로마호",
+    "kana": null,
+    "lat": 44.166666666,
+    "lng": 143.716666666,
+    "links": 23,
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Lake%20Saroma.jpg",
     "types": [
      "호수"
     ]
@@ -3591,20 +3591,6 @@
     ]
    },
    {
-    "qid": "Q201633",
-    "ja": "硫黄島 (東京都)",
-    "ko": "이오섬",
-    "ko_label": "이오섬",
-    "kana": null,
-    "lat": 24.78,
-    "lng": 141.32,
-    "links": 58,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Io-jima%20ASTER%20%28cropped%29.jpg",
-    "types": [
-     "섬"
-    ]
-   },
-   {
     "qid": "Q653433",
     "ja": "東京国立博物館",
     "ko": "도쿄 국립박물관",
@@ -3642,20 +3628,6 @@
     "lng": 139.775,
     "links": 47,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/2018%20FCG%20Headquarters%20Building%202.jpg",
-    "types": [
-     "섬"
-    ]
-   },
-   {
-    "qid": "Q1047492",
-    "ja": "南鳥島",
-    "ko": "미나미토리섬",
-    "ko_label": "미나미토리섬",
-    "kana": null,
-    "lat": 24.286666666,
-    "lng": 153.980555555,
-    "links": 39,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Aerial-View-Minamitori-Island-1987.jpg",
     "types": [
      "섬"
     ]
@@ -3712,6 +3684,34 @@
     "lng": 139.399444444,
     "links": 33,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Landsat%20IzuOshima%20Island.jpg",
+    "types": [
+     "섬"
+    ]
+   },
+   {
+    "qid": "Q1075076",
+    "ja": "三宅島",
+    "ko": "미야케섬",
+    "ko_label": "미야케섬",
+    "kana": null,
+    "lat": 34.0936,
+    "lng": 139.5261,
+    "links": 30,
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Miyakejima%20O-Yama%20Volcano%20crater.jpg",
+    "types": [
+     "섬"
+    ]
+   },
+   {
+    "qid": "Q615578",
+    "ja": "青ヶ島",
+    "ko": "아오가섬",
+    "ko_label": "아오가섬",
+    "kana": null,
+    "lat": 32.457777777,
+    "lng": 139.759166666,
+    "links": 30,
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Aogasima%20maruyama.jpg",
     "types": [
      "섬"
     ]
@@ -3792,20 +3792,6 @@
      "기타"
     ],
     "keep_name": "아시노코"
-   },
-   {
-    "qid": "Q200267",
-    "ja": "鎌倉市",
-    "ko": "가마쿠라시",
-    "ko_label": "가마쿠라시",
-    "kana": "かまくらし",
-    "lat": 35.319166666,
-    "lng": 139.547222222,
-    "links": 76,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/230128%20Hasedera%20Kamakura%20Kanagawa%20pref%20Japan09s3.jpg",
-    "types": [
-     "사적"
-    ]
    },
    {
     "qid": "Q672056",
@@ -4004,6 +3990,20 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/230128%20Yuigahama%20Kamakura%20Kanagawa%20pref%20Japan02s3.jpg",
     "types": [
      "해변"
+    ]
+   },
+   {
+    "qid": "Q11596647",
+    "ja": "稲村ヶ崎",
+    "ko": "이나무라가사키",
+    "ko_label": "이나무라가사키",
+    "kana": null,
+    "lat": 35.302222222,
+    "lng": 139.525555555,
+    "links": 11,
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Inamuragasaki%20-%2001.jpg",
+    "types": [
+     "곶"
     ]
    }
   ],
@@ -13324,20 +13324,6 @@
     ]
    },
    {
-    "qid": "Q1333330",
-    "ja": "琉球王国のグスク及び関連遺産群",
-    "ko": "류큐 왕국의 구수쿠 유적지과 관련 유산",
-    "ko_label": "류큐 왕국의 구스쿠 및 관련 유산군",
-    "kana": null,
-    "lat": 26.2086,
-    "lng": 127.683,
-    "links": 28,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Naha%20Shuri%20Castle16s5s3200.jpg",
-    "types": [
-     "성"
-    ]
-   },
-   {
     "qid": "Q1111504",
     "ja": "北大東島",
     "ko": "기타다이토섬",
@@ -13419,6 +13405,20 @@
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Nakijinjyousi2.jpg",
     "types": [
      "성"
+    ]
+   },
+   {
+    "qid": "Q701089",
+    "ja": "黒島 (沖縄県竹富町)",
+    "ko": "구로시마섬 (다케토미정)",
+    "ko_label": "구로시마섬",
+    "kana": null,
+    "lat": 24.233333,
+    "lng": 124.016667,
+    "links": 19,
+    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Kuroshima%20ISS039.jpg",
+    "types": [
+     "섬"
     ]
    }
   ]
@@ -15617,20 +15617,6 @@
  ],
  "all": {
   "홋카이도": [
-   {
-    "qid": "Q35581",
-    "ja": "北海道",
-    "ko": "홋카이도",
-    "ko_label": "홋카이도",
-    "kana": null,
-    "lat": 43.460555555,
-    "lng": 142.792222222,
-    "links": 164,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/140829%20Ichiko%20of%20Shiretoko%20Goko%20Lakes%20Hokkaido%20Japan04s3.jpg",
-    "types": [
-     "섬"
-    ]
-   },
    {
     "qid": "Q495476",
     "ja": "利尻島",
@@ -102676,20 +102662,6 @@
     ]
    },
    {
-    "qid": "Q201633",
-    "ja": "硫黄島 (東京都)",
-    "ko": "이오섬",
-    "ko_label": "이오섬",
-    "kana": null,
-    "lat": 24.78,
-    "lng": 141.32,
-    "links": 58,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Io-jima%20ASTER%20%28cropped%29.jpg",
-    "types": [
-     "섬"
-    ]
-   },
-   {
     "qid": "Q653433",
     "ja": "東京国立博物館",
     "ko": "도쿄 국립박물관",
@@ -102727,20 +102699,6 @@
     "lng": 139.775,
     "links": 47,
     "image": "http://commons.wikimedia.org/wiki/Special:FilePath/2018%20FCG%20Headquarters%20Building%202.jpg",
-    "types": [
-     "섬"
-    ]
-   },
-   {
-    "qid": "Q1047492",
-    "ja": "南鳥島",
-    "ko": "미나미토리섬",
-    "ko_label": "미나미토리섬",
-    "kana": null,
-    "lat": 24.286666666,
-    "lng": 153.980555555,
-    "links": 39,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Aerial-View-Minamitori-Island-1987.jpg",
     "types": [
      "섬"
     ]
@@ -141582,20 +141540,6 @@
    }
   ],
   "가나가와현": [
-   {
-    "qid": "Q200267",
-    "ja": "鎌倉市",
-    "ko": "가마쿠라시",
-    "ko_label": "가마쿠라시",
-    "kana": "かまくらし",
-    "lat": 35.319166666,
-    "lng": 139.547222222,
-    "links": 76,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/230128%20Hasedera%20Kamakura%20Kanagawa%20pref%20Japan09s3.jpg",
-    "types": [
-     "사적"
-    ]
-   },
    {
     "qid": "Q672056",
     "ja": "高徳院",
@@ -352128,20 +352072,6 @@
     "types": [
      "섬",
      "옛 거리"
-    ]
-   },
-   {
-    "qid": "Q1333330",
-    "ja": "琉球王国のグスク及び関連遺産群",
-    "ko": "류큐 왕국의 구수쿠 유적지과 관련 유산",
-    "ko_label": "류큐 왕국의 구스쿠 및 관련 유산군",
-    "kana": null,
-    "lat": 26.2086,
-    "lng": 127.683,
-    "links": 28,
-    "image": "http://commons.wikimedia.org/wiki/Special:FilePath/Naha%20Shuri%20Castle16s5s3200.jpg",
-    "types": [
-     "성"
     ]
    },
    {

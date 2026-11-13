@@ -59,6 +59,17 @@ PRESERVATION_DISTRICT = 'Q850649'
 EXCLUDE = {
     '沖ノ鳥島',   # 사람이 살지 않는 산호초, 일반 방문 불가
     '沖ノ島',     # 무나카타 대사의 신역, 일반인 상륙 금지
+    '硫黄島 (東京都)',   # 자위대 기지, 일반 방문 불가
+    '北海道',     # 현 전체 (섬 유형으로 걸린다)
+    '鎌倉市',     # 시 전체 (사적 유형으로 걸린다)
+    '琉球王国のグスク及び関連遺産群',   # 유산 묶음 — 슈리성 등 개별 구스쿠가 따로 있다
+    '南鳥島',     # 기상청 · 자위대 시설만 있고 일반 방문 불가
+}
+# 이름 보정 (ja 문서 제목 → 한국어 이름). 요약 때 정한 이름이 다른 산 · 섬과 표기가 어긋난 경우.
+# 岳 은 "~다케" 로 맞추고, "다케산" · "시마섬" 처럼 겹친 표기를 걷어낸다. 운젠산 · 유후산은 굳은 이름이라 둔다
+NAME_FIX = {
+    '谷川岳': '다니가와다케', '剱岳': '쓰루기다케', '荒島岳': '아라시마다케', '北岳': '기타다케',
+    '穂高岳': '호타카다케', '新燃岳': '신모에다케', '大久野島': '오쿠노섬',
 }
 
 PREF_JA = {
@@ -444,6 +455,29 @@ def numbers(text):
     return set(re.findall(r'\d{2,}', text.replace(',', '')))
 
 
+KANJI_DIGIT = dict(zip('〇一二三四五六七八九', range(10)))
+KANJI_UNIT = {'十': 10, '百': 100, '千': 1000}
+
+
+def kanji_numbers(text):
+    """원문의 한자 숫자(百 · 三十三 · 千二百 · 二〇一〇)를 아라비아 숫자로 덧붙인다. 「日本百名山」→ 100 같은 경우가 많다."""
+    found = []
+    for m in re.finditer(r'[〇一二三四五六七八九十百千]+', text):
+        s = m.group()
+        if all(c in KANJI_DIGIT for c in s):   # 二〇一〇 처럼 자리마다 쓴 경우
+            found.append(''.join(str(KANJI_DIGIT[c]) for c in s))
+            continue
+        total, cur = 0, 0
+        for c in s:
+            if c in KANJI_DIGIT:
+                cur = KANJI_DIGIT[c]
+            else:
+                total += (cur or 1) * KANJI_UNIT[c]
+                cur = 0
+        found.append(str(total + cur))
+    return ' '.join(found)
+
+
 def check():
     """요약 검수 보고서. 요약의 숫자가 원문에 없으면 지어냈을 수 있어 목록에 올린다."""
     selected = json.loads(CANDIDATES.read_text(encoding='utf-8'))['selected']
@@ -456,7 +490,8 @@ def check():
             if not s:
                 missing.append(f'{pref} · {x["ja"]}')
                 continue
-            src = sources[x['qid']]['source'].replace(',', '')
+            raw = sources[x['qid']]['source']
+            src = raw.replace(',', '') + ' ' + kanji_numbers(raw)
             extra = sorted(n for n in numbers(s['description']) if n not in src)
             lengths.append(len(s['description']))
             if extra:
@@ -477,5 +512,96 @@ def check():
     print('\n'.join(lines[2:6]))
 
 
+# ---- 4. SQL ----
+
+DEST_SQL = ROOT / 'backend/src/main/resources/destinations.sql'
+
+
+def prefecture_of(x, pref, where, source):
+    """여러 현에 걸친 항목(경계의 산 등)은 원문에서 가장 먼저 나오는 현에 둔다. 후보를 받을 때는 현 순서상 먼저 나온 현에 붙어 있다."""
+    prefs = where.get(x['qid'], [pref])
+    if len(prefs) < 2:
+        return pref
+    pos = {p: source.find(PREF_JA[p]) for p in prefs if source.find(PREF_JA[p]) >= 0}
+    return min(pos, key=pos.get) if pos else pref
+
+
+def commons_image(url):
+    """P18(Commons 파일 주소) → 사진 스크립트와 같은 라이선스 확인을 거친 썸네일 · 출처. 자유 라이선스가 아니면 None."""
+    import fetch_commons_images as fc
+    filename = urllib.parse.unquote(url.rsplit('/', 1)[1])
+    return fc.commons_info(filename)
+
+
+def build_sql():
+    sys.path.insert(0, str(ROOT / 'scripts'))
+    import fetch_commons_images as fc
+    data = json.loads(CANDIDATES.read_text(encoding='utf-8'))
+    sources = json.loads(EXTRACTS.read_text(encoding='utf-8'))
+    done = summaries()
+    prefs = prefecture_qids()
+    where = {}
+    for pref, q in prefs.items():
+        for x in prefecture_candidates(q):
+            where.setdefault(x['qid'], []).append(pref)
+
+    rows = []
+    for pref, items in data['selected'].items():
+        for x in items:
+            s = done[x['qid']]
+            rows.append({**x, 'pref': prefecture_of(x, pref, where, sources[x['qid']]['source']),
+                         'name': NAME_FIX.get(x['ja'], s['name'].strip()), 'description': s['description'].strip()})
+
+#   UNIQUE(name, prefecture_id) — 같은 현에 같은 이름이 있으면 ja 문서의 괄호 구분어(시 이름 등)를 붙인다
+    seen = {}
+    for r in rows:
+        seen.setdefault((r['pref'], r['name']), []).append(r)
+    for (pref, name), same in seen.items():
+        if len(same) > 1:
+            for r in same:
+                if not r.get('keep_name'):
+                    m = re.search(r'[(（](.+?)[)）]', r['ja'])
+                    r['name'] = f'{name} ({m.group(1) if m else r["ja"]})'
+
+    for i, r in enumerate(rows, 1):
+        r['img'] = commons_image(r['image']) if r.get('image') else None
+        if i % 100 == 0:
+            fc.CACHE.write_text(json.dumps(fc.cache, ensure_ascii=False), encoding='utf-8')
+            print(f'[사진 {i}/{len(rows)}]')
+    fc.CACHE.write_text(json.dumps(fc.cache, ensure_ascii=False), encoding='utf-8')
+
+    def q(v):
+        return 'NULL' if v is None else "'" + str(v).replace('\\', '\\\\').replace("'", "''") + "'"
+
+    order = list(PREF_JA)
+    rows.sort(key=lambda r: (order.index(r['pref']), -r['links'], r['qid']))
+    out = [
+        '-- 여행지 시드 (D-089). scripts/wiki_destinations.py sql 이 만든다 — 손으로 고치지 말 것.',
+        '-- 목록 · 좌표 · 사진은 Wikidata, 설명은 ja 위키백과 원문을 한국어로 요약한 것 (CC BY-SA 4.0, 출처는 source_url).',
+        '-- 기동할 때마다 실행된다. INSERT IGNORE + UNIQUE(name, prefecture_id) 로 중복을 막는다 (D-050).',
+        '',
+        'INSERT IGNORE INTO destinations (name, prefecture_id, description, lat, lng, image_path, image_credit, image_source,',
+        '                                 wikidata_id, source_url, created_at)',
+        'SELECT v.name, p.id, v.description, v.lat, v.lng, v.image_path, v.image_credit, v.image_source, v.wikidata_id, v.source_url, NOW()',
+        'FROM (VALUES',
+    ]
+    values = []
+    for r in rows:
+        img = r['img'] or {}
+        url = 'https://ja.wikipedia.org/wiki/' + urllib.parse.quote(r['ja'].replace(' ', '_'))
+        values.append(f'  ROW({q(r["pref"])}, {q(r["name"])}, {q(r["description"])}, {r["lat"]:.6f}, {r["lng"]:.6f}, '
+                      f'{q(img.get("url"))}, {q(img.get("credit"))}, {q(img.get("source"))}, {q(r["qid"])}, {q(url)})')
+    out.append(',\n'.join(values))
+    out += [') AS v(pref, name, description, lat, lng, image_path, image_credit, image_source, wikidata_id, source_url)',
+            'JOIN prefectures p ON p.name = v.pref;', '']
+    DEST_SQL.write_text('\n'.join(out), encoding='utf-8')
+
+    per_pref = {}
+    for r in rows:
+        per_pref[r['pref']] = per_pref.get(r['pref'], 0) + 1
+    print(f'여행지 {len(rows)}건 · 사진 {sum(1 for r in rows if r["img"])}건 · 현당 {min(per_pref.values())}~{max(per_pref.values())}건 · '
+          f'이름 구분어 붙임 {sum(len(v) for v in seen.values() if len(v) > 1)}건')
+
+
 if __name__ == '__main__':
-    {'candidates': candidates, 'extracts': extracts, 'batches': batches, 'check': check}[sys.argv[1]]()
+    {'candidates': candidates, 'extracts': extracts, 'batches': batches, 'check': check, 'sql': build_sql}[sys.argv[1]]()
