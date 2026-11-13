@@ -4,6 +4,7 @@ import com.japantravel.common.error.ApiException;
 import com.japantravel.common.error.ErrorCode;
 import com.japantravel.course.dto.CourseRequest;
 import com.japantravel.course.dto.CourseResponse;
+import com.japantravel.course.dto.CourseStopAddRequest;
 import com.japantravel.course.dto.CourseStopRequest;
 import com.japantravel.course.dto.CourseSummaryResponse;
 import com.japantravel.course.dto.StopType;
@@ -95,6 +96,25 @@ public class CourseService {
         course.clearStops();
         courseRepository.flush();
         stops.forEach(s -> course.addStop(s.toEntity(course)));
+        return CourseResponse.from(course);
+    }
+
+//  정류장 하나를 마지막 일차의 끝에 붙인다 (D-094). 정류장이 없으면 1일차 첫 번째.
+//  판정 순서는 수정과 같다 — 본문 → 코스 존재(남의 비공개도 404) → 작성자 → 대상 장소 (D-047).
+    @Transactional
+    public CourseResponse addStop(Long userId, Long id, CourseStopAddRequest req) {
+        if (req == null || req.type() == null || req.targetId() == null) {
+            throw new ApiException(ErrorCode.INVALID_COURSE);
+        }
+        Course course = findVisible(id, userId);
+        checkOwner(course, userId);
+
+        int dayNo = course.getStops().stream().mapToInt(CourseStop::getDayNo).max().orElse(1);
+        int seq = course.getStops().stream().filter(s -> s.getDayNo() == dayNo)
+                .mapToInt(CourseStop::getSeq).max().orElse(0) + 1;
+        resolveStops(List.of(new CourseStopRequest(dayNo, req.type(), req.targetId(), req.memo())))
+                .forEach(s -> course.addStop(new ResolvedStop(dayNo, seq, s.destination(), s.festival(), s.memo())
+                        .toEntity(course)));
         return CourseResponse.from(course);
     }
 

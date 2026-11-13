@@ -3,6 +3,7 @@ package com.japantravel.course.controller;
 import com.japantravel.common.web.ApiResponse;
 import com.japantravel.course.dto.CourseRequest;
 import com.japantravel.course.dto.CourseResponse;
+import com.japantravel.course.dto.CourseStopAddRequest;
 import com.japantravel.course.dto.CourseSummaryResponse;
 import com.japantravel.course.service.CourseService;
 import lombok.RequiredArgsConstructor;
@@ -62,5 +63,14 @@ public class CourseController {
     @GetMapping("/api/me/courses")
     public ApiResponse<List<CourseSummaryResponse>> mine(@AuthenticationPrincipal Long userId) {
         return ApiResponse.ok(courseService.findMine(userId));
+    }
+
+//  상세 · 즐겨찾기에서 내 코스에 장소 하나를 더한다 (D-094). 응답은 코스 상세 모양
+    @PostMapping("/api/me/courses/{id}/stops")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<CourseResponse> addStop(@AuthenticationPrincipal Long userId,
+                                               @PathVariable Long id,
+                                               @RequestBody CourseStopAddRequest req) {
+        return ApiResponse.ok(courseService.addStop(userId, id, req));
     }
 }
