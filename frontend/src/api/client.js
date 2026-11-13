@@ -73,6 +73,9 @@ export const api = {
   createCourse: (body) => req('/api/courses', { method: 'POST', body }),
   updateCourse: (id, body) => req(`/api/courses/${id}`, { method: 'PUT', body }),
   deleteCourse: (id) => req(`/api/courses/${id}`, { method: 'DELETE' }),
+  // 내 코스의 마지막 일차 끝에 장소 하나를 더한다 (D-094). type 은 destination | festival
+  addCourseStop: (courseId, type, targetId) =>
+    req(`/api/me/courses/${courseId}/stops`, { method: 'POST', body: { type: type.toUpperCase(), targetId } }),
 
   // favorites — {destinations, festivals} 두 배열 (D-039)
   listFavorites: () => req('/api/me/favorites'),
