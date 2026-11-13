@@ -82,3 +82,6 @@ scripts/wiki/extracts.json
 scripts/wiki/batches/
 scripts/wiki_fest/extracts.json
 scripts/wiki_fest/batches/
+
+# 추천용 임베딩 결과 — 약 13MB, scripts/embed_places.py 로 다시 만든다. 저장소에 넣는 형태는 M1-3 에서 정한다 (D-095)
+scripts/embedding/

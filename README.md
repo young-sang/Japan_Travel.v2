@@ -155,6 +155,16 @@ http://localhost:5173 에 접속한다. `/api` 요청은 Vite 프록시가 `:808
 | [docs/ERRORS.md](docs/ERRORS.md) | `ErrorCode` 별 의미 |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | 의사결정 기록 (D-001 ~) |
 
+## 추천용 임베딩 만들기 (D-095)
+
+여행지 · 축제의 "이름 + 지역 + 설명" 을 로컬 [Ollama](https://ollama.com) 의 `bge-m3` 로 벡터화해 `scripts/embedding/places.json` 에 남긴다.
+공개 서버에서는 돌리지 않는다. 장소 시드(`destinations.sql` · `festivals.sql`)가 바뀌면 다시 실행한다 — 항상 전체를 다시 계산한다(GPU 로 약 3분).
+
+```bash
+ollama pull bge-m3              # 처음 한 번 (약 1.2GB)
+python scripts/embed_places.py  # 끝나면 여행지 · 축제 수를 출력한다
+```
+
 ## 검증
 
 백엔드 자동 테스트 (D-062) — 로컬 MySQL 이 켜져 있고 `DB_PASSWORD` 가 설정돼 있어야 한다.
