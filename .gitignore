@@ -75,3 +75,6 @@ data/japan_travel.db
 /*.hwp
 /*.docx
 /*.pptx
+
+# 위키 응답 캐시 — 크고(약 18MB) 다시 받을 수 있다. 결과 파일(candidates.json 등)은 커밋한다 (D-089)
+scripts/wiki/cache.json
