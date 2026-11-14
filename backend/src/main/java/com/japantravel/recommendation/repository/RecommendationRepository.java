@@ -1,5 +1,6 @@
 package com.japantravel.recommendation.repository;
 
+import com.japantravel.recommendation.dto.ActivityKind;
 import com.japantravel.recommendation.dto.RecommendationTargetType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -14,8 +15,6 @@ import java.util.List;
 @Repository
 @RequiredArgsConstructor
 public class RecommendationRepository {
-
-    public enum ActivityKind { FAVORITE, REVIEW, HISTORY }
 
     public record Activity(RecommendationTargetType type, long placeId, ActivityKind kind) {
     }
