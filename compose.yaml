@@ -1,7 +1,7 @@
 # 시연 환경 (D-085). 저장소 맨 위에서 `docker compose up -d --build` 한 줄로 뜬다 → http://localhost
 #   db      MySQL 8. 데이터는 db-data 볼륨에 남는다
 #   backend 스키마 · 여행지 · 축제 시드는 기동할 때 스스로 넣는다 (D-050)
-#   seed    backend 가 뜬 뒤 시연 데이터(scripts/demo_seed.sql, D-070)를 처음 한 번만 넣고 끝난다
+#   seed    backend 가 뜬 뒤 시연 데이터(scripts/demo_seed.sql D-070 · demo_users.sql D-102)를 처음 한 번만 넣고 끝난다
 #   web     nginx 가 화면을 내주고 /api 를 backend 로 넘긴다
 # 공개 서버에서는 .env 로 DB 비밀번호 · JWT 키 · admin 비밀번호를 바꾼다 (.env.example, D-086)
 services:
@@ -56,6 +56,7 @@ services:
       ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:-}
     volumes:
       - ./scripts/demo_seed.sql:/seed/demo_seed.sql:ro
+      - ./scripts/demo_users.sql:/seed/demo_users.sql:ro
     # demo 계정이 이미 있으면 건너뛴다 — 시연 중 바꾼 내용을 재기동이 되돌리지 않게
     command:
       - sh
@@ -63,7 +64,10 @@ services:
       - |
         set -e
         if [ "$$FORCE_SEED" = "1" ] || [ "$$(mysql -hdb -uroot -N -e "SELECT COUNT(*) FROM japan_travel.users WHERE username='demo'")" = "0" ]; then
+          # 보강 계정(D-102)을 먼저 지운다 — demo_seed.sql 이 리뷰를 쓴 모든 계정의 최근 본 장소를 다시 넣기 때문
+          mysql -hdb -uroot japan_travel -e "DELETE FROM users WHERE username LIKE 'traveler%'"
           mysql -hdb -uroot --default-character-set=utf8mb4 japan_travel < /seed/demo_seed.sql
+          mysql -hdb -uroot --default-character-set=utf8mb4 japan_travel < /seed/demo_users.sql
           echo "시연 데이터를 넣었습니다"
         else
           echo "시연 데이터가 이미 있어 건너뜁니다"

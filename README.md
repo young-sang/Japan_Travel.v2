@@ -33,7 +33,7 @@ MySQL · 백엔드 · 화면이 뜨고, 시연 데이터(아래 "시연 데이�
 |---|---|
 | `docker compose ps` | 상태 보기. `seed` 는 시연 데이터를 넣고 끝나는 것이 정상이다 |
 | `docker compose logs -f backend` | 백엔드 로그 |
-| `docker compose exec -T db sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" --default-character-set=utf8mb4 japan_travel' < scripts/demo_seed.sql` | 시연 직전 상태로 되돌리기 |
+| `{ echo "DELETE FROM users WHERE username LIKE 'traveler%';"; cat scripts/demo_seed.sql scripts/demo_users.sql; } \| docker compose exec -T db sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" --default-character-set=utf8mb4 japan_travel'` | 시연 직전 상태로 되돌리기 |
 | `docker compose down` | 끄기. 데이터는 볼륨에 남는다 |
 | `docker compose down -v` | 끄고 데이터까지 지우기. 다음 `up` 때 처음부터 다시 넣는다 |
 
@@ -112,13 +112,16 @@ cd backend
 백엔드를 한 번 띄워 시드가 들어간 뒤에 돌린다. 몇 번을 돌려도 같은 상태로 돌아간다 (D-070).
 
 ```bash
+mysql -uroot -p japan_travel -e "DELETE FROM users WHERE username LIKE 'traveler%'"   # 보강 계정을 먼저 지운다 (D-102)
 mysql -uroot -p --default-character-set=utf8mb4 japan_travel < scripts/demo_seed.sql
+mysql -uroot -p --default-character-set=utf8mb4 japan_travel < scripts/demo_users.sql   # 취향이 다른 계정 44개 (D-102)
 ```
 
 시연 계정 `demo` / `demo1234` (닉네임 "하루") — 즐겨찾기 10 · 내 코스 2 · 최근 본 장소 10 · 리뷰 2.
 리뷰어 계정 4개(`kyoto_lover` · `foodie_park` · `photo_bear` · `weekend_trip`, 비밀번호 같음)가 주요 장소에 리뷰 33건을 더 남기고,
 최근 본 장소 · 즐겨찾기로 TOP 25 가 채워진다(점수 있는 여행지 32곳).
 관리자 계정 `admin` / `demo1234` (닉네임 "편집부") — 헤더 사용자 메뉴의 "관리자" 로 뉴스를 쓴다. 시드에 뉴스 4건이 들어 있다.
+취향이 다른 계정 44개 `traveler01` ~ `traveler44`(비밀번호 같음) — 온천 · 자연 · 축제 · 도시 · 절신사 그룹마다 활동 장소 20~30곳, 리뷰 약 300건(1~2점 포함). `scripts/demo_users.py` 가 `demo_users.sql` 을 만든다 (D-102).
 다시 돌리면 계정 id 가 바뀌므로 브라우저에서 다시 로그인한다.
 
 ### 2) 프론트엔드 (port 5173)
