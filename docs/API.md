@@ -391,6 +391,30 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 
 ---
 
+## 추천 — `RecommendationController` (`/api/me/recommendations`)
+
+설계: `ai-travel-recommender/docs/PLAN.md` M2 · D-095 · D-096 · D-098
+
+| 메서드 | 경로 | 권한 | 설명 |
+|---|---|---|---|
+| GET | `/api/me/recommendations` | 🔑 | 내 활동 기록과 비슷한 여행지 · 축제 최대 5곳, 유사도 높은 순 |
+
+- 사용자 벡터 = 활동한 장소 임베딩의 가중 평균. 가중치 즐겨찾기 3 · 리뷰 2 · 최근 본 장소 1, 한 장소에 여러 활동이면 더한다. 리뷰 별점은 아직 반영하지 않는다.
+- 활동한 장소와 임베딩이 없는 장소는 나오지 않는다.
+- 활동이 없으면 에러가 아니라 빈 배열이다.
+- `similarity` 는 코사인 유사도(-1~1).
+
+**응답 `data`**
+
+```json
+[ { "type": "DESTINATION", "targetId": 129, "name": "...", "prefecture": "홋카이도", "imagePath": "...", "similarity": 0.71 },
+  { "type": "FESTIVAL",    "targetId": 22,  "name": "...", "prefecture": "홋카이도", "imagePath": null,  "similarity": 0.66 } ]
+```
+
+**에러** — `UNAUTHORIZED`(401)
+
+---
+
 ## 예정 (아직 없음)
 
 [재작성 설계 문서](superpowers/specs/2026-09-17-greenfield-rebuild-design.md) 의 Task 순서를 따른다.
