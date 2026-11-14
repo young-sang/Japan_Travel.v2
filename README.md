@@ -155,10 +155,14 @@ http://localhost:5173 에 접속한다. `/api` 요청은 Vite 프록시가 `:808
 | [docs/ERRORS.md](docs/ERRORS.md) | `ErrorCode` 별 의미 |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | 의사결정 기록 (D-001 ~) |
 
-## 추천용 임베딩 만들기 (D-095)
+## 추천용 임베딩 만들기 (D-095 · D-096)
 
-여행지 · 축제의 "이름 + 지역 + 설명" 을 로컬 [Ollama](https://ollama.com) 의 `bge-m3` 로 벡터화해 `scripts/embedding/places.json` 에 남긴다.
-공개 서버에서는 돌리지 않는다. 장소 시드(`destinations.sql` · `festivals.sql`)가 바뀌면 다시 실행한다 — 항상 전체를 다시 계산한다(GPU 로 약 3분).
+여행지 · 축제의 "이름 + 지역 + 설명" 을 로컬 [Ollama](https://ollama.com) 의 `bge-m3` 로 벡터화한다. 결과는 두 곳에 나온다.
+
+- `backend/src/main/resources/embeddings.sql` — 사이트 시드. 기동할 때 `destination_embeddings` · `festival_embeddings` 에 들어간다. **다시 만들었으면 이 파일도 커밋한다** — 공개 서버에는 Ollama 가 없어 `git pull` 로 받은 이 파일이 유일한 원천이다.
+- `scripts/embedding/places.json` — 확인용(`similar_places.py`). git 에 넣지 않는다.
+
+장소 시드(`destinations.sql` · `festivals.sql`)가 바뀌면 다시 실행한다 — 항상 전체를 다시 계산한다(GPU 로 약 3분). 임베딩이 없는 장소는 추천에서 빠질 뿐 기동에는 영향이 없다.
 
 ```bash
 ollama pull bge-m3              # 처음 한 번 (약 1.2GB)

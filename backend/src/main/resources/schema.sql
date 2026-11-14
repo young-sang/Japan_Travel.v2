@@ -193,6 +193,20 @@ CREATE TABLE IF NOT EXISTS history_festivals (
   FOREIGN KEY (festival_id) REFERENCES festivals(id) ON DELETE CASCADE
 );
 
+-- 추천용 임베딩 (D-095 · D-096). embeddings.sql 시드가 채운다. 장소당 1행, 없으면 그 장소는 추천에서 빠진다
+-- vector = bge-m3 1024차원을 float32 리틀엔디언으로 이어 붙인 4096바이트
+CREATE TABLE IF NOT EXISTS destination_embeddings (
+  destination_id BIGINT PRIMARY KEY,
+  vector         BLOB NOT NULL,
+  FOREIGN KEY (destination_id) REFERENCES destinations(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS festival_embeddings (
+  festival_id BIGINT PRIMARY KEY,
+  vector      BLOB NOT NULL,
+  FOREIGN KEY (festival_id) REFERENCES festivals(id) ON DELETE CASCADE
+);
+
 -- news — 관리자가 직접 쓰는 뉴스 (D-075 · D-079). 작성자 계정을 지워도 글은 남긴다
 CREATE TABLE IF NOT EXISTS news (
   id             BIGINT AUTO_INCREMENT PRIMARY KEY,
