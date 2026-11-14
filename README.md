@@ -163,6 +163,7 @@ http://localhost:5173 에 접속한다. `/api` 요청은 Vite 프록시가 `:808
 ```bash
 ollama pull bge-m3              # 처음 한 번 (약 1.2GB)
 python scripts/embed_places.py  # 끝나면 여행지 · 축제 수를 출력한다
+python scripts/similar_places.py "오타루 운하"  # 비슷한 여행지 4 · 축제 1 (임베딩 확인용)
 ```
 
 ## 검증
