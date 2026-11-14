@@ -16,7 +16,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RecommendationRepository {
 
-    public record Activity(RecommendationTargetType type, long placeId, ActivityKind kind) {
+//  disliked = 이 장소에 1~2점 리뷰를 남겼다 (D-103)
+    public record Activity(RecommendationTargetType type, long placeId, ActivityKind kind, boolean disliked) {
+    }
+
+//  다른 사용자들의 평균 별점 — 리뷰 2건 이상인 장소만 (D-103)
+    public record Rating(RecommendationTargetType type, long placeId, double average) {
     }
 
     public record Place(RecommendationTargetType type, long id, String name, String prefecture,
@@ -25,19 +30,30 @@ public class RecommendationRepository {
 
     private final JdbcTemplate jdbc;
 
-//  사용자가 활동한 장소. 리뷰는 한 장소에 여러 개여도 한 번만 센다 (DISTINCT)
+//  사용자가 활동한 장소. 리뷰는 한 장소에 여러 개여도 장소당 한 번, 평균 2점 이하면 disliked
     public List<Activity> findActivities(long userId) {
         return jdbc.query("""
-                SELECT 'DESTINATION' AS type, destination_id AS place_id, 'FAVORITE' AS kind FROM favorite_destinations WHERE user_id = ?
-                UNION ALL SELECT 'FESTIVAL', festival_id, 'FAVORITE' FROM favorite_festivals WHERE user_id = ?
-                UNION ALL SELECT DISTINCT 'DESTINATION', destination_id, 'REVIEW' FROM review_destinations WHERE user_id = ?
-                UNION ALL SELECT DISTINCT 'FESTIVAL', festival_id, 'REVIEW' FROM review_festivals WHERE user_id = ?
-                UNION ALL SELECT 'DESTINATION', destination_id, 'HISTORY' FROM history_destinations WHERE user_id = ?
-                UNION ALL SELECT 'FESTIVAL', festival_id, 'HISTORY' FROM history_festivals WHERE user_id = ?
+                SELECT 'DESTINATION' AS type, destination_id AS place_id, 'FAVORITE' AS kind, 0 AS disliked FROM favorite_destinations WHERE user_id = ?
+                UNION ALL SELECT 'FESTIVAL', festival_id, 'FAVORITE', 0 FROM favorite_festivals WHERE user_id = ?
+                UNION ALL SELECT 'DESTINATION', destination_id, 'REVIEW', AVG(rating) <= 2 FROM review_destinations WHERE user_id = ? GROUP BY destination_id
+                UNION ALL SELECT 'FESTIVAL', festival_id, 'REVIEW', AVG(rating) <= 2 FROM review_festivals WHERE user_id = ? GROUP BY festival_id
+                UNION ALL SELECT 'DESTINATION', destination_id, 'HISTORY', 0 FROM history_destinations WHERE user_id = ?
+                UNION ALL SELECT 'FESTIVAL', festival_id, 'HISTORY', 0 FROM history_festivals WHERE user_id = ?
                 """,
                 (rs, i) -> new Activity(RecommendationTargetType.valueOf(rs.getString("type")),
-                        rs.getLong("place_id"), ActivityKind.valueOf(rs.getString("kind"))),
+                        rs.getLong("place_id"), ActivityKind.valueOf(rs.getString("kind")), rs.getBoolean("disliked")),
                 userId, userId, userId, userId, userId, userId);
+    }
+
+    public List<Rating> findRatings() {
+        return jdbc.query("""
+                SELECT 'DESTINATION' AS type, destination_id AS place_id, AVG(rating) AS average
+                FROM review_destinations GROUP BY destination_id HAVING COUNT(*) >= 2
+                UNION ALL
+                SELECT 'FESTIVAL', festival_id, AVG(rating) FROM review_festivals GROUP BY festival_id HAVING COUNT(*) >= 2
+                """,
+                (rs, i) -> new Rating(RecommendationTargetType.valueOf(rs.getString("type")),
+                        rs.getLong("place_id"), rs.getDouble("average")));
     }
 
 //  임베딩이 있는 모든 장소. 임베딩이 없는 장소는 JOIN 에서 빠져 추천 대상이 되지 않는다
