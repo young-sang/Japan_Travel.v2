@@ -170,6 +170,23 @@ python scripts/embed_places.py  # 끝나면 여행지 · 축제 수를 출력한
 python scripts/similar_places.py "오타루 운하"  # 비슷한 여행지 4 · 축제 1 (임베딩 확인용)
 ```
 
+### 옛 장소 · 옛 설명이 남은 DB 초기화 (D-097)
+
+장소 시드는 `INSERT IGNORE` 라, 데이터 교체(D-089 · D-092) 전에 만든 DB 에는 옛 장소와 옛 설명이 남는다. 임베딩은 새 설명으로 계산했으므로 이런 DB 는 초기화한다.
+**계정이 시연 계정뿐일 때만** 쓴다 — 시연 활동은 `seed` 가 다시 넣지만 그 밖의 데이터는 백업에만 남는다. Docker(로컬 · 공개 서버) 기준.
+
+```bash
+# 1. 백업 (data/*.bak_* 는 git 무시)
+docker compose exec -T db sh -c 'mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" --default-character-set=utf8mb4 --single-transaction japan_travel' > data/japan_travel.docker.bak_$(date +%Y%m%d_%H%M%S).sql
+# 2. 볼륨까지 지우고 다시 띄운다 — 시드 · 임베딩 · 시연 데이터가 자동으로 들어간다
+docker compose down -v
+docker compose up -d --build
+# 3. 확인: 940 · 403 · 940 · 403
+docker compose exec -T db sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -N japan_travel -e "SELECT COUNT(*) FROM destinations; SELECT COUNT(*) FROM festivals; SELECT COUNT(*) FROM destination_embeddings; SELECT COUNT(*) FROM festival_embeddings"'
+```
+
+되돌리기: `docker compose exec -T db sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" --default-character-set=utf8mb4 japan_travel' < data/<백업 파일>` (빈 DB 에 넣는다).
+
 ## 검증
 
 백엔드 자동 테스트 (D-062) — 로컬 MySQL 이 켜져 있고 `DB_PASSWORD` 가 설정돼 있어야 한다.
