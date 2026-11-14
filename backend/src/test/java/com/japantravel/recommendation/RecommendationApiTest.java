@@ -43,8 +43,8 @@ class RecommendationApiTest extends IntegrationTest {
             assertThat(item.get("type").asText() + item.get("targetId").asLong()).isNotEqualTo("DESTINATION" + favorite);
             assertThat(item.get("name").asText()).isNotBlank();
             assertThat(item.get("prefecture").asText()).isNotBlank();
-//          활동이 즐겨찾기 하나뿐이라 모든 이유의 근거는 그 장소다 (D-100)
-            assertThat(item.get("reason").asText()).startsWith("즐겨찾기한 '");
+//          활동이 즐겨찾기 하나뿐이라 모든 근거 장소는 그 장소다 (D-100). 이유 문장은 없다 (D-101)
+            assertThat(item.has("reason")).isFalse();
             assertThat(item.at("/basis/type").asText()).isEqualTo("DESTINATION");
             assertThat(item.at("/basis/targetId").asLong()).isEqualTo(favorite);
             assertThat(item.at("/basis/activity").asText()).isEqualTo("FAVORITE");

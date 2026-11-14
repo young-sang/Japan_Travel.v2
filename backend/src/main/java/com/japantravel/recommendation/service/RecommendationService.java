@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-//  활동 기록 → 사용자 벡터 → 비슷한 장소 5곳 + 선정 이유 (D-098 · D-099 · D-100)
+//  활동 기록 → 사용자 벡터 → 비슷한 장소 5곳 + 근거 장소 (D-098 · D-099 · D-100 · D-101)
 //  사용자 벡터 = 활동한 장소들의 임베딩을 활동 가중치로 평균한 것. 그 벡터와 코사인 유사도가 높은 순으로 고른다.
 @Service
 @RequiredArgsConstructor
@@ -96,13 +96,13 @@ public class RecommendationService {
                 .toList();
 
 //      4. 순위 규칙으로 5곳
-//      5. 곳마다 선정 이유
+//      5. 곳마다 근거 장소
         return pick(ranked).stream()
                 .map(s -> toResponse(s, basisOf(s.place(), liked)))
                 .toList();
     }
 
-//  선정 이유의 근거 = 내 활동 장소 중 (이 장소와의 유사도 × 활동 가중치) 가 가장 큰 곳.
+//  근거 장소 = 내 활동 장소 중 (이 장소와의 유사도 × 활동 가중치) 가 가장 큰 곳.
 //  가중치를 곱해서, 조금 덜 비슷해도 즐겨찾기한 곳이 근거로 나오기 쉽다 (D-100)
     private static Liked basisOf(Place place, List<Liked> liked) {
         Liked best = null;
@@ -121,7 +121,6 @@ public class RecommendationService {
         Place p = s.place();
         Place b = basis.place();
         return new RecommendationResponse(p.type(), p.id(), p.name(), p.prefecture(), p.imagePath(), s.similarity(),
-                RecommendationReason.write(basis.kind(), b.name()),
                 new RecommendationResponse.Basis(b.type(), b.id(), b.name(), basis.kind()));
     }
 

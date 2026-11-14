@@ -393,7 +393,7 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 
 ## 추천 — `RecommendationController` (`/api/me/recommendations`)
 
-설계: `ai-travel-recommender/docs/PLAN.md` M2 · D-095 · D-096 · D-098 · D-099 · D-100
+설계: `ai-travel-recommender/docs/PLAN.md` M2 · D-095 · D-096 · D-098 · D-099 · D-100 · D-101
 
 | 메서드 | 경로 | 권한 | 설명 |
 |---|---|---|---|
@@ -404,13 +404,12 @@ Japan Travel v2 백엔드 — Spring Boot 3.3 / Java 17 / MySQL 8, `greenfield` 
 - 고르기(D-099): 유사도 높은 순으로 보며 여행지 4 · 축제 1 칸을 채운다. 같은 현은 최대 2곳 — 넘으면 건너뛴다. 결과는 종류가 섞인 채 유사도 순. 후보가 모자라면 있는 만큼만.
 - 활동이 없으면 에러가 아니라 빈 배열이다.
 - `similarity` 는 코사인 유사도(-1~1).
-- 선정 이유(D-100): `basis` = 내 활동 장소 중 (이 장소와의 유사도 × 활동 가중치)가 가장 큰 곳, `activity` 는 그 장소의 가장 강한 활동(FAVORITE > REVIEW > HISTORY). `reason` = "즐겨찾기한 / 리뷰를 남긴 / 최근 본 '{basis.name}'와(과) 비슷한 곳이에요" — 조사는 이름 마지막 한글의 받침으로 고른다.
+- 근거 장소(D-100 · D-101): `basis` = 내 활동 장소 중 (이 장소와의 유사도 × 활동 가중치)가 가장 큰 곳, `activity` 는 그 장소의 가장 강한 활동(FAVORITE > REVIEW > HISTORY). 이유 문장은 API 가 만들지 않는다.
 
 **응답 `data`**
 
 ```json
 [ { "type": "DESTINATION", "targetId": 505, "name": "기온", "prefecture": "교토부", "imagePath": "...", "similarity": 0.78,
-    "reason": "즐겨찾기한 '기요미즈데라'와 비슷한 곳이에요",
     "basis": { "type": "DESTINATION", "targetId": 12, "name": "기요미즈데라", "activity": "FAVORITE" } },
   ... ]
 ```
