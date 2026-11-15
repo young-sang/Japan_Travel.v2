@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api } from '../api/client.js';
+import { api, typeSlug } from '../api/client.js';
+import { useAuth } from '../auth/useAuth.js';
 import Container from '../components/ui/Container.jsx';
 import IconButton from '../components/ui/IconButton.jsx';
 import PlaceCard from '../components/PlaceCard.jsx';
@@ -66,6 +67,35 @@ export default function Home() {
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
   const [popular, setPopular] = useState(null);
+  const { user } = useAuth();
+  //  맞춤 추천 (M3-1): null = 불러오는 중, [] = 칸을 숨김 (비로그인 · 활동 없음 · 오류)
+  const [recs, setRecs] = useState(null);
+
+  useEffect(() => {
+    if (!user) {
+      setRecs([]);
+      return;
+    }
+    let cancelled = false;
+    setRecs(null);
+    api.recommendations()
+      //  PlaceCard 가 읽는 모양으로 바꾼다. 유사도 · 근거 장소는 화면에 보이지 않는다
+      .then((r) => {
+        if (cancelled) return;
+        setRecs((r || []).map((x) => ({
+          id: x.targetId,
+          type: typeSlug(x.type),
+          name: x.name,
+          prefecture: x.prefecture,
+          imagePath: x.imagePath,
+          description: x.description,
+          avgRating: x.avgRating,
+          reviewCount: x.reviewCount,
+        })));
+      })
+      .catch(() => { if (!cancelled) setRecs([]); });
+    return () => { cancelled = true; };
+  }, [user]);
 
   useEffect(() => {
     if (paused) return;
@@ -135,6 +165,23 @@ export default function Home() {
             ))}
           </div>
         </section>
+
+        {user && (recs === null || recs.length > 0) && (
+          <section className={styles.section} aria-label="맞춤 추천 여행지">
+            <header className={styles.sectionHead}>
+              <h2 className={styles.sectionTitle}>
+                {user.nickname}님을 위한 추천
+                <span className={styles.forYouBadge}>맞춤</span>
+              </h2>
+            </header>
+            <div className={styles.cardGrid}>
+              {recs === null && Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)}
+              {recs !== null && recs.map((p) => (
+                <PlaceCard key={`${p.type}-${p.id}`} item={p} type={p.type} />
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className={styles.section} aria-label="추천 여행코스">
           <header className={styles.sectionHead}>

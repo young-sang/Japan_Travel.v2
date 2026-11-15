@@ -4,6 +4,7 @@ import com.japantravel.recommendation.dto.ActivityKind;
 import com.japantravel.recommendation.dto.RecommendationResponse;
 import com.japantravel.recommendation.repository.RecommendationRepository;
 import com.japantravel.recommendation.repository.RecommendationRepository.Activity;
+import com.japantravel.recommendation.repository.RecommendationRepository.CardInfo;
 import com.japantravel.recommendation.repository.RecommendationRepository.Place;
 import com.japantravel.recommendation.repository.RecommendationRepository.Rating;
 import com.japantravel.recommendation.service.RecommendationService;
@@ -90,5 +91,24 @@ class RecommendationServiceTest {
         when(repository.findRatings()).thenReturn(List.of());
 
         assertThat(service.recommend(1L)).extracting(RecommendationResponse::targetId).containsExactly(3L, 4L);
+    }
+
+    @Test
+    void 고른_곳에_카드_정보를_붙이고_없으면_빈값() {
+        when(repository.findActivities(1L)).thenReturn(List.of(favorite(1)));
+        when(repository.findAllPlaces()).thenReturn(List.of(place(1, "A현", 0), place(3, "C현", 10), place(4, "D현", 13)));
+        when(repository.findRatings()).thenReturn(List.of());
+//      3 만 정보가 있다. 4 는 못 찾은 경우
+        when(repository.findCardInfo(List.of(3L, 4L), List.of()))
+                .thenReturn(List.of(new CardInfo(DESTINATION, 3, "설명3", 4.5, 2)));
+
+        List<RecommendationResponse> result = service.recommend(1L);
+
+        assertThat(result.get(0).description()).isEqualTo("설명3");
+        assertThat(result.get(0).avgRating()).isEqualTo(4.5);
+        assertThat(result.get(0).reviewCount()).isEqualTo(2);
+        assertThat(result.get(1).description()).isNull();
+        assertThat(result.get(1).avgRating()).isNull();
+        assertThat(result.get(1).reviewCount()).isZero();
     }
 }

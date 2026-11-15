@@ -9,6 +9,8 @@ import org.springframework.stereotype.Repository;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 //  임베딩 테이블에는 엔티티가 없다 (읽기 전용 BLOB, D-096). SQL 두 개라 JdbcTemplate 으로 읽는다 (D-098)
@@ -26,6 +28,11 @@ public class RecommendationRepository {
 
     public record Place(RecommendationTargetType type, long id, String name, String prefecture,
                         String imagePath, float[] vector) {
+    }
+
+//  카드에 보여 줄 정보 — 고른 몇 곳만 읽는다. 별점은 엔티티 @Formula 와 같은 기준 (D-057, 리뷰 1건 이상이면 평균)
+    public record CardInfo(RecommendationTargetType type, long placeId, String description,
+                           Double avgRating, long reviewCount) {
     }
 
     private final JdbcTemplate jdbc;
@@ -70,6 +77,38 @@ public class RecommendationRepository {
                 (rs, i) -> new Place(RecommendationTargetType.valueOf(rs.getString("type")), rs.getLong("id"),
                         rs.getString("name"), rs.getString("prefecture"), rs.getString("image_path"),
                         toVector(rs.getBytes("vector"))));
+    }
+
+//  설명 앞 200자 + 리뷰 평균 · 수. 1,350곳 전체를 읽는 findAllPlaces 에는 설명을 넣지 않는다 (M3-1)
+    public List<CardInfo> findCardInfo(List<Long> destinationIds, List<Long> festivalIds) {
+        List<CardInfo> result = new ArrayList<>();
+        result.addAll(cardInfo(RecommendationTargetType.DESTINATION, "destinations", "review_destinations",
+                "destination_id", destinationIds));
+        result.addAll(cardInfo(RecommendationTargetType.FESTIVAL, "festivals", "review_festivals",
+                "festival_id", festivalIds));
+        return result;
+    }
+
+//  테이블 · 컬럼 이름은 위 상수만 들어온다 (사용자 입력 아님). id 는 ? 로 넘긴다
+    private List<CardInfo> cardInfo(RecommendationTargetType type, String table, String reviewTable,
+                                    String fk, List<Long> ids) {
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        String in = String.join(",", Collections.nCopies(ids.size(), "?"));
+        String sql = """
+                SELECT t.id, LEFT(t.description, 200) AS description,
+                       (SELECT AVG(r.rating) FROM %2$s r WHERE r.%3$s = t.id) AS avg_rating,
+                       (SELECT COUNT(*) FROM %2$s r WHERE r.%3$s = t.id) AS review_count
+                FROM %1$s t WHERE t.id IN (%4$s)
+                """.formatted(table, reviewTable, fk, in);
+        return jdbc.query(sql,
+                (rs, i) -> {
+                    Object avg = rs.getObject("avg_rating");
+                    return new CardInfo(type, rs.getLong("id"), rs.getString("description"),
+                            avg == null ? null : ((Number) avg).doubleValue(), rs.getLong("review_count"));
+                },
+                ids.toArray());
     }
 
 //  BLOB = float32 리틀엔디언을 이어 붙인 것 (embed_places.py 의 struct.pack('<1024f'))

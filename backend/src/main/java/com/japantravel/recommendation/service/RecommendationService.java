@@ -5,6 +5,7 @@ import com.japantravel.recommendation.dto.RecommendationResponse;
 import com.japantravel.recommendation.dto.RecommendationTargetType;
 import com.japantravel.recommendation.repository.RecommendationRepository;
 import com.japantravel.recommendation.repository.RecommendationRepository.Activity;
+import com.japantravel.recommendation.repository.RecommendationRepository.CardInfo;
 import com.japantravel.recommendation.repository.RecommendationRepository.Place;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -111,10 +112,27 @@ public class RecommendationService {
                 .toList();
 
 //      4. 순위 규칙으로 5곳
-//      5. 곳마다 근거 장소
-        return pick(ranked).stream()
-                .map(s -> toResponse(s, basisOf(s.place(), liked)))
+//      5. 곳마다 근거 장소 + 카드 정보(설명 · 별점, M3-1). 순위에는 영향이 없다
+        List<Scored> picked = pick(ranked);
+        Map<Key, CardInfo> cards = cardInfoOf(picked);
+        return picked.stream()
+                .map(s -> toResponse(s, basisOf(s.place(), liked),
+                        cards.get(new Key(s.place().type(), s.place().id()))))
                 .toList();
+    }
+
+//  고른 곳만 한 번에 읽는다. 못 찾은 곳은 응답에서 설명 null · 별점 null · 리뷰 0
+    private Map<Key, CardInfo> cardInfoOf(List<Scored> picked) {
+        List<Long> destinationIds = new ArrayList<>();
+        List<Long> festivalIds = new ArrayList<>();
+        for (Scored s : picked) {
+            (s.place().type() == RecommendationTargetType.DESTINATION ? destinationIds : festivalIds)
+                    .add(s.place().id());
+        }
+        Map<Key, CardInfo> cards = new HashMap<>();
+        repository.findCardInfo(destinationIds, festivalIds)
+                .forEach(c -> cards.put(new Key(c.type(), c.placeId()), c));
+        return cards;
     }
 
 //  근거 장소 = 내 활동 장소 중 (이 장소와의 유사도 × 활동 가중치) 가 가장 큰 곳.
@@ -132,10 +150,14 @@ public class RecommendationService {
         return best;
     }
 
-    private static RecommendationResponse toResponse(Scored s, Liked basis) {
+    private static RecommendationResponse toResponse(Scored s, Liked basis, CardInfo card) {
         Place p = s.place();
         Place b = basis.place();
-        return new RecommendationResponse(p.type(), p.id(), p.name(), p.prefecture(), p.imagePath(), s.similarity(),
+        return new RecommendationResponse(p.type(), p.id(), p.name(), p.prefecture(), p.imagePath(),
+                card == null ? null : card.description(),
+                card == null ? null : card.avgRating(),
+                card == null ? 0 : card.reviewCount(),
+                s.similarity(),
                 new RecommendationResponse.Basis(b.type(), b.id(), b.name(), basis.kind()));
     }
 

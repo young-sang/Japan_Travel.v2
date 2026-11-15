@@ -43,6 +43,10 @@ class RecommendationApiTest extends IntegrationTest {
             assertThat(item.get("type").asText() + item.get("targetId").asLong()).isNotEqualTo("DESTINATION" + favorite);
             assertThat(item.get("name").asText()).isNotBlank();
             assertThat(item.get("prefecture").asText()).isNotBlank();
+//          메인 카드용 설명 · 리뷰 수 (M3-1). 설명은 앞 200자까지, 리뷰가 없으면 avgRating 은 null
+            assertThat(item.get("description").asText()).isNotBlank().hasSizeLessThanOrEqualTo(200);
+            assertThat(item.get("reviewCount").asLong()).isGreaterThanOrEqualTo(0);
+            assertThat(item.has("avgRating")).isTrue();
 //          활동이 즐겨찾기 하나뿐이라 모든 근거 장소는 그 장소다 (D-100). 이유 문장은 없다 (D-101)
             assertThat(item.has("reason")).isFalse();
             assertThat(item.at("/basis/type").asText()).isEqualTo("DESTINATION");

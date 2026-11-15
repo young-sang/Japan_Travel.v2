@@ -140,6 +140,19 @@
   margin: 0;
   letter-spacing: -0.5px;
 }
+/* 맞춤 추천 칸 제목 옆 배지 (M3-1) */
+.forYouBadge {
+  display: inline-block;
+  margin-left: var(--space-2);
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--color-brand-500);
+  color: #fff;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0;
+  vertical-align: middle;
+}
 .sectionMore { font-size: var(--fs-sm); color: var(--color-brand-500); font-weight: var(--fw-semibold); }
 .sectionMore:hover { color: var(--color-brand-600); }
 

@@ -94,6 +94,9 @@ export const api = {
   touchHistory: (type, id) => req(`/api/me/history/${plural(type)}/${id}`, { method: 'POST' }),
   clearHistory: () => req('/api/me/history', { method: 'DELETE' }),
 
+  // 맞춤 추천 — 활동 기록으로 고른 5곳. 활동이 없으면 빈 배열 (D-098, M3-1)
+  recommendations: () => req('/api/me/recommendations'),
+
   // search (D-053)
   search: (q) => req(`/api/search${query({ q })}`),
 
