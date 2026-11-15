@@ -140,11 +140,19 @@ class AiRecommendationServiceTest {
     }
 
     @Test
-    void 후보가_없으면_실패() {
+    void 후보가_없으면_NO_AI_CANDIDATES_이고_LLM을_부르지_않는다() {
         given(repository.findDestinationsByPrefecture(PREF, 150)).willReturn(List.of());
         assertThatThrownBy(() -> service.recommend(
                 new AiRecommendationRequest("조용한 온천", PREF, AiPlaceKind.DESTINATION, null)))
                 .isInstanceOf(ApiException.class)
-                .extracting("errorCode").isEqualTo(ErrorCode.AI_RECOMMEND_FAILED);
+                .extracting("errorCode").isEqualTo(ErrorCode.NO_AI_CANDIDATES);
+        verify(llmPicker, never()).pick(anyString(), any(), anyList());
+    }
+
+    @Test
+    void 검증_후_1곳만_남으면_카드_1장() {
+        List<AiRecommendationResponse> result = recommend(AiPlaceKind.DESTINATION, List.of(
+                new LlmPicker.Pick("D99", "후보 밖"), new LlmPicker.Pick("D3", "하나")));
+        assertThat(result).extracting(AiRecommendationResponse::targetId).containsExactly(3L);
     }
 }

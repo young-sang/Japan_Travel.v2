@@ -12,6 +12,7 @@ import com.japantravel.recommendation.dto.Season;
 import com.japantravel.recommendation.repository.RecommendationRepository;
 import com.japantravel.recommendation.repository.RecommendationRepository.CardInfo;
 import com.japantravel.recommendation.repository.RecommendationRepository.PlaceCandidate;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 
 //  AI 추천 페이지: 조건(도도부현 · 종류 · 계절)으로 후보를 추림 → LLM 이 2~3곳 + 이유 → 후보에 없는 키를 버림
 //  (결정: recommender/2026-11-15-ai-page-filter-then-llm). M4-1 여행지, M4-2 축제 · 계절
+@Slf4j
 @Service
 public class AiRecommendationService {
 
@@ -69,7 +71,7 @@ public class AiRecommendationService {
                     season == null ? List.of() : season.months(), maxCandidates));
         }
         if (candidates.isEmpty()) {
-            throw new ApiException(ErrorCode.AI_RECOMMEND_FAILED);   // 상황별 문구는 M4-3
+            throw new ApiException(ErrorCode.NO_AI_CANDIDATES);   // LLM 을 부르지 않는다 (M4-3)
         }
         Map<String, PlaceCandidate> byKey = candidates.stream()
                 .collect(Collectors.toMap(c -> key(c.type(), c.id()), Function.identity()));
@@ -89,6 +91,7 @@ public class AiRecommendationService {
             }
         }
         if (valid.isEmpty()) {
+            log.warn("LLM 이 후보 밖만 골랐다: {}", picks.stream().map(LlmPicker.Pick::key).toList());
             throw new ApiException(ErrorCode.AI_RECOMMEND_FAILED);
         }
 

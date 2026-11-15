@@ -46,7 +46,9 @@ public enum ErrorCode {
 //  AI 추천 페이지 (M4-1). 실패 상황별 문구는 M4-3 에서 나눈다
 //  취향 문장이 비었거나 200자 초과, 또는 도도부현 없음
     INVALID_AI_REQUEST(HttpStatus.BAD_REQUEST, "취향 문장과 지역을 확인해 주세요"),
-//  LLM 호출 실패 · 후보 없음 · 검증 후 남은 장소 없음
+//  조건(도도부현 · 종류 · 계절)에 맞는 후보가 0곳 — LLM 을 부르지 않는다 (M4-3). 화면이 자기 입력으로 안내 문구를 만든다
+    NO_AI_CANDIDATES(HttpStatus.NOT_FOUND, "조건에 맞는 장소가 없습니다"),
+//  LLM 호출 실패 · 검증 후 남은 장소 없음. 둘은 서버 로그로만 구분한다 (M4-3)
     AI_RECOMMEND_FAILED(HttpStatus.BAD_GATEWAY, "AI 추천을 만들지 못했습니다. 잠시 후 다시 시도해 주세요"),
 
 //  Spring 이 던지는 요청 오류 (ApiExceptionHandler 가 변환)

@@ -1,6 +1,8 @@
 package com.japantravel.recommendation;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.japantravel.common.error.ApiException;
+import com.japantravel.common.error.ErrorCode;
 import com.japantravel.recommendation.ai.LlmPicker;
 import com.japantravel.support.IntegrationTest;
 import org.junit.jupiter.api.Test;
@@ -139,6 +141,28 @@ class AiRecommendationApiTest extends IntegrationTest {
         expectError(mockMvc.perform(withJson(post("/api/recommendations/ai"),
                 Map.of("preference", "조용한 온천", "prefecture", "없는현"))),
                 404, "PREFECTURE_NOT_FOUND");
+    }
+
+    @Test
+    void 조건에_맞는_후보가_없으면_404이고_LLM을_부르지_않는다() throws Exception {
+//      겨울(12 · 1 · 2월) 축제가 하나도 없는 현
+        String prefecture = jdbc.queryForObject("""
+                SELECT p.name FROM prefectures p
+                WHERE NOT EXISTS (SELECT 1 FROM festivals f WHERE f.prefecture_id = p.id AND f.month IN (12, 1, 2))
+                ORDER BY p.id LIMIT 1""", String.class);
+        expectError(mockMvc.perform(withJson(post("/api/recommendations/ai"),
+                Map.of("preference", "눈 축제", "prefecture", prefecture, "kind", "FESTIVAL", "season", "WINTER"))),
+                404, "NO_AI_CANDIDATES");
+        verify(llmPicker, never()).pick(anyString(), any(), anyList());
+    }
+
+    @Test
+    void LLM_호출이_실패하면_502() throws Exception {
+        given(llmPicker.pick(anyString(), any(), anyList()))
+                .willThrow(new ApiException(ErrorCode.AI_RECOMMEND_FAILED));
+        expectError(mockMvc.perform(withJson(post("/api/recommendations/ai"),
+                Map.of("preference", "조용한 온천", "prefecture", prefectureOfDestination(destinationId())))),
+                502, "AI_RECOMMEND_FAILED");
     }
 
     @Test

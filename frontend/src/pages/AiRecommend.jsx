@@ -25,7 +25,18 @@ const SEASONS = [
   { value: 'WINTER', label: '겨울 (12~2월)' },
 ];
 
-//  AI 추천 페이지 (M4-1 · M4-2). 로그인 없이 쓴다. 취향 문장 + 도도부현 + 종류 · 계절 → LLM 이 고른 2~3곳.
+//  후보 0곳 안내 (M4-3). 서버 문구에는 요청 값이 없으므로 보낸 조건으로 만든다
+function noCandidatesMessage({ prefecture, kind, season }) {
+  const seasonLabel = SEASONS.find((s) => s.value === season)?.label.replace(' ', '');
+  if (kind === 'FESTIVAL' && season) {
+    return `${prefecture}에는 ${seasonLabel}에 열리는 축제가 없어요. 방문 시기나 종류를 바꿔 보세요.`;
+  }
+  if (kind === 'FESTIVAL') return `${prefecture}에는 등록된 축제가 없어요. 종류를 바꿔 보세요.`;
+  if (kind === 'DESTINATION') return `${prefecture}에는 등록된 여행지가 없어요. 지역을 바꿔 보세요.`;
+  return `${prefecture}에는 조건에 맞는 장소가 없어요. 지역을 바꿔 보세요.`;
+}
+
+//  AI 추천 페이지 (M4-1 · M4-2 · M4-3). 로그인 없이 쓴다. 취향 문장 + 도도부현 + 종류 · 계절 → LLM 이 고른 2~3곳.
 //  축제는 개최 월로 거르고, 여행지는 계절을 LLM 이 판단한다.
 //  카드는 메인 추천 칸의 PlaceCard 를 그대로 쓰고, 설명 자리에 AI 가 쓴 이유를 넣는다
 export default function AiRecommend() {
@@ -34,22 +45,30 @@ export default function AiRecommend() {
   const [prefecture, setPrefecture] = useState('');
   const [kind, setKind] = useState('ALL');
   const [season, setSeason] = useState('');
-  //  status: idle | loading | done | error
+  //  status: idle | loading | done | no-candidates | failed (M4-3)
   const [status, setStatus] = useState('idle');
   const [items, setItems] = useState([]);
+  //  마지막으로 보낸 조건 — 안내 문구와 다시 시도에 쓴다. 입력 칸을 바꿔도 문구는 보낸 조건 기준
+  const [lastRequest, setLastRequest] = useState(null);
 
   const canSubmit = preference.trim().length > 0 && prefecture !== '' && status !== 'loading';
 
-  const submit = (e) => {
-    e.preventDefault();
-    if (!canSubmit) return;
+  const send = (body) => {
+    setLastRequest(body);
     setStatus('loading');
-    api.aiRecommend({ preference: preference.trim(), prefecture, kind, ...(season ? { season } : {}) })
+    api.aiRecommend(body)
       .then((list) => {
         setItems((list || []).map((x) => ({ ...x, id: x.targetId, type: typeSlug(x.type), description: x.reason })));
         setStatus('done');
       })
-      .catch(() => setStatus('error'));
+      //  후보 0곳만 따로 안내하고, LLM 실패 · 검증 후 0곳 · 그 밖의 오류는 같은 문구 + 다시 시도
+      .catch((err) => setStatus(err?.code === 'NO_AI_CANDIDATES' ? 'no-candidates' : 'failed'));
+  };
+
+  const submit = (e) => {
+    e.preventDefault();
+    if (!canSubmit) return;
+    send({ preference: preference.trim(), prefecture, kind, ...(season ? { season } : {}) });
   };
 
   return (
@@ -113,8 +132,14 @@ export default function AiRecommend() {
             </div>
           </>
         )}
-        {status === 'error' && (
-          <p className={styles.error}>추천을 만들지 못했어요. 잠시 후 다시 시도해 주세요.</p>
+        {status === 'no-candidates' && lastRequest && (
+          <p className={styles.notice}>{noCandidatesMessage(lastRequest)}</p>
+        )}
+        {status === 'failed' && (
+          <div className={styles.error}>
+            <p>AI 추천을 만들지 못했어요. 잠시 후 다시 시도해 주세요.</p>
+            <Button variant="secondary" size="sm" onClick={() => send(lastRequest)}>다시 시도</Button>
+          </div>
         )}
         {status === 'done' && (
           <div className={styles.cardGrid}>

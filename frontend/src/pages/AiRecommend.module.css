@@ -62,8 +62,22 @@
 }
 
 .error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
   color: var(--color-danger);
   background: var(--color-danger-bg);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+}
+
+.error p { margin: 0; }
+
+.notice {
+  color: var(--color-ink-800);
+  background: var(--color-ink-200);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
 }
