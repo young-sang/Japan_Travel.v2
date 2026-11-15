@@ -58,6 +58,7 @@
 | `INVALID_NEWS` | 400 | 서비스 | 뉴스 제목 · 본문이 비었거나 제목이 200자 초과 |
 | `INVALID_AI_REQUEST` | 400 | 서비스 | AI 추천 취향 문장이 비었거나 200자 초과, 또는 지역 없음 |
 | `NO_AI_CANDIDATES` | 404 | 서비스 | AI 추천 조건(현 · 종류 · 계절)에 맞는 후보 0곳 |
+| `AI_DAILY_LIMIT_EXCEEDED` | 429 | 서비스 | AI 추천 사이트 전체 하루 상한(기본 200회)을 넘음 |
 | `AI_RECOMMEND_FAILED` | 502 | 서비스 · LLM | AI 추천 LLM 호출 실패, 또는 검증 후 남은 장소 0곳 |
 | `TYPE_MISMATCH` | 400 | Spring | 경로·쿼리 값의 타입 변환 실패 |
 | `MALFORMED_REQUEST` | 400 | Spring | 요청 본문 JSON 을 읽지 못함 |
@@ -208,6 +209,13 @@
 - **어디서** `AiRecommendationService.recommend` (`POST /api/recommendations/ai`)
 - **무엇 때문에** 고른 도도부현 · 종류 · 계절에 맞는 후보가 0곳이다 (예: 그 현에 겨울에 열리는 축제가 없음). LLM 을 부르지 않는다.
 - 문구에 현 이름을 싣지 않는다 (D-034). 화면이 보낸 조건으로 "○○현에는 겨울에 열리는 축제가 없어요" 같은 안내를 만든다.
+
+### `AI_DAILY_LIMIT_EXCEEDED` — 429
+
+- **어디서** `AiRecommendationService.recommend` → `AiDailyLimiter.tryAcquire` (`POST /api/recommendations/ai`)
+- **무엇 때문에** 오늘(한국 시간) LLM 을 부른 횟수가 `llm.daily-limit`(기본 200, 환경 변수 `LLM_DAILY_LIMIT`)에 닿았다. LLM 을 부르지 않는다.
+- **세는 것** LLM 을 실제로 부른 요청만 (호출이 실패해도 1회). 입력 오류 · 후보 0곳(`NO_AI_CANDIDATES`)은 그 전에 끝나 세지 않는다.
+- 횟수는 서버 메모리에만 있어 재시작하면 0 이다 (M4-4).
 
 ### `AI_RECOMMEND_FAILED` — 502
 

@@ -3,6 +3,7 @@ package com.japantravel.recommendation.service;
 import com.japantravel.common.error.ApiException;
 import com.japantravel.common.error.ErrorCode;
 import com.japantravel.prefecture.repository.PrefectureRepository;
+import com.japantravel.recommendation.ai.AiDailyLimiter;
 import com.japantravel.recommendation.ai.LlmPicker;
 import com.japantravel.recommendation.dto.AiPlaceKind;
 import com.japantravel.recommendation.dto.AiRecommendationRequest;
@@ -35,13 +36,16 @@ public class AiRecommendationService {
     private final RecommendationRepository repository;
     private final PrefectureRepository prefectureRepository;
     private final LlmPicker llmPicker;
+    private final AiDailyLimiter limiter;
     private final int maxCandidates;
 
     public AiRecommendationService(RecommendationRepository repository, PrefectureRepository prefectureRepository,
-                                   LlmPicker llmPicker, @Value("${llm.max-candidates}") int maxCandidates) {
+                                   LlmPicker llmPicker, AiDailyLimiter limiter,
+                                   @Value("${llm.max-candidates}") int maxCandidates) {
         this.repository = repository;
         this.prefectureRepository = prefectureRepository;
         this.llmPicker = llmPicker;
+        this.limiter = limiter;
         this.maxCandidates = maxCandidates;
     }
 
@@ -76,6 +80,10 @@ public class AiRecommendationService {
         Map<String, PlaceCandidate> byKey = candidates.stream()
                 .collect(Collectors.toMap(c -> key(c.type(), c.id()), Function.identity()));
 
+//      하루 상한은 LLM 을 부르기 바로 앞에서 센다 — 입력 오류 · 후보 0곳은 세지 않는다 (M4-4)
+        if (!limiter.tryAcquire()) {
+            throw new ApiException(ErrorCode.AI_DAILY_LIMIT_EXCEEDED);
+        }
         List<LlmPicker.Pick> picks = llmPicker.pick(preference, season == null ? null : season.label(),
                 candidates.stream()
                         .map(c -> new LlmPicker.Candidate(key(c.type(), c.id()),

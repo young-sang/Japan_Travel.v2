@@ -45,7 +45,7 @@ export default function AiRecommend() {
   const [prefecture, setPrefecture] = useState('');
   const [kind, setKind] = useState('ALL');
   const [season, setSeason] = useState('');
-  //  status: idle | loading | done | no-candidates | failed (M4-3)
+  //  status: idle | loading | done | no-candidates | failed (M4-3) | limit (M4-4)
   const [status, setStatus] = useState('idle');
   const [items, setItems] = useState([]);
   //  마지막으로 보낸 조건 — 안내 문구와 다시 시도에 쓴다. 입력 칸을 바꿔도 문구는 보낸 조건 기준
@@ -62,7 +62,12 @@ export default function AiRecommend() {
         setStatus('done');
       })
       //  후보 0곳만 따로 안내하고, LLM 실패 · 검증 후 0곳 · 그 밖의 오류는 같은 문구 + 다시 시도
-      .catch((err) => setStatus(err?.code === 'NO_AI_CANDIDATES' ? 'no-candidates' : 'failed'));
+      //  하루 상한(M4-4)은 다시 시도해도 소용없으므로 버튼 없는 안내
+      .catch((err) => setStatus(
+        err?.code === 'NO_AI_CANDIDATES' ? 'no-candidates'
+          : err?.code === 'AI_DAILY_LIMIT_EXCEEDED' ? 'limit'
+            : 'failed',
+      ));
   };
 
   const submit = (e) => {
@@ -134,6 +139,9 @@ export default function AiRecommend() {
         )}
         {status === 'no-candidates' && lastRequest && (
           <p className={styles.notice}>{noCandidatesMessage(lastRequest)}</p>
+        )}
+        {status === 'limit' && (
+          <p className={styles.notice}>오늘 AI 추천 이용 횟수를 모두 썼어요. 내일 다시 이용해 주세요.</p>
         )}
         {status === 'failed' && (
           <div className={styles.error}>

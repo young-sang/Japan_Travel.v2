@@ -52,6 +52,8 @@ llm:
   model: claude-haiku-5-5
   # 한 도도부현에서 LLM 에 넘길 여행지 후보 상한 (추정, 결정: 조건으로 추린 뒤 LLM)
   max-candidates: 150
+  # 사이트 전체 하루 AI 추천 상한 — LLM 을 실제로 부른 요청만 센다 (M4-4). 로컬 확인 때 환경 변수로 낮춘다
+  daily-limit: ${LLM_DAILY_LIMIT:200}
 
 external:
   open-meteo:

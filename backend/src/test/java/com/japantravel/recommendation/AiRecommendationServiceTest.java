@@ -3,6 +3,7 @@ package com.japantravel.recommendation;
 import com.japantravel.common.error.ApiException;
 import com.japantravel.common.error.ErrorCode;
 import com.japantravel.prefecture.repository.PrefectureRepository;
+import com.japantravel.recommendation.ai.AiDailyLimiter;
 import com.japantravel.recommendation.ai.LlmPicker;
 import com.japantravel.recommendation.dto.AiPlaceKind;
 import com.japantravel.recommendation.dto.AiRecommendationRequest;
@@ -45,12 +46,15 @@ class AiRecommendationServiceTest {
     private PrefectureRepository prefectureRepository;
     @Mock
     private LlmPicker llmPicker;
+    @Mock
+    private AiDailyLimiter limiter;
 
     private AiRecommendationService service;
 
     @BeforeEach
     void setUp() {
-        service = new AiRecommendationService(repository, prefectureRepository, llmPicker, 150);
+        service = new AiRecommendationService(repository, prefectureRepository, llmPicker, limiter, 150);
+        lenient().when(limiter.tryAcquire()).thenReturn(true);
         lenient().when(prefectureRepository.existsByName(PREF)).thenReturn(true);
         lenient().when(repository.findDestinationsByPrefecture(PREF, 150)).thenReturn(List.of(
                 dest(1), dest(2), dest(3), dest(4), dest(5)));
@@ -147,6 +151,24 @@ class AiRecommendationServiceTest {
                 .isInstanceOf(ApiException.class)
                 .extracting("errorCode").isEqualTo(ErrorCode.NO_AI_CANDIDATES);
         verify(llmPicker, never()).pick(anyString(), any(), anyList());
+//      후보 0곳은 하루 상한에 세지 않는다 (M4-4)
+        verify(limiter, never()).tryAcquire();
+    }
+
+    @Test
+    void 하루_상한을_넘으면_LLM을_부르지_않는다() {
+        given(limiter.tryAcquire()).willReturn(false);
+        assertThatThrownBy(() -> service.recommend(new AiRecommendationRequest("조용한 온천", PREF, null, null)))
+                .isInstanceOf(ApiException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.AI_DAILY_LIMIT_EXCEEDED);
+        verify(llmPicker, never()).pick(anyString(), any(), anyList());
+    }
+
+    @Test
+    void 입력_오류는_하루_상한에_세지_않는다() {
+        assertThatThrownBy(() -> service.recommend(new AiRecommendationRequest(" ", PREF, null, null)))
+                .isInstanceOf(ApiException.class);
+        verify(limiter, never()).tryAcquire();
     }
 
     @Test

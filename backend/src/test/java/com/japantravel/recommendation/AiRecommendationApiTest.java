@@ -3,8 +3,10 @@ package com.japantravel.recommendation;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.japantravel.common.error.ApiException;
 import com.japantravel.common.error.ErrorCode;
+import com.japantravel.recommendation.ai.AiDailyLimiter;
 import com.japantravel.recommendation.ai.LlmPicker;
 import com.japantravel.support.IntegrationTest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -29,6 +31,24 @@ class AiRecommendationApiTest extends IntegrationTest {
 
     @MockBean
     private LlmPicker llmPicker;
+
+//  하루 상한은 테스트마다 열어 둔다 — 실제 상한기는 AiDailyLimiterTest 가 본다 (M4-4)
+    @MockBean
+    private AiDailyLimiter limiter;
+
+    @BeforeEach
+    void openLimit() {
+        given(limiter.tryAcquire()).willReturn(true);
+    }
+
+    @Test
+    void 하루_상한을_넘으면_429이고_LLM을_부르지_않는다() throws Exception {
+        given(limiter.tryAcquire()).willReturn(false);
+        expectError(mockMvc.perform(withJson(post("/api/recommendations/ai"),
+                Map.of("preference", "조용한 온천", "prefecture", prefectureOfDestination(destinationId())))),
+                429, "AI_DAILY_LIMIT_EXCEEDED");
+        verify(llmPicker, never()).pick(anyString(), any(), anyList());
+    }
 
     @Test
     void 비로그인도_고른_현의_여행지_카드와_이유를_받는다() throws Exception {
