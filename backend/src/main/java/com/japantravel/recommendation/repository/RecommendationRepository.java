@@ -35,9 +35,9 @@ public class RecommendationRepository {
                            Double avgRating, long reviewCount) {
     }
 
-//  AI 추천 페이지 후보 (M4-1). 설명은 프롬프트용 앞 200자
-    public record DestinationCandidate(long id, String name, String prefecture, String imagePath,
-                                       String description) {
+//  AI 추천 페이지 후보 (M4-1 여행지, M4-2 축제). 설명은 프롬프트용 앞 200자
+    public record PlaceCandidate(RecommendationTargetType type, long id, String name, String prefecture,
+                                 String imagePath, String description) {
     }
 
     private final JdbcTemplate jdbc;
@@ -117,7 +117,7 @@ public class RecommendationRepository {
     }
 
 //  한 도도부현의 여행지 — AI 추천 페이지가 LLM 에 넘길 후보 (M4-1). limit 을 넘으면 id 순으로 자른다
-    public List<DestinationCandidate> findDestinationsByPrefecture(String prefecture, int limit) {
+    public List<PlaceCandidate> findDestinationsByPrefecture(String prefecture, int limit) {
         return jdbc.query("""
                 SELECT d.id, d.name, p.name AS prefecture, d.image_path, LEFT(d.description, 200) AS description
                 FROM destinations d JOIN prefectures p ON p.id = d.prefecture_id
@@ -125,9 +125,33 @@ public class RecommendationRepository {
                 ORDER BY d.id
                 LIMIT ?
                 """,
-                (rs, i) -> new DestinationCandidate(rs.getLong("id"), rs.getString("name"),
-                        rs.getString("prefecture"), rs.getString("image_path"), rs.getString("description")),
+                (rs, i) -> candidate(RecommendationTargetType.DESTINATION, rs),
                 prefecture, limit);
+    }
+
+//  한 도도부현의 축제 (M4-2). months 가 비어 있지 않으면 개최 월이 그 안인 것만 (계절 조건)
+    public List<PlaceCandidate> findFestivalsByPrefecture(String prefecture, List<Integer> months, int limit) {
+        String monthFilter = months.isEmpty() ? ""
+                : " AND f.month IN (" + String.join(",", Collections.nCopies(months.size(), "?")) + ")";
+        List<Object> args = new ArrayList<>();
+        args.add(prefecture);
+        args.addAll(months);
+        args.add(limit);
+        return jdbc.query("""
+                SELECT f.id, f.name, p.name AS prefecture, f.image_path, LEFT(f.description, 200) AS description
+                FROM festivals f JOIN prefectures p ON p.id = f.prefecture_id
+                WHERE p.name = ?%s
+                ORDER BY f.id
+                LIMIT ?
+                """.formatted(monthFilter),
+                (rs, i) -> candidate(RecommendationTargetType.FESTIVAL, rs),
+                args.toArray());
+    }
+
+    private static PlaceCandidate candidate(RecommendationTargetType type, java.sql.ResultSet rs)
+            throws java.sql.SQLException {
+        return new PlaceCandidate(type, rs.getLong("id"), rs.getString("name"), rs.getString("prefecture"),
+                rs.getString("image_path"), rs.getString("description"));
     }
 
 //  BLOB = float32 리틀엔디언을 이어 붙인 것 (embed_places.py 의 struct.pack('<1024f'))
