@@ -41,6 +41,9 @@ dependencies {
     // JSON
     implementation 'com.fasterxml.jackson.core:jackson-databind'
 
+    // LLM — AI 추천 페이지 (M4). 공식 SDK 의 구조화 출력으로 응답을 record 로 받는다
+    implementation 'com.anthropic:anthropic-java:3.3.0'
+
     // Lombok — 버전은 Spring Boot BOM 이 관리한다
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

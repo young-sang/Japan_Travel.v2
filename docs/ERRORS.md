@@ -56,6 +56,8 @@
 | `INVALID_COURSE` | 400 | 서비스 | 코스 요청 본문의 필수 값이 없거나 `dayNo < 1` |
 | `NEWS_NOT_FOUND` | 404 | 서비스 | 없는 뉴스 id |
 | `INVALID_NEWS` | 400 | 서비스 | 뉴스 제목 · 본문이 비었거나 제목이 200자 초과 |
+| `INVALID_AI_REQUEST` | 400 | 서비스 | AI 추천 취향 문장이 비었거나 200자 초과, 또는 지역 없음 |
+| `AI_RECOMMEND_FAILED` | 502 | 서비스 · LLM | AI 추천 LLM 호출 실패, 후보 0곳, 또는 검증 후 남은 장소 0곳 |
 | `TYPE_MISMATCH` | 400 | Spring | 경로·쿼리 값의 타입 변환 실패 |
 | `MALFORMED_REQUEST` | 400 | Spring | 요청 본문 JSON 을 읽지 못함 |
 | `UNSUPPORTED_MEDIA_TYPE` | 415 | Spring | 본문의 Content-Type 이 JSON 이 아님 |
@@ -193,6 +195,18 @@
 - **무엇 때문에** `rating` 이 없거나(`null`) 1~5 밖이다. DB 에도 `CHECK` 가 있지만 거기까지 가면 500 이
   되므로 서비스에서 먼저 거른다.
 - **아닌 경우** `rating: "abc"` 처럼 숫자가 아니면 본문을 읽지 못해 `MALFORMED_REQUEST` 다.
+
+### `INVALID_AI_REQUEST` — 400
+
+- **어디서** `AiRecommendationService.recommend` (`POST /api/recommendations/ai`)
+- **무엇 때문에** `preference` 가 없거나 공백뿐이거나 200자를 넘는다, 또는 `prefecture` 가 없다.
+- **아닌 경우** `prefecture` 가 있지만 없는 이름이면 `PREFECTURE_NOT_FOUND` 다.
+
+### `AI_RECOMMEND_FAILED` — 502
+
+- **어디서** `AiRecommendationService.recommend` · `ClaudeLlmPicker.pick`
+- **무엇 때문에** LLM 호출 실패(키 없음 · 네트워크 · 30초 타임아웃 · `stop_reason` 이 `end_turn` 아님), 그 지역 여행지 후보가 0곳,
+  또는 LLM 이 고른 id 가 모두 후보 밖이라 검증 후 0곳. 세 경우를 아직 나누지 않는다 (M4-3 에서 나눔).
 
 ---
 

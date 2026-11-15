@@ -14,6 +14,8 @@ const NAV = [
   //  홈 빠른 메뉴로만 들어가던 두 화면을 상단 메뉴에도 둔다. 모바일 메뉴도 이 목록을 쓴다 (D-081)
   { to: '/top25', label: 'TOP 25' },
   { to: '/news', label: '뉴스' },
+  //  AI 추천 페이지 (M4-1)
+  { to: '/ai-recommend', label: 'AI 추천' },
 ];
 
 export default function Header() {

@@ -9,3 +9,7 @@ spring:
 logging:
   level:
     com.japantravel: INFO
+
+# 테스트는 LLM 을 부르지 않는다 (LlmPicker 를 @MockBean 으로 바꾼다)
+llm:
+  api-key: test

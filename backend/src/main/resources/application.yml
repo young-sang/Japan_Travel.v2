@@ -46,6 +46,13 @@ jwt:
   secret: ${JWT_SECRET:japan-travel-dev-secret-key-0123456789abcdef}
   expiration: 24h
 
+# AI 추천 페이지 (M4). 키가 비어 있어도 기동은 되고, 추천 요청만 실패한다
+llm:
+  api-key: ${LLM_API_KEY:}
+  model: claude-haiku-5-5
+  # 한 도도부현에서 LLM 에 넘길 여행지 후보 상한 (추정, 결정: 조건으로 추린 뒤 LLM)
+  max-candidates: 150
+
 external:
   open-meteo:
     base-url: https://api.open-meteo.com

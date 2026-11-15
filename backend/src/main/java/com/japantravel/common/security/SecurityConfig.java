@@ -40,6 +40,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/search").permitAll()
 //                      뉴스 조회는 공개 (D-079)
                         .requestMatchers(HttpMethod.GET, "/api/news/**").permitAll()
+//                      AI 추천 페이지는 비로그인도 쓴다 (M4-1)
+                        .requestMatchers(HttpMethod.POST, "/api/recommendations/ai").permitAll()
 //                      뉴스 쓰기 · 수정 · 삭제는 관리자만 (D-079). 거부는 accessDeniedHandler 가 403 으로 쓴다
                         .requestMatchers("/api/news/**").hasRole("ADMIN")
 //                      처리되지 않은 예외는 /error 로 포워드된다. 이걸 열지 않으면 500 이 401 로 바뀌어 나간다.

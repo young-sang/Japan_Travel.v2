@@ -18,6 +18,7 @@ import NewsDetail from './pages/NewsDetail.jsx';
 import NewsAdmin from './pages/admin/NewsAdmin.jsx';
 import NewsEditor from './pages/admin/NewsEditor.jsx';
 import NotFound from './pages/NotFound.jsx';
+import AiRecommend from './pages/AiRecommend.jsx';
 import ProtectedRoute from './auth/ProtectedRoute.jsx';
 import ErrorBoundary from './components/ui/ErrorBoundary.jsx';
 import ScrollToTop from './components/ui/ScrollToTop.jsx';
@@ -37,6 +38,8 @@ export default function App() {
             <Route path="/festival" element={<Festival />} />
             <Route path="/course" element={<Course />} />
             <Route path="/top25" element={<Top25 />} />
+            {/* AI 추천 페이지 (M4-1). 로그인 없이 쓴다 */}
+            <Route path="/ai-recommend" element={<AiRecommend />} />
             {/* 옛 주소 — Top100 은 Top25 로 바뀌었다 (D-076) */}
             <Route path="/top100" element={<Navigate to="/top25" replace />} />
             {/* 뉴스는 관리자가 직접 쓴다 (D-075 · D-079) */}

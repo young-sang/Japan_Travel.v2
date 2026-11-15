@@ -35,6 +35,11 @@ public class RecommendationRepository {
                            Double avgRating, long reviewCount) {
     }
 
+//  AI 추천 페이지 후보 (M4-1). 설명은 프롬프트용 앞 200자
+    public record DestinationCandidate(long id, String name, String prefecture, String imagePath,
+                                       String description) {
+    }
+
     private final JdbcTemplate jdbc;
 
 //  사용자가 활동한 장소. 리뷰는 한 장소에 여러 개여도 장소당 한 번, 평균 2점 이하면 disliked
@@ -109,6 +114,20 @@ public class RecommendationRepository {
                             avg == null ? null : ((Number) avg).doubleValue(), rs.getLong("review_count"));
                 },
                 ids.toArray());
+    }
+
+//  한 도도부현의 여행지 — AI 추천 페이지가 LLM 에 넘길 후보 (M4-1). limit 을 넘으면 id 순으로 자른다
+    public List<DestinationCandidate> findDestinationsByPrefecture(String prefecture, int limit) {
+        return jdbc.query("""
+                SELECT d.id, d.name, p.name AS prefecture, d.image_path, LEFT(d.description, 200) AS description
+                FROM destinations d JOIN prefectures p ON p.id = d.prefecture_id
+                WHERE p.name = ?
+                ORDER BY d.id
+                LIMIT ?
+                """,
+                (rs, i) -> new DestinationCandidate(rs.getLong("id"), rs.getString("name"),
+                        rs.getString("prefecture"), rs.getString("image_path"), rs.getString("description")),
+                prefecture, limit);
     }
 
 //  BLOB = float32 리틀엔디언을 이어 붙인 것 (embed_places.py 의 struct.pack('<1024f'))

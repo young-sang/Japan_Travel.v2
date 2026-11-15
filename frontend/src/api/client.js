@@ -96,6 +96,8 @@ export const api = {
 
   // 맞춤 추천 — 활동 기록으로 고른 5곳. 활동이 없으면 빈 배열 (D-098, M3-1)
   recommendations: () => req('/api/me/recommendations'),
+  //  AI 추천 페이지 (M4-1). 로그인 없이 쓴다
+  aiRecommend: (body) => req('/api/recommendations/ai', { method: 'POST', body }),
 
   // search (D-053)
   search: (q) => req(`/api/search${query({ q })}`),

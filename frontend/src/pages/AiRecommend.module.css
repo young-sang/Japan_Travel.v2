@@ -1,0 +1,63 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 640px;
+  margin: var(--space-5) 0;
+}
+
+.label {
+  font-weight: var(--fw-bold);
+  color: var(--color-ink-900);
+  margin-top: var(--space-3);
+}
+
+.textarea,
+.select {
+  font: inherit;
+  font-size: var(--fs-base);
+  padding: var(--space-3);
+  border: 1px solid var(--color-ink-200);
+  border-radius: var(--radius-md);
+  background: #fff;
+  color: var(--color-ink-900);
+}
+
+.textarea { resize: vertical; }
+
+.textarea:focus,
+.select:focus {
+  outline: 2px solid var(--color-brand-400);
+  outline-offset: 1px;
+}
+
+.count {
+  align-self: flex-end;
+  font-size: var(--fs-sm);
+  color: var(--color-ink-500);
+}
+
+.submit {
+  margin-top: var(--space-4);
+  align-self: flex-start;
+}
+
+.result { padding-bottom: var(--space-7); }
+
+.message {
+  color: var(--color-ink-700);
+  margin-bottom: var(--space-4);
+}
+
+.error {
+  color: var(--color-danger);
+  background: var(--color-danger-bg);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-4);
+}
