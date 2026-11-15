@@ -62,40 +62,58 @@ function pickFeatured(courses) {
   return [...featured, ...rest].slice(0, 6);
 }
 
+//  맞춤 추천 한 곳 → PlaceCard 모양. 유사도 · 근거 장소는 화면에 보이지 않는다 (M3-1)
+function fromRecommendation(x) {
+  return {
+    id: x.targetId,
+    type: typeSlug(x.type),
+    name: x.name,
+    prefecture: x.prefecture,
+    imagePath: x.imagePath,
+    description: x.description,
+    avgRating: x.avgRating,
+    reviewCount: x.reviewCount,
+  };
+}
+
+//  인기 = TOP 25 순위(D-074 · D-076)의 1~5위. 두 목록이 같도록 순위를 그대로 쓴다 (M3-2)
+function loadPopular() {
+  return api.destinationRanking().then((r) => ({
+    kind: 'popular',
+    items: (r || []).slice(0, 5).map((x) => ({ ...x.destination, type: 'destination' })),
+  }));
+}
+
+const SECTION_TEXT = {
+  personal: { badge: '맞춤', label: '맞춤 추천 여행지' },
+  popular: { title: '지금 인기 있는 여행지', badge: '인기', label: '인기 여행지' },
+};
+
 export default function Home() {
   usePageTitle(null);
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
   const [popular, setPopular] = useState(null);
-  const { user } = useAuth();
-  //  맞춤 추천 (M3-1): null = 불러오는 중, [] = 칸을 숨김 (비로그인 · 활동 없음 · 오류)
-  const [recs, setRecs] = useState(null);
+  const { user, isLoading } = useAuth();
+  //  추천 칸 (M3-1 · M3-2). kind: 'personal'(맞춤) | 'popular'(인기) | null(숨김), items: null = 불러오는 중
+  const [section, setSection] = useState({ kind: null, items: null });
 
   useEffect(() => {
-    if (!user) {
-      setRecs([]);
-      return;
-    }
+    //  로그인 확인이 끝나기 전에 인기 → 맞춤으로 깜빡이며 두 번 부르지 않는다
+    if (isLoading) return;
     let cancelled = false;
-    setRecs(null);
-    api.recommendations()
-      //  PlaceCard 가 읽는 모양으로 바꾼다. 유사도 · 근거 장소는 화면에 보이지 않는다
-      .then((r) => {
-        if (cancelled) return;
-        setRecs((r || []).map((x) => ({
-          id: x.targetId,
-          type: typeSlug(x.type),
-          name: x.name,
-          prefecture: x.prefecture,
-          imagePath: x.imagePath,
-          description: x.description,
-          avgRating: x.avgRating,
-          reviewCount: x.reviewCount,
-        })));
-      })
-      .catch(() => { if (!cancelled) setRecs([]); });
+    setSection({ kind: user ? 'personal' : 'popular', items: null });
+    const load = user
+      //  활동이 없으면 맞춤이 빈 배열 → 인기로 대신한다
+      ? api.recommendations().then((r) => (r && r.length > 0
+          ? { kind: 'personal', items: r.map(fromRecommendation) }
+          : loadPopular()))
+      : loadPopular();
+    load
+      .then((s) => { if (!cancelled) setSection(s.items.length > 0 ? s : { kind: null, items: [] }); })
+      .catch(() => { if (!cancelled) setSection({ kind: null, items: [] }); });
     return () => { cancelled = true; };
-  }, [user]);
+  }, [user, isLoading]);
 
   useEffect(() => {
     if (paused) return;
@@ -166,17 +184,17 @@ export default function Home() {
           </div>
         </section>
 
-        {user && (recs === null || recs.length > 0) && (
-          <section className={styles.section} aria-label="맞춤 추천 여행지">
+        {section.kind && (section.items === null || section.items.length > 0) && (
+          <section className={styles.section} aria-label={SECTION_TEXT[section.kind].label}>
             <header className={styles.sectionHead}>
               <h2 className={styles.sectionTitle}>
-                {user.nickname}님을 위한 추천
-                <span className={styles.forYouBadge}>맞춤</span>
+                {section.kind === 'personal' ? `${user?.nickname ?? ''}님을 위한 추천` : SECTION_TEXT.popular.title}
+                <span className={styles.forYouBadge}>{SECTION_TEXT[section.kind].badge}</span>
               </h2>
             </header>
             <div className={styles.cardGrid}>
-              {recs === null && Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)}
-              {recs !== null && recs.map((p) => (
+              {section.items === null && Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)}
+              {section.items !== null && section.items.map((p) => (
                 <PlaceCard key={`${p.type}-${p.id}`} item={p} type={p.type} />
               ))}
             </div>
