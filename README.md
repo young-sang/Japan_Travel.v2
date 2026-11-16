@@ -37,6 +37,7 @@ MySQL · 백엔드 · 화면이 뜨고, 시연 데이터(아래 "시연 데이�
 | `docker compose down` | 끄기. 데이터는 볼륨에 남는다 |
 | `docker compose down -v` | 끄고 데이터까지 지우기. 다음 `up` 때 처음부터 다시 넣는다 |
 
+AI 추천 페이지는 LLM 키가 있어야 동작한다. 키를 사용자 환경 변수 `LLM_API_KEY` 에 둔 Windows 에서는 PowerShell 로 `$env:LLM_API_KEY = [Environment]::GetEnvironmentVariable('LLM_API_KEY','User'); docker compose up -d --build` 처럼 띄운다. 키가 없어도 나머지 기능은 그대로 뜬다.
 80 포트를 이미 쓰고 있으면 `WEB_PORT=8088 docker compose up -d --build` 처럼 바꾼다. DB 비밀번호 기본값은 `japantravel` 이고 `DB_PASSWORD` 로 바꾼다.
 사진(Wikimedia Commons)과 지도 타일은 인터넷에서 불러온다.
 
@@ -52,7 +53,10 @@ cd japan-travel
 # 공개 서버용 비밀 값 (.env.example 참고). admin 비밀번호 원문은 서버의 파일에만 둔다
 openssl rand -base64 12 > ~/admin-password.txt && chmod 600 ~/admin-password.txt
 HASH=$(docker run --rm httpd:2.4-alpine htpasswd -nbBC 10 "" "$(cat ~/admin-password.txt)" | tr -d ':\n')
-printf "DB_PASSWORD=%s\nJWT_SECRET=%s\nADMIN_PASSWORD_HASH='%s'\nWEB_PORT=80\n" "$(openssl rand -hex 16)" "$(openssl rand -hex 32)" "$HASH" > .env && chmod 600 .env
+printf "DB_PASSWORD=%s\nJWT_SECRET=%s\nADMIN_PASSWORD_HASH='%s'\nWEB_PORT=80\nLLM_DAILY_LIMIT=40\n" "$(openssl rand -hex 16)" "$(openssl rand -hex 32)" "$HASH" > .env && chmod 600 .env
+
+# AI 추천 LLM 키는 편집기로 직접 한 줄 추가한다: LLM_API_KEY=<Console 에서 발급한 키>
+nano .env
 
 docker compose up -d --build
 ```
@@ -60,11 +64,13 @@ docker compose up -d --build
 | 할 일 | 명령 |
 |---|---|
 | 새 코드로 바꾸기 | `git pull && docker compose up -d --build` |
+| 옛 서버(M3 · M4 이전)를 이번 코드로 바꾸기 | ① 아래 "옛 장소 · 옛 설명이 남은 DB 초기화"의 백업 → ② `git pull` → ③ `.env` 에 `LLM_API_KEY=` · `LLM_DAILY_LIMIT=40` 두 줄 추가 → ④ `docker compose down -v` → `docker compose up -d --build` → ⑤ 같은 절의 장소 수 확인 |
 | 시연 직전 되돌리기 | `docker compose run --rm -e FORCE_SEED=1 seed` (admin 비밀번호는 `.env` 값 그대로) |
 | 상태 · 로그 | `docker compose ps -a` · `docker compose logs -f backend` |
 
 서버에서는 `admin` 이 README 의 `demo1234` 로 로그인되지 않는다. `demo` 와 리뷰어 계정은 그대로 `demo1234` 다.
 `db` · `backend` · `web` 은 `restart: unless-stopped` 라 서버를 껐다 켜도 다시 뜬다.
+AI 추천은 Anthropic 선불 크레딧을 쓴다. 크레딧이 떨어지면 AI 추천이 모두 "만들지 못했어요"로 실패하므로 시연 전 Console 에서 잔액을 확인한다. 하루 상한(`LLM_DAILY_LIMIT`, 기본 40)을 넘으면 그날은 안내만 나온다.
 비용: 시연이 없으면 EC2 콘솔에서 인스턴스를 **중지**한다. 다 쓰면 인스턴스 **종료** 후 **탄력적 IP 릴리스**까지 해야 요금이 멈춘다.
 
 아래는 Docker 없이 개발 모드로 띄우는 방법이다.

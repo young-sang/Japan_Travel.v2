@@ -4,6 +4,7 @@
 #   seed    backend 가 뜬 뒤 시연 데이터(scripts/demo_seed.sql D-070 · demo_users.sql D-102)를 처음 한 번만 넣고 끝난다
 #   web     nginx 가 화면을 내주고 /api 를 backend 로 넘긴다
 # 공개 서버에서는 .env 로 DB 비밀번호 · JWT 키 · admin 비밀번호를 바꾼다 (.env.example, D-086)
+# AI 추천(M4)의 LLM 키 · 하루 상한도 .env 로 넘긴다. 키가 없으면 기동은 되고 AI 추천만 실패한다
 services:
   db:
     image: mysql:8.0
@@ -35,6 +36,10 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-japantravel}
       # 빈 값을 넘기면 application.yml 의 기본값 대신 빈 키가 들어가 기동에 실패한다. 그래서 같은 개발용 키를 기본값으로 둔다
       JWT_SECRET: ${JWT_SECRET:-japan-travel-dev-secret-key-0123456789abcdef}
+      # AI 추천 LLM 키. 저장소에 쓰지 않는다 — 서버는 .env, 로컬은 사용자 환경 변수에서
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      # 사이트 전체 하루 AI 추천 상한. 전국 요청 1회 약 $0.05~0.073 이라 크레딧에 맞춰 40 (M5)
+      LLM_DAILY_LIMIT: ${LLM_DAILY_LIMIT:-40}
       TZ: Asia/Seoul
     depends_on:
       db:
