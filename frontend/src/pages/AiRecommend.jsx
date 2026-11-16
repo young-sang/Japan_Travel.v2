@@ -26,14 +26,23 @@ const SEASONS = [
 ];
 
 //  후보 0곳 안내 (M4-3). 서버 문구에는 요청 값이 없으므로 보낸 조건으로 만든다
+//  전국(M4-5)이면 prefecture 가 없다 — "전국에"로 쓴다
 function noCandidatesMessage({ prefecture, kind, season }) {
+  const where = prefecture ? `${prefecture}에는` : '전국에';
   const seasonLabel = SEASONS.find((s) => s.value === season)?.label.replace(' ', '');
   if (kind === 'FESTIVAL' && season) {
-    return `${prefecture}에는 ${seasonLabel}에 열리는 축제가 없어요. 방문 시기나 종류를 바꿔 보세요.`;
+    return `${where} ${seasonLabel}에 열리는 축제가 없어요. 방문 시기나 종류를 바꿔 보세요.`;
   }
-  if (kind === 'FESTIVAL') return `${prefecture}에는 등록된 축제가 없어요. 종류를 바꿔 보세요.`;
-  if (kind === 'DESTINATION') return `${prefecture}에는 등록된 여행지가 없어요. 지역을 바꿔 보세요.`;
-  return `${prefecture}에는 조건에 맞는 장소가 없어요. 지역을 바꿔 보세요.`;
+  if (kind === 'FESTIVAL') return `${where} 등록된 축제가 없어요. 종류를 바꿔 보세요.`;
+  if (kind === 'DESTINATION') return `${where} 등록된 여행지가 없어요. 지역을 바꿔 보세요.`;
+  return `${where} 조건에 맞는 장소가 없어요. 지역을 바꿔 보세요.`;
+}
+
+//  LLM 이 "취향에 맞는 곳이 없다"고 답함 (M4-5). 지역을 골랐으면 전국을 권한다
+function noMatchMessage({ prefecture }) {
+  return prefecture
+    ? `${prefecture}에서는 취향에 맞는 곳을 찾지 못했어요. 지역을 전국으로 바꿔 보세요.`
+    : '취향에 맞는 곳을 찾지 못했어요. 문장을 바꿔 보세요.';
 }
 
 //  AI 추천 페이지 (M4-1 · M4-2 · M4-3). 로그인 없이 쓴다. 취향 문장 + 도도부현 + 종류 · 계절 → LLM 이 고른 2~3곳.
@@ -45,13 +54,14 @@ export default function AiRecommend() {
   const [prefecture, setPrefecture] = useState('');
   const [kind, setKind] = useState('ALL');
   const [season, setSeason] = useState('');
-  //  status: idle | loading | done | no-candidates | failed (M4-3) | limit (M4-4)
+  //  status: idle | loading | done | no-candidates | failed (M4-3) | limit (M4-4) | no-match (M4-5)
   const [status, setStatus] = useState('idle');
   const [items, setItems] = useState([]);
   //  마지막으로 보낸 조건 — 안내 문구와 다시 시도에 쓴다. 입력 칸을 바꿔도 문구는 보낸 조건 기준
   const [lastRequest, setLastRequest] = useState(null);
 
-  const canSubmit = preference.trim().length > 0 && prefecture !== '' && status !== 'loading';
+  //  지역은 선택 사항 — '' 이면 전국 (M4-5)
+  const canSubmit = preference.trim().length > 0 && status !== 'loading';
 
   const send = (body) => {
     setLastRequest(body);
@@ -65,6 +75,7 @@ export default function AiRecommend() {
       //  하루 상한(M4-4)은 다시 시도해도 소용없으므로 버튼 없는 안내
       .catch((err) => setStatus(
         err?.code === 'NO_AI_CANDIDATES' ? 'no-candidates'
+          : err?.code === 'NO_AI_MATCH' ? 'no-match'
           : err?.code === 'AI_DAILY_LIMIT_EXCEEDED' ? 'limit'
             : 'failed',
       ));
@@ -73,7 +84,12 @@ export default function AiRecommend() {
   const submit = (e) => {
     e.preventDefault();
     if (!canSubmit) return;
-    send({ preference: preference.trim(), prefecture, kind, ...(season ? { season } : {}) });
+    send({
+      preference: preference.trim(),
+      kind,
+      ...(prefecture ? { prefecture } : {}),
+      ...(season ? { season } : {}),
+    });
   };
 
   return (
@@ -81,7 +97,7 @@ export default function AiRecommend() {
       <PageHeader
         eyebrow="AI 추천"
         title="어떤 여행을 원하세요?"
-        subtitle="취향을 한 문장으로 적고 지역을 고르면, 사이트의 여행지 · 축제 중에서 AI가 2~3곳을 골라 이유와 함께 알려 드려요."
+        subtitle="취향을 한 문장으로 적으면, 사이트의 여행지 · 축제 중에서 AI가 2~3곳을 골라 이유와 함께 알려 드려요. 지역을 모르면 전국으로 두세요."
       />
 
       <form className={styles.form} onSubmit={submit}>
@@ -104,7 +120,7 @@ export default function AiRecommend() {
           value={prefecture}
           onChange={(e) => setPrefecture(e.target.value)}
         >
-          <option value="">도도부현 선택</option>
+          <option value="">전국</option>
           {PREFECTURES.map((p) => <option key={p} value={p}>{p}</option>)}
         </select>
 
@@ -139,6 +155,9 @@ export default function AiRecommend() {
         )}
         {status === 'no-candidates' && lastRequest && (
           <p className={styles.notice}>{noCandidatesMessage(lastRequest)}</p>
+        )}
+        {status === 'no-match' && lastRequest && (
+          <p className={styles.notice}>{noMatchMessage(lastRequest)}</p>
         )}
         {status === 'limit' && (
           <p className={styles.notice}>오늘 AI 추천 이용 횟수를 모두 썼어요. 내일 다시 이용해 주세요.</p>

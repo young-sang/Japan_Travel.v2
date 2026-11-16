@@ -56,10 +56,11 @@
 | `INVALID_COURSE` | 400 | 서비스 | 코스 요청 본문의 필수 값이 없거나 `dayNo < 1` |
 | `NEWS_NOT_FOUND` | 404 | 서비스 | 없는 뉴스 id |
 | `INVALID_NEWS` | 400 | 서비스 | 뉴스 제목 · 본문이 비었거나 제목이 200자 초과 |
-| `INVALID_AI_REQUEST` | 400 | 서비스 | AI 추천 취향 문장이 비었거나 200자 초과, 또는 지역 없음 |
+| `INVALID_AI_REQUEST` | 400 | 서비스 | AI 추천 취향 문장이 비었거나 200자 초과 |
 | `NO_AI_CANDIDATES` | 404 | 서비스 | AI 추천 조건(현 · 종류 · 계절)에 맞는 후보 0곳 |
+| `NO_AI_MATCH` | 404 | 서비스 · LLM | AI 추천 LLM 이 후보 중 취향에 맞는 곳이 없다고 답함 |
 | `AI_DAILY_LIMIT_EXCEEDED` | 429 | 서비스 | AI 추천 사이트 전체 하루 상한(기본 200회)을 넘음 |
-| `AI_RECOMMEND_FAILED` | 502 | 서비스 · LLM | AI 추천 LLM 호출 실패, 또는 검증 후 남은 장소 0곳 |
+| `AI_RECOMMEND_FAILED` | 502 | 서비스 · LLM | AI 추천 LLM 호출 실패, 또는 검증(후보 밖 · 이름 불일치) 후 남은 장소 0곳 |
 | `TYPE_MISMATCH` | 400 | Spring | 경로·쿼리 값의 타입 변환 실패 |
 | `MALFORMED_REQUEST` | 400 | Spring | 요청 본문 JSON 을 읽지 못함 |
 | `UNSUPPORTED_MEDIA_TYPE` | 415 | Spring | 본문의 Content-Type 이 JSON 이 아님 |
@@ -201,14 +202,21 @@
 ### `INVALID_AI_REQUEST` — 400
 
 - **어디서** `AiRecommendationService.recommend` (`POST /api/recommendations/ai`)
-- **무엇 때문에** `preference` 가 없거나 공백뿐이거나 200자를 넘는다, 또는 `prefecture` 가 없다.
-- **아닌 경우** `prefecture` 가 있지만 없는 이름이면 `PREFECTURE_NOT_FOUND` 다.
+- **무엇 때문에** `preference` 가 없거나 공백뿐이거나 200자를 넘는다.
+- **아닌 경우** `prefecture` 는 선택 사항이다 — 없으면 전국 (M4-5). 있지만 없는 이름이면 `PREFECTURE_NOT_FOUND` 다.
 
 ### `NO_AI_CANDIDATES` — 404
 
 - **어디서** `AiRecommendationService.recommend` (`POST /api/recommendations/ai`)
 - **무엇 때문에** 고른 도도부현 · 종류 · 계절에 맞는 후보가 0곳이다 (예: 그 현에 겨울에 열리는 축제가 없음). LLM 을 부르지 않는다.
 - 문구에 현 이름을 싣지 않는다 (D-034). 화면이 보낸 조건으로 "○○현에는 겨울에 열리는 축제가 없어요" 같은 안내를 만든다.
+
+### `NO_AI_MATCH` — 404
+
+- **어디서** `AiRecommendationService.recommend` (`POST /api/recommendations/ai`)
+- **무엇 때문에** LLM 이 후보 중 취향에 맞는 곳이 없다고 답했다 (빈 `picks`). 프롬프트가 억지로 고르지 말라고 한다 (M4-5).
+- **아닌 경우** 후보 자체가 0곳이면 LLM 전에 `NO_AI_CANDIDATES`, LLM 이 골랐는데 검증에서 모두 버려지면 `AI_RECOMMEND_FAILED`.
+- 하루 상한에는 센다 (LLM 을 불렀다). 화면은 지역을 골랐으면 "전국으로 바꿔 보세요", 전국이면 "문장을 바꿔 보세요".
 
 ### `AI_DAILY_LIMIT_EXCEEDED` — 429
 
@@ -221,7 +229,7 @@
 
 - **어디서** `AiRecommendationService.recommend` · `ClaudeLlmPicker.pick`
 - **무엇 때문에** LLM 호출 실패(키 없음 · 네트워크 · 30초 타임아웃 · `stop_reason` 이 `end_turn` 아님), 또는 LLM 이 고른 키가 모두
-  후보 밖이라 검증 후 0곳. 화면에는 같은 문구 + 다시 시도 버튼이고, 서버 로그(`LLM 호출 실패` / `LLM 이 후보 밖만 골랐다`)로만 구분한다 (M4-3).
+  후보 밖이거나 이름이 달라(M4-5) 검증 후 0곳. 화면에는 같은 문구 + 다시 시도 버튼이고, 서버 로그(`LLM 호출 실패` / `LLM 이 후보 밖만 골랐다`)로만 구분한다 (M4-3).
 
 ---
 

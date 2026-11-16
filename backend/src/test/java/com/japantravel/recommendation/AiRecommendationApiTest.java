@@ -41,6 +41,43 @@ class AiRecommendationApiTest extends IntegrationTest {
         given(limiter.tryAcquire()).willReturn(true);
     }
 
+//  LLM 이 고른 한 곳 — 이름은 DB 의 실제 이름 (서버가 키와 이름을 대조한다, M4-5). 없는 id 는 아무 이름
+    private LlmPicker.Pick pick(String key, String reason) {
+        String table = key.startsWith("D") ? "destinations" : "festivals";
+        List<String> names = jdbc.queryForList("SELECT name FROM " + table + " WHERE id = ?", String.class,
+                Long.parseLong(key.substring(1)));
+        return new LlmPicker.Pick(key, names.isEmpty() ? "없는 장소" : names.get(0), reason);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void 지역_없이_요청하면_전국_후보를_짧은_설명으로_넘긴다() throws Exception {
+        long dest = destinationId();
+        given(llmPicker.pick(anyString(), any(), anyList())).willReturn(List.of(pick("D" + dest, "전국에서 고름")));
+
+        JsonNode data = body(mockMvc.perform(withJson(post("/api/recommendations/ai"),
+                        Map.of("preference", "한적한 온천", "kind", "DESTINATION")))
+                .andExpect(status().isOk())).get("data");
+        assertThat(data.get(0).get("targetId").asLong()).isEqualTo(dest);
+
+        ArgumentCaptor<List<LlmPicker.Candidate>> captor = ArgumentCaptor.forClass(List.class);
+        verify(llmPicker).pick(anyString(), eq(null), captor.capture());
+        List<LlmPicker.Candidate> candidates = captor.getValue();
+        int total = jdbc.queryForObject("SELECT COUNT(*) FROM destinations", Integer.class);
+        assertThat(candidates).hasSize(total);
+        assertThat(candidates.stream().map(LlmPicker.Candidate::prefecture).distinct().count()).isGreaterThan(1);
+        assertThat(candidates).allSatisfy(c -> assertThat(c.description() == null ? 0 : c.description().length())
+                .isLessThanOrEqualTo(80));
+    }
+
+    @Test
+    void LLM이_맞는_곳이_없다고_하면_404() throws Exception {
+        given(llmPicker.pick(anyString(), any(), anyList())).willReturn(List.of());
+        expectError(mockMvc.perform(withJson(post("/api/recommendations/ai"),
+                Map.of("preference", "스키장", "prefecture", prefectureOfDestination(destinationId())))),
+                404, "NO_AI_MATCH");
+    }
+
     @Test
     void 하루_상한을_넘으면_429이고_LLM을_부르지_않는다() throws Exception {
         given(limiter.tryAcquire()).willReturn(false);
@@ -59,8 +96,8 @@ class AiRecommendationApiTest extends IntegrationTest {
                 WHERE p.name <> ?""", Long.class, prefecture);
 //      후보 밖 키(다른 현 여행지)는 버려진다
         given(llmPicker.pick(anyString(), any(), anyList())).willReturn(List.of(
-                new LlmPicker.Pick("D" + dest, "조용한 온천이 있어요"),
-                new LlmPicker.Pick("D" + otherPref, "다른 현")));
+                pick("D" + dest, "조용한 온천이 있어요"),
+                pick("D" + otherPref, "다른 현")));
 
         JsonNode data = body(mockMvc.perform(withJson(post("/api/recommendations/ai"),
                         Map.of("preference", "조용한 온천", "prefecture", prefecture, "kind", "DESTINATION")))
@@ -97,9 +134,9 @@ class AiRecommendationApiTest extends IntegrationTest {
                 WHERE p.name = ?""", Long.class, prefecture);
 
         given(llmPicker.pick(anyString(), any(), anyList())).willReturn(List.of(
-                new LlmPicker.Pick("D" + dest, "여행지"),
-                new LlmPicker.Pick("F" + spring, "봄 축제"),
-                new LlmPicker.Pick("F" + autumn, "가을 축제")));
+                pick("D" + dest, "여행지"),
+                pick("F" + spring, "봄 축제"),
+                pick("F" + autumn, "가을 축제")));
 
         JsonNode data = body(mockMvc.perform(withJson(post("/api/recommendations/ai"),
                         Map.of("preference", "단풍", "prefecture", prefecture, "kind", "FESTIVAL", "season", "AUTUMN")))
@@ -128,7 +165,7 @@ class AiRecommendationApiTest extends IntegrationTest {
         long fest = jdbc.queryForObject("""
                 SELECT MIN(f.id) FROM festivals f JOIN prefectures p ON p.id = f.prefecture_id
                 WHERE p.name = ?""", Long.class, prefecture);
-        given(llmPicker.pick(anyString(), any(), anyList())).willReturn(List.of(new LlmPicker.Pick("F" + fest, "축제")));
+        given(llmPicker.pick(anyString(), any(), anyList())).willReturn(List.of(pick("F" + fest, "축제")));
 
         JsonNode data = body(mockMvc.perform(withJson(post("/api/recommendations/ai"),
                         Map.of("preference", "축제 구경", "prefecture", prefecture)))
@@ -188,7 +225,7 @@ class AiRecommendationApiTest extends IntegrationTest {
     @Test
     void LLM이_후보_밖만_고르면_502() throws Exception {
         given(llmPicker.pick(anyString(), any(), anyList()))
-                .willReturn(List.of(new LlmPicker.Pick("D" + MISSING_ID, "없음")));
+                .willReturn(List.of(pick("D" + MISSING_ID, "없음")));
         expectError(mockMvc.perform(withJson(post("/api/recommendations/ai"),
                 Map.of("preference", "조용한 온천", "prefecture", prefectureOfDestination(destinationId())))),
                 502, "AI_RECOMMEND_FAILED");

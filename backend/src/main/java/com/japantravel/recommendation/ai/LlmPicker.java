@@ -7,11 +7,13 @@ import java.util.List;
 public interface LlmPicker {
 
 //  key = 종류 + id ("D123" 여행지, "F45" 축제). 여행지와 축제는 id 가 겹치므로 숫자만 쓰지 않는다 (M4-2)
-//  kind = 프롬프트에 보일 한글 종류 ("여행지" · "축제")
-    record Candidate(String key, String kind, String name, String description) {
+//  kind = 프롬프트에 보일 한글 종류 ("여행지" · "축제"), prefecture = 전국 후보일 때 판단 근거 (M4-5)
+    record Candidate(String key, String kind, String name, String prefecture, String description) {
     }
 
-    record Pick(String key, String reason) {
+//  name = LLM 이 돌려준 장소 이름. 서버가 key 의 실제 이름과 맞는지 확인한다 (M4-5)
+//  picks 가 빈 목록이면 "취향에 맞는 곳이 없다"는 LLM 의 답이다
+    record Pick(String key, String name, String reason) {
     }
 
 //  season = 프롬프트에 넣을 방문 시기 (예: "가을(9~11월)"), 상관없음이면 null

@@ -116,34 +116,48 @@ public class RecommendationRepository {
                 ids.toArray());
     }
 
-//  한 도도부현의 여행지 — AI 추천 페이지가 LLM 에 넘길 후보 (M4-1). limit 을 넘으면 id 순으로 자른다
-    public List<PlaceCandidate> findDestinationsByPrefecture(String prefecture, int limit) {
-        return jdbc.query("""
-                SELECT d.id, d.name, p.name AS prefecture, d.image_path, LEFT(d.description, 200) AS description
-                FROM destinations d JOIN prefectures p ON p.id = d.prefecture_id
-                WHERE p.name = ?
-                ORDER BY d.id
-                LIMIT ?
-                """,
-                (rs, i) -> candidate(RecommendationTargetType.DESTINATION, rs),
-                prefecture, limit);
-    }
-
-//  한 도도부현의 축제 (M4-2). months 가 비어 있지 않으면 개최 월이 그 안인 것만 (계절 조건)
-    public List<PlaceCandidate> findFestivalsByPrefecture(String prefecture, List<Integer> months, int limit) {
-        String monthFilter = months.isEmpty() ? ""
-                : " AND f.month IN (" + String.join(",", Collections.nCopies(months.size(), "?")) + ")";
+//  AI 추천 페이지가 LLM 에 넘길 여행지 후보 (M4-1). prefecture 가 null 이면 전국 (M4-5).
+//  설명은 앞 descriptionLength 자, limit 을 넘으면 id 순으로 자른다
+    public List<PlaceCandidate> findDestinations(String prefecture, int descriptionLength, int limit) {
         List<Object> args = new ArrayList<>();
-        args.add(prefecture);
-        args.addAll(months);
+        args.add(descriptionLength);
+        if (prefecture != null) {
+            args.add(prefecture);
+        }
         args.add(limit);
         return jdbc.query("""
-                SELECT f.id, f.name, p.name AS prefecture, f.image_path, LEFT(f.description, 200) AS description
+                SELECT d.id, d.name, p.name AS prefecture, d.image_path, LEFT(d.description, ?) AS description
+                FROM destinations d JOIN prefectures p ON p.id = d.prefecture_id
+                %s
+                ORDER BY d.id
+                LIMIT ?
+                """.formatted(prefecture == null ? "" : "WHERE p.name = ?"),
+                (rs, i) -> candidate(RecommendationTargetType.DESTINATION, rs),
+                args.toArray());
+    }
+
+//  축제 후보 (M4-2). prefecture 가 null 이면 전국 (M4-5), months 가 비어 있지 않으면 개최 월이 그 안인 것만 (계절)
+    public List<PlaceCandidate> findFestivals(String prefecture, List<Integer> months, int descriptionLength,
+                                              int limit) {
+        List<String> where = new ArrayList<>();
+        List<Object> args = new ArrayList<>();
+        args.add(descriptionLength);
+        if (prefecture != null) {
+            where.add("p.name = ?");
+            args.add(prefecture);
+        }
+        if (!months.isEmpty()) {
+            where.add("f.month IN (" + String.join(",", Collections.nCopies(months.size(), "?")) + ")");
+            args.addAll(months);
+        }
+        args.add(limit);
+        return jdbc.query("""
+                SELECT f.id, f.name, p.name AS prefecture, f.image_path, LEFT(f.description, ?) AS description
                 FROM festivals f JOIN prefectures p ON p.id = f.prefecture_id
-                WHERE p.name = ?%s
+                %s
                 ORDER BY f.id
                 LIMIT ?
-                """.formatted(monthFilter),
+                """.formatted(where.isEmpty() ? "" : "WHERE " + String.join(" AND ", where)),
                 (rs, i) -> candidate(RecommendationTargetType.FESTIVAL, rs),
                 args.toArray());
     }
