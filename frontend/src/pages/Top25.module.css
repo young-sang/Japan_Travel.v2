@@ -154,6 +154,17 @@
   color: #5f4564;
 }
 
+/* 설명이 길면 카드가 끝없이 늘어나서 3줄까지만 보여준다. 전체는 상세 페이지에서.
+   상자(padding 있음)가 아니라 안쪽 글자에 걸어야 4번째 줄이 아래 여백에 비치지 않는다 */
+.descText {
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 @media (max-width: 740px) {
   .main {
     padding: 1.2rem 1rem 2.5rem;

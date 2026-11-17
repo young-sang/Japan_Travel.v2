@@ -49,7 +49,7 @@ export default function Top25() {
                     {d.avgRating != null && <> · ★ {d.avgRating} ({d.reviewCount})</>}
                     {favoriteCount > 0 && <> · ♥ {favoriteCount}</>}
                   </div>
-                  {d.description && <div className={styles.descBox}>{d.description}</div>}
+                  {d.description && <div className={styles.descBox}><p className={styles.descText}>{d.description}</p></div>}
                 </div>
               </div>
             </Link>
